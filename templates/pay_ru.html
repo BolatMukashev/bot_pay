@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/pay.css') }}">
+    <!-- "{{ url_for('static', filename='styles/pay.css') }}" -->
+    <!-- "../static/styles/pay.css" -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
+    <title>Оплата</title>
+</head>
+
+<body>
+    <div class="block">
+        <div class="block__row">
+            <div class="block__element">
+                <div class="block__content">
+                    <div class="block__title">
+                        <h1>Оплатить</h1>
+                        <h2>доступ к образовательной платформе</h2>
+                        <h2>в мессенджере Telegram (<a href="{{ bot_address }}">{{ bot_name }}</a>)</h2>
+                        <h2 class="large__title">Цена: {{ price }} тг</h2>
+                    </div>
+                    <form action='' method="POST">
+                        <div class="block__user">
+                            <label for="telegram_id">ID в Telegram: {{ telegram_id }}</label>
+                            <p><input type="hidden" id="telegram_id" name="telegram_id" class='input'
+                                    value="{{ telegram_id }}"></p>
+                            <input type="hidden" id="language" name="language" value="RU">
+                            <label for="user_name">Имя в Telegram: {{ user_name }}</label>
+                            <p><input type="hidden" id="user_name" name="user_name" class='input'
+                                    value="{{ user_name }}"></p>
+                        </div>
+                        <div class="block__promocode">
+                            <label for="discount" class='discount__label'>Получить скидку:</label>
+                            <p><input type="text" id="discount" name="discount" class='input promo__code uppercase'
+                                    placeholder="ПРОМОКОД"></p>
+                            <p class='discount__label error__text'> {{error_text}} </p>
+                        </div>
+                        <div>
+                            <input type="submit" class='button' value="Далее">
+                        </div>
+                    </form>
+                    <div class="block__about">
+                        <p class="link__about"><a href="/pay_instructions" target="blank">Процедура оплаты</a></p>
+                        <p class="link__about"><a href="/confidence_politics" target="blank">Политика
+                                конфиденциальности</a></p>
+                        <p class="link__about"><a href="/about_us" target="blank">О нас</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts/uppercase_script.js') }}"></script>
+</body>
+
+</html>

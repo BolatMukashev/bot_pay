@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/promo_code.css') }}">
+    <!-- "{{ url_for('static', filename='styles/promo_code.css') }}" -->
+    <!-- "../static/styles/promo_code.css" -->
+    <title>Регистрация ПРОМОКОДА</title>
+</head>
+
+<body>
+    <div class="block">
+        <div class="flex__block">
+            <div class="small__block">
+                <form action="" method="post">
+                    <div class="small__blockchields">
+                        <div class="title">
+                            <h1>НАЗВАНИЕ АВТОШКОЛЫ</h1>
+                        </div>
+                        <div class="block__input">
+                            <input type="text" name='school_name' id='school_name' class="input"
+                                value="{{ school_name }}" placeholder="название автошколы" maxlength="50" required>
+                        </div>
+                    </div>
+                    <div class="small__blockchields">
+                        <div class="title">
+                            <h2>Придумайте ПРОМОКОД</h2>
+                        </div>
+                        <div class="title">
+                            <h3>
+                                Заглавными буквами, на английском языке<br>
+                                не более 20 символов.<br>
+                                Примеры: PDD_SCHOOL, QAZAQ-AVTO, KOLESA
+                            </h3>
+                        </div>
+                        <div class="block__input">
+                            <input type="text" name='promo_code' id='promo_code' class="input uppercase"
+                                placeholder="введи промокод" maxlength="20" required autocomplete="off">
+                        </div>
+                        <div class="error__text">
+                            {{ error_text }}
+                        </div>
+                    </div>
+                    <div class="small__blockchields">
+                        <div class="title">
+                            <h2>Придумайте СЕКРЕТНЫЙ КОД</h2>
+                        </div>
+                        <div class="title">
+                            <h3>Он будет необходим, если Вы захотите изменить номер банковского счета.</h3>
+                        </div>
+                        <div class="block__input">
+                            <input type="text" name='secret_code' id='secret_code' class="input"
+                                value="{{ secret_code }}" placeholder="введи секретный код" maxlength="50" required
+                                autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="small__blockchields">
+                        <div class="title">
+                            <h2>Номер банковского счета</h2>
+                        </div>
+                        <div class="title">
+                            <h3>На это счет будут начисляться бонусные деньги</h3>
+                        </div>
+                        <div class="block__input">
+                            <input type="text" name='bank_account' id='bank_account' class="input"
+                                value="{{ bank_account }}" placeholder="номер банковского счета" minlength="20"
+                                maxlength="20" required>
+                        </div>
+                    </div>
+                    <div class="small__blockchields block__mini">
+                        <div class="checkbox">
+                            <input class='checkbox__input' type="checkbox" name="agree" id="agree" value='True' checked>
+                            <label class="checkbox__label" for="agree"
+                                title="Имя Вашей школы будет использовано в рекламных целях. Например, будет размещено на сайте платформы">Дать
+                                согласие на рекламу (опционально)</label>
+                        </div>
+                    </div>
+                    <div class="small__blockchields">
+                        <div class="block__offer">
+                            <p>Нажимая кнопку <b>ЗАРЕГИСТРИРОВАТЬ</b>,<br>
+                                Вы подтверждаете, что соглашаетесь с<br>
+                                <a href="/offer" target="blank">договором оферты</a>.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="small__blockchields">
+                        <div class="block__button">
+                            <input type="submit" class="button" value="ЗАРЕГИСТРИРОВАТЬ">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts/uppercase_script.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/pay.css') }}">
+    <!-- "{{ url_for('static', filename='styles/pay.css') }}" -->
+    <!-- "../static/styles/pay.css" -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
+    <title>Төлем</title>
+</head>
+
+<body>
+    <div class="block">
+        <div class="block__row">
+            <div class="block__element">
+                <div class="block__content">
+                    <div class="block__title">
+                        <h2>
+                            Telegram мессенджердегі (<a href="{{ bot_address }}">{{ bot_name }}</a>)<br>
+                            білім беру платформасына кіру үшін төлем
+                        </h2>
+                        <h2 class="large__title">Бағасы: {{ price }} тг</h2>
+                    </div>
+                    <form action='' method="POST">
+                        <div class="block__user">
+                            <label for="telegram_id">Telegram ID: {{ telegram_id }}</label>
+                            <p><input type="hidden" id="telegram_id" name="telegram_id" class='input'
+                                    value="{{ telegram_id }}"></p>
+                            <input type="hidden" id="language" name="language" value="KZ">
+                            <label for="user_name">Telegramдағы аты-жөні: {{ user_name }}</label>
+                            <p><input type="hidden" id="user_name" name="user_name" class='input'
+                                    value="{{ user_name }}"></p>
+                        </div>
+                        <div class="block__promocode">
+                            <label for="discount" class='discount__label'>Жеңілдік алыңыз:</label>
+                            <p><input type="text" id="discount" name="discount" class='input promo__code uppercase'
+                                    placeholder="ПРОМОКОД"></p>
+                            <p class='discount__label error__text'> {{error_text}} </p>
+                        </div>
+                        <div>
+                            <input type="submit" class='button' value="Жалғасы">
+                        </div>
+                    </form>
+                    <div class="block__about">
+                        <p class="link__about"><a href="/pay_instructions" target="blank">Төлем тәртібі</a></p>
+                        <p class="link__about"><a href="/confidence_politics" target="blank">Құпиялылық саясаты</a></p>
+                        <p class="link__about"><a href="/about_us" target="blank">Біз туралы</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts/uppercase_script.js') }}"></script>
+</body>
+
+</html>

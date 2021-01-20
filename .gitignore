@@ -1,0 +1,6 @@
+venv
+config.py
+img_id.txt
+to_server.txt
+.idea
+__pycache__
