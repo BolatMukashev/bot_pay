@@ -1,0 +1,12 @@
+* {
+    font-family: 'Alegreya Sans', sans-serif;
+    letter-spacing: 0.07em;
+}
+
+.block__title {
+    line-height: 2em;
+}
+
+.block__about {
+    line-height: 1em;
+}
