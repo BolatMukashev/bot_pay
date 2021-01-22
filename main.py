@@ -5,7 +5,7 @@ from werkzeug.exceptions import BadRequestKeyError
 from config import *
 from db_operation import set_new_promo_code, check_promo_code, up_number_of_references, up_user_questions_available, \
     check_super_promo_code, up_number_of_references_super, uppercase_check
-from messages import MESSAGE
+from messages import MESSAGE, PROMO
 
 app = Flask(__name__)
 app.secret_key = SESSION_SECRET_KEY
@@ -43,11 +43,11 @@ def promo_code():
                 set_new_promo_code(school_name, user_promo_code, secret_code, bank_account, agree)
                 return redirect(url_for('promo_code_registered', user_promo_code=user_promo_code))
             else:
-                error_text = 'Данный промокод уже зарегистрирован'
+                error_text = PROMO['registered']
                 return render_template('promo_code.html', error_text=error_text, school_name=school_name,
                                        secret_code=secret_code, bank_account=bank_account)
         else:
-            error_text = 'Промокод введен не верно'
+            error_text = PROMO['error']
             return render_template('promo_code.html', error_text=error_text, school_name=school_name,
                                    secret_code=secret_code, bank_account=bank_account)
     else:
