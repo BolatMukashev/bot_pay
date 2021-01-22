@@ -6,7 +6,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from config import *
 from db_operation import *
 from keyboards.inline.language import language_buttons
-from messages import MESSAGE
+from keyboards.inline.penalty import penalty_buttons
+from messages import MESSAGE, PENALTY
 
 
 bot = Bot(token=BOT_TOKEN)
@@ -25,6 +26,7 @@ async def cmd_set_commands(message: types.Message):
     if user_id == ADMIN_ID:
         commands = [types.BotCommand(command="/start", description="Старт"),
                     types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
+                    types.BotCommand(command="/penalty", description="Посмотрить штрафы"),
                     types.BotCommand(command="/pay", description="Оплатить. Төлеу"),
                     types.BotCommand(command="/info", description="Подсказки")]
         await bot.set_my_commands(commands)
@@ -46,6 +48,11 @@ async def cmd_start(message: types.Message):
 @dp.message_handler(commands=["language"])
 async def language(message: types.Message):
     await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
+
+
+@dp.message_handler(commands=["penalty"])
+async def penalty(message: types.Message):
+    await message.answer(PENALTY['main'], reply_markup=penalty_buttons)
 
 
 @dp.message_handler(commands=["statistics"])
@@ -226,5 +233,4 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
 
 if __name__ == "__main__":
     from handlers import dp
-
     executor.start_polling(dp, skip_updates=True)
