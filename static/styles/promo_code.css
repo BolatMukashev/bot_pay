@@ -95,26 +95,6 @@ h3 {
     font-size: calc(14px + 10 * ((100vw - 320px) / (1780 - 320)));
 }
 
-.error_text {
-    display:block;
-    color: rgb(189, 40, 64);
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    margin-bottom: 10px;
-    font-size: calc(18px + 10 * ((100vw - 320px) / (1780 - 320)));
-    letter-spacing: 1px;
-    animation: blink 4s alternate infinite;
-    animation-delay: 3s;
-    font-weight:600;
-}
-@keyframes blink {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.2;
-  }
-}
-
 .input {
     color: white;
     font-size: calc(16px + 10 * ((100vw - 320px) / (1780 - 320)));

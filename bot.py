@@ -124,6 +124,14 @@ async def standard_super_promo_code(message: types.Message):
         await message.answer('Стандартный промокод установлен!')
 
 
+@dp.message_handler(commands=["up_admin_q_a"])
+async def up_admin_q_a(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == ADMIN_ID:
+        up_admin_questions_available()
+        await message.answer('+5 к вопросам')
+
+
 @dp.message_handler(commands=["all_users"])
 async def all_users(message: types.Message):
     user_id = message.from_user.id
@@ -148,9 +156,34 @@ async def agreement_school_list(message: types.Message):
         await message.answer('\n'.join(result))
 
 
+@dp.message_handler(commands=["pay"])
+async def user_do_pay(message: types.Message):
+    telegram_id = message.from_user.id
+    user_name = message.from_user.full_name
+    user_name = user_name.replace(' ', '_')
+    user_language = get_language(telegram_id)
+    if user_language == 'KZ':
+        pay_text = MESSAGE['pay_message_kz']
+        language_pay_message = MESSAGE['pay_kz']
+    else:
+        pay_text = MESSAGE['pay_message_ru']
+        language_pay_message = MESSAGE['pay_ru']
+
+    markup = types.InlineKeyboardMarkup()
+    pay_link = types.InlineKeyboardButton(text=language_pay_message,
+                                          url=PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={user_name}')
+    markup.add(pay_link)
+    await message.answer(pay_text, reply_markup=markup)
+
+
 @dp.message_handler(commands=["info"])
 async def cmd_help(message: types.Message):
-    await message.answer(MESSAGE['info'])
+    telegram_id = message.from_user.id
+    user_language = get_language(telegram_id)
+    if user_language == 'KZ':
+        await message.answer(MESSAGE['info_kz'])
+    else:
+        await message.answer(MESSAGE['info_ru'])
 
 
 @dp.poll_answer_handler()

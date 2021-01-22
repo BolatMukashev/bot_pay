@@ -10,6 +10,11 @@ if (language === 'KZ') {
     description_message = 'Telegram мессенджері негізінде білім беру платформасына кіру ақысы';
 };
 
+var secret_key = $('script[src*="pay_script.js"]').data('secret_key');
+var telegram_id = $('script[src*="pay_script.js"]').data('telegram_id');
+var promo_code = $('script[src*="pay_script.js"]').data('promo_code');
+
+let url = `/accept?secret_key=${secret_key}&telegram_id=${telegram_id}&promo_code=${promo_code}`;
 
 this.pay = function () {
  var widget = new cp.CloudPayments({language: lang});
@@ -29,11 +34,17 @@ this.pay = function () {
         {
             onSuccess: function (options) { // success
                 //действие при успешной оплате
+                var zap = new XMLHttpRequest();
+                zap.open("GET", url, true);
+                zap.onload = function (){ console.log( zap.responseText); }
+                zap.send();
+                document.location.href = '/pay_registered';
                 },
 
             onFail: function (reason, options) { // fail
                 //действие при неуспешной оплате
                 },
+
             onComplete: function (paymentResult, options) { //Вызывается как только виджет получает от api.cloudpayments
              // ответ с результатом транзакции. Положительный или отрицательный - неважно
              //например вызов вашей аналитики Facebook Pixel
@@ -43,4 +54,3 @@ this.pay = function () {
 };
 
 $('#pay_button_on').click(pay);
-

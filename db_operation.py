@@ -2,7 +2,7 @@ import peewee
 from db_models import *
 import random
 from datetime import datetime, timedelta
-from config import QUESTION_AVAILABLE
+from config import QUESTION_AVAILABLE, ADMIN_ID
 from test_db import bad_db
 import pickle
 from google_trans_new import google_translator
@@ -203,6 +203,11 @@ def up_user_questions_available(telegram_id):
     query.execute()
 
 
+def up_admin_questions_available():
+    query = Users.update(questions_available=5).where(Users.telegram_id == ADMIN_ID)
+    query.execute()
+
+
 def get_time_visit(telegram_id):
     user = Users.get(Users.telegram_id == telegram_id)
     return user.last_visit
@@ -312,7 +317,8 @@ def get_agreement_school_list():
     school_list = []
     promo_codes = PromoCodes.select().where(PromoCodes.agree == 1).order_by(PromoCodes.number_of_references.desc())
     for promo_code in promo_codes:
-        school_list.append(promo_code.school_name)
+        school = f'{promo_code.school_name} = {promo_code.number_of_references}'
+        school_list.append(school)
     return school_list
 
 
