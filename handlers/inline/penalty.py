@@ -11,4 +11,4 @@ async def get_penalty(call: CallbackQuery, callback_data: dict):
     values = PENALTY['items'][answer_id]
     text = [values['title']] + values['answers']
     text.append(values['description'])
-    await call.message.answer('\n'.join(text))
+    await call.message.answer('\n\n'.join(text))
