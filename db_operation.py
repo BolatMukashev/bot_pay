@@ -3,7 +3,7 @@ from db_models import *
 import random
 from datetime import datetime, timedelta
 from config import QUESTION_AVAILABLE, ADMIN_ID
-from test_db import bad_db
+from questions_ru1 import bad_db
 import pickle
 from google_trans_new import google_translator
 
@@ -114,8 +114,8 @@ def get_random_question(user_language):
     return question_dict
 
 
-def get_all_kz_questions():
-    questions = QuestionsKZ.select()
+def get_all_ru_questions():
+    questions = QuestionsRU.select()
     questions_list = []
     for el in questions:
         id = el.id
@@ -130,20 +130,20 @@ def get_all_kz_questions():
     return questions_list
 
 
-def questions_list_out_of_limit():
-    spisok = []
-    for el in get_all_kz_questions():
-        for x in el['all_answers']:
-            if len(x) > 100:
-                spisok.append(el['id'])
-    return spisok
-
-
-def edit_question(question_id, new_correct_answer, new_all_answers):
-    new_all_answers = pickle.dumps(new_all_answers, pickle.HIGHEST_PROTOCOL)
-    query = QuestionsKZ.update(correct_answer=new_correct_answer,
-                               all_answers=new_all_answers).where(QuestionsKZ.id == question_id)
-    query.execute()
+def get_all_kz_questions():
+    questions = QuestionsKZ.select()
+    questions_list = []
+    for el in questions:
+        id = el.id
+        question = el.question
+        correct_answer = el.correct_answer
+        all_answers = pickle.loads(el.all_answers)
+        explanation = el.explanation
+        image_code = el.image_code
+        question_dict = {'id': id, 'question': question, 'correct_answer': correct_answer, 'all_answers': all_answers,
+                         'explanation': explanation, 'image_code': image_code}
+        questions_list.append(question_dict)
+    return questions_list
 
 
 # ПОЛЬЗОВАТЕЛЬ -------------------------------------------------------------------------------------------------------
@@ -578,5 +578,5 @@ def get_big_statistics():
 if __name__ == '__main__':
     create_new_tables(table_names)
     set_default_super_promo_code()
-    # questions_to_ru_db(bad_db)
-    # questions_to_kz_db(bad_db[:101])
+    for el in get_all_ru_questions():
+        print(el, end=',\n')
