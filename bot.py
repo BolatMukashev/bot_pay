@@ -203,6 +203,8 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
     if question_limit > 0:
         question = get_random_question(user_language)
 
+        await bot.send_photo(telegram_id, 'AgACAgIAAxkBAAInx2ASaIZQrS4JYcNfqqBrQfTrM-GSAALbrzEbZdiZSJ4D4gaxDZs4EnHUli4AAwEAAwIAA3gAA8TVBgABHgQ')
+
         # if question.image_code:
         #     await bot.send_photo(telegram_id, question.image_code)
 
