@@ -4,10 +4,11 @@ from questions_ru1 import bad_db
 from questions_ru2 import bad_db2
 from questions_kz1 import bad_db_kz1
 from questions_kz2 import bad_db_kz2
+from questions_auto_ru import bad_db3
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
 
-db_to_test = bad_db_kz2
+db_to_test = bad_db3
 
 
 def test_questions_in_db(db_name):
