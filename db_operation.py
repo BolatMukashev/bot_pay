@@ -1,15 +1,27 @@
+import json
 import peewee
-from db_models import *
 import random
+from db_models import *
 from datetime import datetime, timedelta
 from config import QUESTION_AVAILABLE, ADMIN_ID
-from questions_ru1 import bad_db
 import pickle
 from google_trans_new import google_translator
+from google_trans_new.google_trans_new import google_new_transError
+
+# КАРТИНКИ -----------------------------------------------------------------------------------------------------------
+
+
+def get_image_codes_from(txt_file_name):
+    with open(txt_file_name, encoding='utf-8-sig', mode='r') as f:
+        text = f.readlines()
+    new_list = [el.replace('\n', '') for el in text]
+    return new_list
+
 
 # ПЕРЕВОД ------------------------------------------------------------------------------------------------------------
 
-translator = google_translator()
+
+translator = google_translator(timeout=30)
 
 
 def translate_to_kz(text):
@@ -18,8 +30,65 @@ def translate_to_kz(text):
 
 
 def translate_list_to_kz(questions_list):
-    translated_list = list(map(lambda x: translator.translate(x, lang_src='ru', lang_tgt='kk'), questions_list))
+    translated_list = list(map(lambda x: translator.translate(x, lang_src='ru', lang_tgt='kk').strip(), questions_list))
     return translated_list
+
+
+def beautiful_print_data_from_db(db_name):
+    print(json.dumps(db_name, sort_keys=True, indent=4, ensure_ascii=False))
+
+
+def get_data_from_json_file(json_file_name):
+    try:
+        with open(json_file_name, 'r', encoding='utf-8') as json_file:
+            data = json.load(json_file)
+            return data
+    except FileNotFoundError:
+        return False
+
+
+def edit_data_in_json_file(json_file_name, new_data):
+    with open(json_file_name, 'w', encoding='utf-8') as json_file:
+        json.dump(new_data, json_file, ensure_ascii=False)
+
+
+def create_new_json_file(json_file_name):
+    null_list = []
+    with open(json_file_name, 'w', encoding='utf-8') as json_file:
+        json.dump(null_list, json_file, ensure_ascii=False)
+
+
+def translate_dict_to_kz_language(ru_question):
+    try:
+        question = translate_to_kz(ru_question['question']).strip()
+        all_answers = translate_list_to_kz(ru_question['all_answers'])
+        correct_answer = translate_to_kz(ru_question['correct_answer']).strip()
+        explanation = translate_to_kz(ru_question['explanation']).strip()
+        image_code = ru_question['image_code']
+        kz_question = {'question': question, 'all_answers': all_answers, 'correct_answer': correct_answer,
+                       'image_code': image_code, 'explanation': explanation}
+        return kz_question
+    except google_new_transError:
+        return False
+
+
+def translate_db_to_kz_language(db_name, json_file_name):
+    data = get_data_from_json_file(json_file_name)
+    if not data:
+        data = ''
+        create_new_json_file(json_file_name)
+
+    for ru_question in db_name[len(data):]:
+        kz_question = translate_dict_to_kz_language(ru_question)
+        if not kz_question:
+            print('Limit error')
+            return
+
+        data = get_data_from_json_file(json_file_name)
+        data.append(kz_question)
+        edit_data_in_json_file(json_file_name, data)
+
+    print('Yippee! Translation finished!!!')
 
 
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
@@ -578,5 +647,3 @@ def get_big_statistics():
 if __name__ == '__main__':
     create_new_tables(table_names)
     set_default_super_promo_code()
-    for el in get_all_ru_questions():
-        print(el, end=',\n')
