@@ -18,6 +18,12 @@ def get_image_codes_from(txt_file_name):
     return new_list
 
 
+def add_image_code_to(db_name, image_code_list):
+    for question in db_name:
+        question['image_code'] = image_code_list.pop(0)
+    return db_name
+
+
 # ПЕРЕВОД ------------------------------------------------------------------------------------------------------------
 
 
@@ -36,6 +42,11 @@ def translate_list_to_kz(questions_list):
 
 def beautiful_print_data_from_db(db_name):
     print(json.dumps(db_name, sort_keys=True, indent=4, ensure_ascii=False))
+
+
+def beautiful_print_data_from_dict(dict_name):
+    for el in dict_name:
+        print(el, end=',\n')
 
 
 def get_data_from_json_file(json_file_name):

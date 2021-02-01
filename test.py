@@ -1,14 +1,17 @@
 import json
 
-from questions_ru1 import bad_db
-from questions_ru2 import bad_db2
-from questions_kz1 import bad_db_kz1
-from questions_kz2 import bad_db_kz2
-from questions_auto_ru import bad_db3
+from db_operation import get_image_codes_from, add_image_code_to, translate_db_to_kz_language, get_data_from_json_file, \
+    beautiful_print_data_from_dict
+from questions_ru1 import questions_ru1
+from questions_ru2 import questions_ru2
+from questions_ru3 import questions_ru3
+from questions_kz1 import questions_kz1
+from questions_kz2 import questions_kz2
+from questions_kz3 import questions_kz3
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
 
-db_to_test = bad_db3
+db_list = [questions_ru1, questions_ru2, questions_ru3, questions_kz1, questions_kz2, questions_kz3]
 
 
 def test_questions_in_db(db_name):
@@ -72,7 +75,18 @@ def test_explanations_in_db(db_name):
         print('all good')
 
 
-test_questions_in_db(db_to_test)
-test_answers_in_db(db_to_test)
-test_correct_answers_in_db(db_to_test)
-test_explanations_in_db(db_to_test)
+def all_db_testing(db_list):
+    for idd, el in enumerate(db_list):
+        print(f'Data base {idd + 1} testing...........')
+        test_questions_in_db(el)
+        test_answers_in_db(el)
+        test_correct_answers_in_db(el)
+        test_explanations_in_db(el)
+        print()
+
+
+all_db_testing(db_list)
+
+# translate_db_to_kz_language(questions_ru3, 'kz.json')
+# data = get_data_from_json_file('kz.json')
+# beautiful_print_data_from_dict(data)
