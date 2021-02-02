@@ -151,23 +151,22 @@ def get_table_lenght(db_name):
     return count
 
 
-def question_to_db(raw_db, language):
+def questions_to_db(raw_db, language):
     for el in raw_db:
         question = el['question']
         correct_answer = el['correct_answer']
         all_answers = pickle.dumps(el['all_answers'], pickle.HIGHEST_PROTOCOL)
         explanation = el['explanation']
         image_code = el['image_code']
-    if language == 'KZ':
-        new_kz_question(question, correct_answer, all_answers, explanation, image_code)
-    else:
-        new_ru_question(question, correct_answer, all_answers, explanation, image_code)
+        if language == 'KZ':
+            new_kz_question(question, correct_answer, all_answers, explanation, image_code)
+        else:
+            new_ru_question(question, correct_answer, all_answers, explanation, image_code)
 
 
 def write_all_questions_on_db(json_file_name, language):
     data = get_data_from_json_file(json_file_name)
-    for question in data:
-        question_to_db(question, language)
+    questions_to_db(data, language)
 
 
 def get_random_question(user_language):
