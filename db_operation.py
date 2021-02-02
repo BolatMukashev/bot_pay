@@ -582,7 +582,7 @@ def get_conversion():
     users = view_number_of_users()
     payed_users = view_number_of_payed_users()
     try:
-        conversion = payed_users * 100 / users
+        conversion = round(payed_users * 100 / users, 2)
     except ZeroDivisionError:
         conversion = 0
     return payed_users, conversion
@@ -598,8 +598,8 @@ def view_percent_of_language_choice():
             ru_language += 1
         else:
             kz_language += 1
-    result_ru = ru_language * 100 / users
-    result_kz = kz_language * 100 / users
+    result_ru = round(ru_language * 100 / users, 2)
+    result_kz = round(kz_language * 100 / users, 2)
     return result_ru, result_kz
 
 
