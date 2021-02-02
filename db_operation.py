@@ -63,7 +63,12 @@ def edit_data_in_json_file(json_file_name, new_data):
         json.dump(new_data, json_file, ensure_ascii=False)
 
 
-def create_new_json_file(json_file_name):
+def create_new_json_file(json_file_name, questions_list):
+    with open(json_file_name, 'w', encoding='utf-8') as json_file:
+        json.dump(questions_list, json_file, ensure_ascii=False)
+
+
+def create_null_json_file(json_file_name):
     null_list = []
     with open(json_file_name, 'w', encoding='utf-8') as json_file:
         json.dump(null_list, json_file, ensure_ascii=False)
@@ -87,7 +92,7 @@ def translate_db_to_kz_language(db_name, json_file_name):
     data = get_data_from_json_file(json_file_name)
     if not data:
         data = ''
-        create_new_json_file(json_file_name)
+        create_null_json_file(json_file_name)
 
     for ru_question in db_name[len(data):]:
         kz_question = translate_dict_to_kz_language(ru_question)
@@ -146,24 +151,23 @@ def get_table_lenght(db_name):
     return count
 
 
-def questions_to_ru_db(raw_db):
+def question_to_db(raw_db, language):
     for el in raw_db:
         question = el['question']
         correct_answer = el['correct_answer']
         all_answers = pickle.dumps(el['all_answers'], pickle.HIGHEST_PROTOCOL)
         explanation = el['explanation']
-        image_code = el['img']
+        image_code = el['image_code']
+    if language == 'KZ':
+        new_kz_question(question, correct_answer, all_answers, explanation, image_code)
+    else:
         new_ru_question(question, correct_answer, all_answers, explanation, image_code)
 
 
-def questions_to_kz_db(raw_db):
-    for el in raw_db:
-        question = translate_to_kz(el['question'])
-        correct_answer = translate_to_kz(el['correct_answer'])
-        all_answers = pickle.dumps(translate_list_to_kz(el['all_answers']), pickle.HIGHEST_PROTOCOL)
-        explanation = 'Дұрыс емес'
-        image_code = el['img']
-        new_kz_question(question, correct_answer, all_answers, explanation, image_code)
+def write_all_questions_on_db(json_file_name, language):
+    data = get_data_from_json_file(json_file_name)
+    for question in data:
+        question_to_db(question, language)
 
 
 def get_random_question(user_language):
@@ -657,4 +661,7 @@ def get_big_statistics():
 
 if __name__ == '__main__':
     create_new_tables(table_names)
+    write_all_questions_on_db('all_questions_ru.json', 'RU')
+    write_all_questions_on_db('all_questions_kz.json', 'KZ')
     set_default_super_promo_code()
+

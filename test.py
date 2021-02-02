@@ -1,17 +1,10 @@
 import json
-
-from db_operation import get_image_codes_from, add_image_code_to, translate_db_to_kz_language, get_data_from_json_file, \
-    beautiful_print_data_from_dict
-from questions_ru1 import questions_ru1
-from questions_ru2 import questions_ru2
-from questions_ru3 import questions_ru3
-from questions_kz1 import questions_kz1
-from questions_kz2 import questions_kz2
-from questions_kz3 import questions_kz3
+from db_operation import get_image_codes_from, add_image_code_to, translate_db_to_kz_language, \
+    get_data_from_json_file, beautiful_print_data_from_dict, create_new_json_file
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
 
-db_list = [questions_ru1, questions_ru2, questions_ru3, questions_kz1, questions_kz2, questions_kz3]
+db_list = []
 
 
 def test_questions_in_db(db_name):
@@ -86,7 +79,3 @@ def all_db_testing(db_list):
 
 
 all_db_testing(db_list)
-
-# translate_db_to_kz_language(questions_ru3, 'kz.json')
-# data = get_data_from_json_file('kz.json')
-# beautiful_print_data_from_dict(data)
