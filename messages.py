@@ -1,6 +1,7 @@
 MESSAGE = {
     'start_admin': 'Открыть статистику: /statistics\n'
                    'Сообщения всем: /message_for_all\n'
+                   'Сообщения всем о ремонте: /message_for_all_repair\n'
                    'Сообщение для неактивных: /message_for_losers\n'
                    'Список всех пользователей: /all_users\n'
                    'Список всех промо-кодов: /all_promo_codes\n'
@@ -41,6 +42,13 @@ MESSAGE = {
     'promo_code_none_text_ru': 'Не использовался',
     'pay_error_message': 'Мы не смогли определить Ваш Telegram ID. Пожалуйста, зайдите в бота.\n'
                          'Біз сіздің Telegram идентификаторыңызды анықтай алмадық. Ботқа кіріңіз.'
+}
+
+STICKERS = {
+    'hello': 'CAACAgIAAxkBAAEB1rxgGo2hRDlaGoiEHOZf3mY6C19jKQACKwIAArnzlwv7BQOMjG9ozB4E',
+    'repair': 'CAACAgIAAxkBAAEB1rhgGo2MKy7iUaRUUGj5b1LO4V0sHgACMQEAArnzlws-7wljOEZF0x4E',
+    'message': 'CAACAgIAAxkBAAEB1rpgGo2RcuS-bNqr3URmqOIh9Nv3SAACPAEAArnzlwvMnvUK9IcNFR4E',
+    'come_back': 'CAACAgIAAxkBAAEB1sRgGpJtzbzRtNodSiGctvngZ9AccQACHwEAArnzlwu5r6hVbS11sB4E'
 }
 
 PROMO = {

@@ -7,7 +7,7 @@ from config import *
 from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons
-from messages import MESSAGE, PENALTY
+from messages import MESSAGE, PENALTY, STICKERS
 
 
 bot = Bot(token=BOT_TOKEN)
@@ -16,6 +16,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 class AllStates(StatesGroup):
     MessageForAll: State = State()
+    MessageForAllRepair: State = State()
     MessageForLosers: State = State()
     NewSuperPromoCode: State = State()
 
@@ -38,6 +39,7 @@ async def cmd_start(message: types.Message):
     user_id = message.from_user.id
     user_name = message.from_user.full_name
     new_user(user_id, user_name)
+    await bot.send_sticker(user_id, STICKERS['hello'])
     if user_id == ADMIN_ID:
         await message.answer(MESSAGE['start_admin'])
     else:
@@ -78,6 +80,29 @@ async def message_for_all_action(message: types.Message, state: FSMContext):
     users = all_users_id()
     for user in users:
         try:
+            await bot.send_sticker(user, STICKERS['message'])
+            await bot.send_message(user, my_message)
+        except ChatNotFound:
+            pass
+    await state.finish()
+
+
+@dp.message_handler(commands=["message_for_all_repair"], state='*')
+async def message_for_all_repair(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == ADMIN_ID:
+        await message.answer('Пиши своё сообщение, но помни что оно уйдет всем пользователям!!!')
+        await AllStates.MessageForAllRepair.set()
+
+
+@dp.message_handler(state=AllStates.MessageForAllRepair,  content_types=types.ContentTypes.TEXT)
+async def message_for_all_repair_action(message: types.Message, state: FSMContext):
+    my_message = message.text
+    await state.update_data(my_message=my_message)
+    users = all_users_id()
+    for user in users:
+        try:
+            await bot.send_sticker(user, STICKERS['repair'])
             await bot.send_message(user, my_message)
         except ChatNotFound:
             pass
@@ -99,6 +124,7 @@ async def message_for_losers_action(message: types.Message, state: FSMContext):
     users = get_loser_list()
     for user in users:
         try:
+            await bot.send_sticker(user, STICKERS['come_back'])
             await bot.send_message(user, my_message)
         except ChatNotFound:
             pass
