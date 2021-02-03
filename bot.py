@@ -6,7 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from config import *
 from db_operation import *
 from keyboards.inline.language import language_buttons
-from keyboards.inline.penalty import penalty_buttons
+from keyboards.inline.penalty import penalty_buttons1
 from messages import MESSAGE, PENALTY, STICKERS
 
 
@@ -54,7 +54,7 @@ async def language(message: types.Message):
 
 @dp.message_handler(commands=["penalty"])
 async def penalty(message: types.Message):
-    await message.answer(PENALTY['main'], reply_markup=penalty_buttons)
+    await message.answer(PENALTY['main'], reply_markup=penalty_buttons1)
 
 
 @dp.message_handler(commands=["statistics"])
