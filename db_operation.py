@@ -3,7 +3,7 @@ import peewee
 import random
 from db_models import *
 from datetime import datetime, timedelta
-from config import ADMIN_ID
+import config
 import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
@@ -145,7 +145,7 @@ def new_kz_question(question, correct_answer, all_answers, explanation=None, ima
     new_question.save()
 
 
-def get_table_lenght(db_name):
+def get_table_length(db_name):
     db_all = db_name.select()
     count = len(db_all)
     return count
@@ -178,7 +178,7 @@ def choose_db_by_language(user_language):
 
 def get_random_question(user_language):
     db_name = choose_db_by_language(user_language)
-    table_length = get_table_lenght(db_name)
+    table_length = get_table_length(db_name)
     random_id = random.randrange(1, table_length + 1)
     question_block = db_name.get(db_name.id == random_id)
 
@@ -200,34 +200,19 @@ def get_random_question(user_language):
     return question_dict
 
 
-def get_all_ru_questions():
-    questions = QuestionsRU.select()
+def get_all_questions_from_db(user_language):
+    db_name = choose_db_by_language(user_language)
+    questions = db_name.select()
     questions_list = []
     for el in questions:
-        id = el.id
+        question_id = el.id
         question = el.question
         correct_answer = el.correct_answer
         all_answers = pickle.loads(el.all_answers)
         explanation = el.explanation
         image_code = el.image_code
-        question_dict = {'id': id, 'question': question, 'correct_answer': correct_answer, 'all_answers': all_answers,
-                         'explanation': explanation, 'image_code': image_code}
-        questions_list.append(question_dict)
-    return questions_list
-
-
-def get_all_kz_questions():
-    questions = QuestionsKZ.select()
-    questions_list = []
-    for el in questions:
-        id = el.id
-        question = el.question
-        correct_answer = el.correct_answer
-        all_answers = pickle.loads(el.all_answers)
-        explanation = el.explanation
-        image_code = el.image_code
-        question_dict = {'id': id, 'question': question, 'correct_answer': correct_answer, 'all_answers': all_answers,
-                         'explanation': explanation, 'image_code': image_code}
+        question_dict = {'id': question_id, 'question': question, 'correct_answer': correct_answer,
+                         'all_answers': all_answers, 'explanation': explanation, 'image_code': image_code}
         questions_list.append(question_dict)
     return questions_list
 
@@ -298,7 +283,7 @@ def up_user_time_limit_1years(telegram_id):
 
 
 def up_admin_time_limit_3minute():
-    query = Users.update(time_limit=datetime.now() + timedelta(minutes=3)).where(Users.telegram_id == ADMIN_ID)
+    query = Users.update(time_limit=datetime.now() + timedelta(minutes=3)).where(Users.telegram_id == config.ADMIN_ID)
     query.execute()
 
 
@@ -676,4 +661,3 @@ if __name__ == '__main__':
     create_new_tables(table_names)
     # write_all_questions_in_db('all_questions_ru.json', 'RU')
     # write_all_questions_in_db('all_questions_kz.json', 'KZ')
-

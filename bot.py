@@ -1,16 +1,14 @@
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.utils.exceptions import ChatNotFound
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from config import *
+from aiogram.utils.exceptions import ChatNotFound
 from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons1
 from messages import MESSAGE, PENALTY, STICKERS
 
-
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
@@ -22,7 +20,7 @@ class AllStates(StatesGroup):
 @dp.message_handler(commands="set_commands", state="*")
 async def cmd_set_commands(message: types.Message):
     user_id = message.from_user.id
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         commands = [types.BotCommand(command="/start", description="Старт"),
                     types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
                     types.BotCommand(command="/penalty", description="Посмотрить штрафы"),
@@ -38,7 +36,7 @@ async def cmd_start(message: types.Message):
     user_name = message.from_user.full_name
     new_user(user_id, user_name)
     await bot.send_sticker(user_id, STICKERS['hello'])
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         await message.answer(MESSAGE['start_admin_text'])
     else:
         await message.answer(MESSAGE['start_user_text'])
@@ -58,7 +56,7 @@ async def penalty(message: types.Message):
 @dp.message_handler(commands=["statistics"])
 async def statistics(message: types.Message):
     user_id = message.from_user.id
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         result = get_big_statistics()
         await message.answer(result)
 
@@ -66,7 +64,7 @@ async def statistics(message: types.Message):
 @dp.message_handler(commands=["message_for_all"], state='*')
 async def message_for_all(message: types.Message):
     user_id = message.from_user.id
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         await message.answer('Пиши своё сообщение, но помни что оно уйдет всем пользователям!!!')
         await AllStates.MessageForAll.set()
 
@@ -88,7 +86,7 @@ async def message_for_all_action(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["message_for_all_about_repair"], state='*')
 async def message_for_all_repair(message: types.Message):
     user_id = message.from_user.id
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         await message.answer('Пиши своё сообщение о РЕМОНТНЫХ РАБОТАХ, но помни что оно уйдет всем пользователям!!!')
         await AllStates.MessageForAllRepair.set()
 
@@ -114,15 +112,15 @@ async def message_for_all_repair_action(message: types.Message, state: FSMContex
 @dp.message_handler(commands=["up_admin_time_limit"])
 async def up_admin_q_a(message: types.Message):
     user_id = message.from_user.id
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         up_admin_time_limit_3minute()
-        await message.answer('+5 к вопросам')
+        await message.answer('+3 минуты добавлено')
 
 
 @dp.message_handler(commands=["all_users"])
 async def all_users(message: types.Message):
     user_id = message.from_user.id
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         result = get_all_users_list()
         await message.answer(result)
 
@@ -130,7 +128,7 @@ async def all_users(message: types.Message):
 @dp.message_handler(commands=["all_promo_codes"])
 async def all_users(message: types.Message):
     user_id = message.from_user.id
-    if user_id == ADMIN_ID:
+    if user_id == config.ADMIN_ID:
         result = get_all_promo_code_list()
         await message.answer(result)
 
@@ -141,16 +139,12 @@ async def user_do_pay(message: types.Message):
     user_name = message.from_user.full_name
     user_name = user_name.replace(' ', '_')
     user_language = get_user_language(telegram_id)
-    if user_language == 'KZ':
-        pay_text = MESSAGE['pay_message_kz']
-        language_pay_message = MESSAGE['pay_kz']
-    else:
-        pay_text = MESSAGE['pay_message_ru']
-        language_pay_message = MESSAGE['pay_ru']
+    pay_text = MESSAGE[f'pay_message_{user_language}']
+    language_pay_message = MESSAGE[f'pay_{user_language}']
 
     markup = types.InlineKeyboardMarkup()
-    pay_link = types.InlineKeyboardButton(text=language_pay_message,
-                                          url=PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={user_name}')
+    url = config.PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={user_name}'
+    pay_link = types.InlineKeyboardButton(text=language_pay_message, url=url)
     markup.add(pay_link)
     await message.answer(pay_text, reply_markup=markup)
 
@@ -159,10 +153,7 @@ async def user_do_pay(message: types.Message):
 async def cmd_help(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    if user_language == 'KZ':
-        await message.answer(MESSAGE['info_kz'])
-    else:
-        await message.answer(MESSAGE['info_ru'])
+    await message.answer(MESSAGE[f'info_{user_language}'])
 
 
 @dp.poll_answer_handler()
@@ -175,7 +166,7 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
     user_language = get_user_language(telegram_id)
     if time_limit > today:
         question = get_random_question(user_language)
-        if DEBUG is False and question.image_code:
+        if config.DEBUG is False and question.image_code:
             await bot.send_photo(telegram_id, question.image_code)
         await quiz_answer.bot.send_poll(telegram_id,
                                         type='quiz',
@@ -190,8 +181,8 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
 
         markup = types.InlineKeyboardMarkup()
-        pay_link = types.InlineKeyboardButton(text=language_pay_message,
-                                              url=PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={user_name}')
+        url = config.PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={user_name}'
+        pay_link = types.InlineKeyboardButton(text=language_pay_message, url=url)
         markup.add(pay_link)
         await bot.send_message(telegram_id, limit_error_message, reply_markup=markup)
     update_time_visit(telegram_id)
