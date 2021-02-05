@@ -17,8 +17,6 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 class AllStates(StatesGroup):
     MessageForAll: State = State()
     MessageForAllRepair: State = State()
-    MessageForLosers: State = State()
-    NewSuperPromoCode: State = State()
 
 
 @dp.message_handler(commands="set_commands", state="*")
@@ -41,9 +39,9 @@ async def cmd_start(message: types.Message):
     new_user(user_id, user_name)
     await bot.send_sticker(user_id, STICKERS['hello'])
     if user_id == ADMIN_ID:
-        await message.answer(MESSAGE['start_admin'])
+        await message.answer(MESSAGE['start_admin_text'])
     else:
-        await message.answer(MESSAGE['start_user'])
+        await message.answer(MESSAGE['start_user_text'])
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
@@ -87,11 +85,11 @@ async def message_for_all_action(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(commands=["message_for_all_repair"], state='*')
+@dp.message_handler(commands=["message_for_all_about_repair"], state='*')
 async def message_for_all_repair(message: types.Message):
     user_id = message.from_user.id
     if user_id == ADMIN_ID:
-        await message.answer('Пиши своё сообщение, но помни что оно уйдет всем пользователям!!!')
+        await message.answer('Пиши своё сообщение о РЕМОНТНЫХ РАБОТАХ, но помни что оно уйдет всем пользователям!!!')
         await AllStates.MessageForAllRepair.set()
 
 
@@ -109,59 +107,15 @@ async def message_for_all_repair_action(message: types.Message, state: FSMContex
     await state.finish()
 
 
-@dp.message_handler(commands=["message_for_losers"], state='*')
-async def message_for_losers(message: types.Message):
-    user_id = message.from_user.id
-    if user_id == ADMIN_ID:
-        await message.answer('Сообщение получат те кто не заходил в бота 2 недели и не оплачивал сервис...')
-        await AllStates.MessageForLosers.set()
+# @dp.message_handler(commands=["message_for_losers"], state='*')
+# await bot.send_sticker(user, STICKERS['come_back'])
 
 
-@dp.message_handler(state=AllStates.MessageForLosers,  content_types=types.ContentTypes.TEXT)
-async def message_for_losers_action(message: types.Message, state: FSMContext):
-    my_message = message.text
-    await state.update_data(my_message=my_message)
-    users = get_loser_list()
-    for user in users:
-        try:
-            await bot.send_sticker(user, STICKERS['come_back'])
-            await bot.send_message(user, my_message)
-        except ChatNotFound:
-            pass
-    await state.finish()
-    await bot.send_message(ADMIN_ID, f'Сообщение отправлено {len(users)} пользователям.')
-
-
-@dp.message_handler(commands=["super_promo_code"], state='*')
-async def set_super_promo_code(message: types.Message):
-    user_id = message.from_user.id
-    if user_id == ADMIN_ID:
-        await message.answer('Новый супер-промо код:')
-        await AllStates.NewSuperPromoCode.set()
-
-
-@dp.message_handler(state=AllStates.NewSuperPromoCode,  content_types=types.ContentTypes.TEXT)
-async def set_super_promo_code_action(message: types.Message, state: FSMContext):
-    my_message = message.text
-    await state.update_data(my_message=my_message)
-    edit_super_promo_code(my_message)
-    await message.answer('Промокод установлен!')
-    await state.finish()
-
-
-@dp.message_handler(commands=["standard_super_promo_code"])
-async def standard_super_promo_code(message: types.Message):
-    user_id = message.from_user.id
-    if user_id == ADMIN_ID:
-        set_default_super_promo_code()
-        await message.answer('Стандартный промокод установлен!')
-
-
-@dp.message_handler(commands=["up_admin_q_a"])
+@dp.message_handler(commands=["up_admin_time_limit"])
 async def up_admin_q_a(message: types.Message):
     user_id = message.from_user.id
     if user_id == ADMIN_ID:
-        up_admin_questions_available()
+        up_admin_time_limit_3minute()
         await message.answer('+5 к вопросам')
 
 
@@ -169,7 +123,7 @@ async def up_admin_q_a(message: types.Message):
 async def all_users(message: types.Message):
     user_id = message.from_user.id
     if user_id == ADMIN_ID:
-        result = view_all_users_list()
+        result = get_all_users_list()
         await message.answer(result)
 
 
@@ -177,16 +131,8 @@ async def all_users(message: types.Message):
 async def all_users(message: types.Message):
     user_id = message.from_user.id
     if user_id == ADMIN_ID:
-        result = view_all_promo_code_list()
+        result = get_all_promo_code_list()
         await message.answer(result)
-
-
-@dp.message_handler(commands=["agreement_school_list"])
-async def agreement_school_list(message: types.Message):
-    user_id = message.from_user.id
-    if user_id == ADMIN_ID:
-        result = get_agreement_school_list()
-        await message.answer('\n'.join(result))
 
 
 @dp.message_handler(commands=["pay"])
@@ -194,7 +140,7 @@ async def user_do_pay(message: types.Message):
     telegram_id = message.from_user.id
     user_name = message.from_user.full_name
     user_name = user_name.replace(' ', '_')
-    user_language = get_language(telegram_id)
+    user_language = get_user_language(telegram_id)
     if user_language == 'KZ':
         pay_text = MESSAGE['pay_message_kz']
         language_pay_message = MESSAGE['pay_kz']
@@ -212,7 +158,7 @@ async def user_do_pay(message: types.Message):
 @dp.message_handler(commands=["info"])
 async def cmd_help(message: types.Message):
     telegram_id = message.from_user.id
-    user_language = get_language(telegram_id)
+    user_language = get_user_language(telegram_id)
     if user_language == 'KZ':
         await message.answer(MESSAGE['info_kz'])
     else:
@@ -221,17 +167,16 @@ async def cmd_help(message: types.Message):
 
 @dp.poll_answer_handler()
 async def handle_poll_answer(quiz_answer: types.PollAnswer):
+    today = datetime.now()
     telegram_id = quiz_answer.user.id
     user_name = quiz_answer.user.full_name
     user_name = user_name.replace(' ', '_')
-    question_limit = get_user_questions_available(telegram_id)
-    user_language = get_language(telegram_id)
-    if question_limit > 0:
+    time_limit = get_user_time_limit(telegram_id)
+    user_language = get_user_language(telegram_id)
+    if time_limit > today:
         question = get_random_question(user_language)
-
-        # if question.image_code:
-        #     await bot.send_photo(telegram_id, question.image_code)
-
+        if DEBUG is False and question.image_code:
+            await bot.send_photo(telegram_id, question.image_code)
         await quiz_answer.bot.send_poll(telegram_id,
                                         type='quiz',
                                         is_anonymous=False,
@@ -240,14 +185,9 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
                                         options=question['options'],
                                         correct_option_id=question['correct_option_id'],
                                         explanation=question['explanation'])
-        reduce_user_questions_available(telegram_id)
     else:
-        if user_language == 'KZ':
-            language_pay_message = MESSAGE['pay_kz']
-            limit_error_message = MESSAGE['limit_error_kz']
-        else:
-            language_pay_message = MESSAGE['pay_ru']
-            limit_error_message = MESSAGE['limit_error_ru']
+        language_pay_message = MESSAGE[f'pay_{user_language}']
+        limit_error_message = MESSAGE[f'limit_error_{user_language}']
 
         markup = types.InlineKeyboardMarkup()
         pay_link = types.InlineKeyboardButton(text=language_pay_message,
@@ -260,4 +200,3 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
 if __name__ == "__main__":
     from handlers import dp
     executor.start_polling(dp, skip_updates=True)
-

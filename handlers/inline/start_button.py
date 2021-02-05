@@ -1,13 +1,13 @@
 from aiogram.types import CallbackQuery
 from bot import dp, bot
-from keyboards.inline.callback_datas import set_language
+from keyboards.inline.callback_datas import start_button_call
 from db_operation import edit_user_language
 from keyboards.inline.country import country_buttons
 from messages import MESSAGE
 
 
-@dp.callback_query_handler(set_language.filter(language='language'))
-async def update_language(call: CallbackQuery, callback_data: dict):
+@dp.callback_query_handler(start_button_call.filter(st='st'))
+async def start_button_handler(call: CallbackQuery, callback_data: dict):
     telegram_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id

@@ -3,7 +3,7 @@ import peewee
 import random
 from db_models import *
 from datetime import datetime, timedelta
-from config import QUESTION_AVAILABLE, ADMIN_ID
+from config import ADMIN_ID
 import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
@@ -110,7 +110,7 @@ def translate_db_to_kz_language(db_name, json_file_name):
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
 
-table_names = [Users, QuestionsRU, QuestionsKZ, PromoCodes, SuperPromoCode]
+table_names = [Users, QuestionsRU, QuestionsKZ, PromoCodes]
 
 
 def create_new_tables(db_models):
@@ -164,19 +164,22 @@ def questions_to_db(raw_db, language):
             new_ru_question(question, correct_answer, all_answers, explanation, image_code)
 
 
-def write_all_questions_on_db(json_file_name, language):
+def write_all_questions_in_db(json_file_name, language):
     data = get_data_from_json_file(json_file_name)
     questions_to_db(data, language)
 
 
-def get_random_question(user_language):
+def choose_db_by_language(user_language):
     if user_language == 'RU':
-        db_name = QuestionsRU
+        return QuestionsRU
     elif user_language == 'KZ':
-        db_name = QuestionsKZ
+        return QuestionsKZ
 
-    table_lenght = get_table_lenght(db_name)
-    random_id = random.randrange(1, table_lenght + 1)
+
+def get_random_question(user_language):
+    db_name = choose_db_by_language(user_language)
+    table_length = get_table_lenght(db_name)
+    random_id = random.randrange(1, table_length + 1)
     question_block = db_name.get(db_name.id == random_id)
 
     question_id = question_block.id
@@ -233,9 +236,9 @@ def get_all_kz_questions():
 
 
 # new_user(778899, 'Bolat')
-def new_user(telegram_id, user_name):
+def new_user(telegram_id, full_name):
     try:
-        user = Users(telegram_id=telegram_id, user_name=user_name)
+        user = Users(telegram_id=telegram_id, full_name=full_name)
         user.save()
     except peewee.IntegrityError:
         pass
@@ -249,7 +252,6 @@ def check_id(telegram_id):
         return False
 
 
-# print message for all users
 def all_users_id():
     users_id_list = []
     all_users = Users.select()
@@ -258,36 +260,45 @@ def all_users_id():
     return users_id_list
 
 
-def get_language(telegram_id):
+def get_user_language(telegram_id):
     user = Users.get(Users.telegram_id == telegram_id)
     return user.language
 
 
+def get_user_country(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user.country
+
+
 # user_language = 'RU' or 'KZ'
-def edit_language(telegram_id, user_language):
-    user = Users.get(Users.telegram_id == telegram_id)
-    user.language = user_language
-    user.save()
-
-
-def get_user_questions_available(telegram_id):
-    user = Users.get(Users.telegram_id == telegram_id)
-    count = user.questions_available
-    return count
-
-
-def reduce_user_questions_available(telegram_id):
-    query = Users.update(questions_available=Users.questions_available - 1).where(Users.telegram_id == telegram_id)
+def edit_user_language(telegram_id, user_language):
+    query = Users.update(language=user_language).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
-def up_user_questions_available(telegram_id):
-    query = Users.update(questions_available=100000).where(Users.telegram_id == telegram_id)
+def edit_user_country(telegram_id, user_country):
+    query = Users.update(country=user_country).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
-def up_admin_questions_available():
-    query = Users.update(questions_available=5).where(Users.telegram_id == ADMIN_ID)
+def get_user_time_limit(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    date_time = user.time_limit
+    return date_time
+
+
+def up_user_time_limit_7days(telegram_id):
+    query = Users.update(time_limit=datetime.now() + timedelta(days=7)).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
+def up_user_time_limit_1years(telegram_id):
+    query = Users.update(time_limit=datetime.now() + timedelta(days=365)).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
+def up_admin_time_limit_3minute():
+    query = Users.update(time_limit=datetime.now() + timedelta(minutes=3)).where(Users.telegram_id == ADMIN_ID)
     query.execute()
 
 
@@ -301,15 +312,27 @@ def update_time_visit(telegram_id):
     query.execute()
 
 
-def get_loser_list():
-    two_week_ago = datetime.now().date() - timedelta(days=14)
+def get_loser_list_14days():
     loser_list = []
     all_users = Users.select()
     for user in all_users:
-        questions_available = user.questions_available
-        last_visit = user.last_visit.date()
-        if questions_available == 0 and last_visit < two_week_ago:
-            loser_list.append(user.telegram_id)
+        telegram_id = user.telegram_id
+        time_limit = get_user_time_limit(telegram_id)
+        two_week_ago = time_limit + timedelta(days=14)
+        if datetime.now() >= two_week_ago:
+            loser_list.append(telegram_id)
+    return loser_list
+
+
+def get_loser_list_45days():
+    loser_list = []
+    all_users = Users.select()
+    for user in all_users:
+        telegram_id = user.telegram_id
+        time_limit = get_user_time_limit(telegram_id)
+        two_week_ago = time_limit + timedelta(days=45)
+        if datetime.now() >= two_week_ago:
+            loser_list.append(telegram_id)
     return loser_list
 
 
@@ -332,12 +355,11 @@ def check_promo_code(promo_code):
         return False
 
 
-def set_new_promo_code(school_name, promo_code, secret_key, bank_account, agree):
+def set_new_promo_code(school_name, secret_key):
     new_promo_code = PromoCodes(school_name=school_name,
-                                promo_code=promo_code,
                                 secret_key=secret_key,
-                                bank_account=bank_account,
-                                agree=agree)
+                                promo_code=secret_key
+                                )
     new_promo_code.save()
 
 
@@ -347,62 +369,10 @@ def get_number_of_references(promo_code):
     return number_of_references
 
 
-def get_percent(promo_code):
-    promo_code = PromoCodes.get(PromoCodes.promo_code == promo_code)
-    percent = promo_code.percent
-    return percent
-
-
-def get_bank_account(promo_code):
-    promo_code = PromoCodes.get(PromoCodes.promo_code == promo_code)
-    bank_account = promo_code.bank_account
-    return bank_account
-
-
 def up_number_of_references(promo_code):
     query = PromoCodes.update(number_of_references=PromoCodes.number_of_references + 1).where(
         PromoCodes.promo_code == promo_code)
     query.execute()
-
-
-def check_super_promo_code():
-    try:
-        promo_code = SuperPromoCode.get(SuperPromoCode.id == 1)
-        return promo_code.promo_code
-    except:
-        return False
-
-
-def up_number_of_references_super():
-    query = SuperPromoCode.update(number_of_references=SuperPromoCode.number_of_references + 1).where(
-        SuperPromoCode.id == 1)
-    query.execute()
-
-
-def set_default_super_promo_code():
-    if check_super_promo_code():
-        delete_super_promo_code()
-    promo_code = SuperPromoCode()
-    promo_code.save()
-
-
-def delete_super_promo_code():
-    promo_code = SuperPromoCode.delete().where(SuperPromoCode.id == 1)
-    promo_code.execute()
-
-
-def edit_super_promo_code(name):
-    query = SuperPromoCode.update(promo_code=name).where(SuperPromoCode.id == 1)
-    query.execute()
-
-
-def get_agreement_school_list():
-    school_list = []
-    promo_codes = PromoCodes.select().where(PromoCodes.agree == 1).order_by(PromoCodes.number_of_references.desc())
-    for promo_code in promo_codes:
-        school = f'{promo_code.school_name} = {promo_code.number_of_references}'
-        school_list.append(school)
-    return school_list
 
 
 def filter_by(text):
@@ -422,27 +392,27 @@ def uppercase_check(text):
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
 
 
-def view_number_of_users():
+def get_number_of_users():
     all_users = Users.select()
     number_of_users = len(all_users)
     return number_of_users
 
 
-def view_number_of_users_on_day():
+def get_number_of_users_on_day():
     today = datetime.now().date()
     all_users = Users.select().where(Users.registration_date == today)
     number_of_users = len(all_users)
     return number_of_users
 
 
-def view_number_of_users_on_week():
+def get_number_of_users_on_week():
     old_day = datetime.now().date() - timedelta(days=7)
     all_users = Users.select().where(Users.registration_date > old_day)
     number_of_users = len(all_users)
     return number_of_users
 
 
-def view_number_of_users_on_month():
+def get_number_of_users_on_month():
     this_month = datetime.now().month
     this_year = datetime.now().year
     users_count = 0
@@ -453,7 +423,7 @@ def view_number_of_users_on_month():
     return users_count
 
 
-def view_number_of_users_on_year():
+def get_number_of_users_on_year():
     this_year = datetime.now().year
     users_count = 0
     all_users = Users.select()
@@ -463,17 +433,17 @@ def view_number_of_users_on_year():
     return users_count
 
 
-def view_users_online_now():
+def get_users_online_now():
     today = datetime.now()
-    count = 0
+    users_online = 0
     all_users = Users.select()
     for user in all_users:
         if user.last_visit.year == today.year and user.last_visit.month == today.month and user.last_visit.hour == today.hour:
-            count += 1
-    return count
+            users_online += 1
+    return users_online
 
 
-def view_users_online_today():
+def get_users_online_today():
     today = datetime.now()
     count = 0
     all_users = Users.select()
@@ -483,7 +453,7 @@ def view_users_online_today():
     return count
 
 
-def view_users_online_on_this_week():
+def get_users_online_on_this_week():
     old_day = datetime.now() - timedelta(days=7)
     count = 0
     all_users = Users.select()
@@ -493,7 +463,7 @@ def view_users_online_on_this_week():
     return count
 
 
-def view_users_online_on_this_month():
+def get_users_online_on_this_month():
     today = datetime.now()
     count = 0
     all_users = Users.select()
@@ -503,7 +473,7 @@ def view_users_online_on_this_month():
     return count
 
 
-def view_users_online_on_this_year():
+def get_users_online_on_this_year():
     today = datetime.now()
     count = 0
     all_users = Users.select()
@@ -513,119 +483,162 @@ def view_users_online_on_this_year():
     return count
 
 
-def view_all_users_list():
+def get_all_users_list():
     result = []
     all_users = Users.select()
-    result.append('id' + ' ' * 20 + 'имя' + ' ' * 20 + 'count')
+    result.append('id -> имя')
     for user in all_users:
-        result.append(f"{user.telegram_id} {user.user_name} {user.questions_available}")
+        result.append(f"{user.telegram_id} -> {user.full_name}")
     return '\n'.join(result)
 
 
-def view_number_of_promo_codes():
-    all_promo_codes = PromoCodes.select()
-    number_of_promo_codes = len(all_promo_codes)
+def get_number_of_promo_codes():
+    promo_codes = PromoCodes.select()
+    number_of_promo_codes = len(promo_codes)
     return number_of_promo_codes
 
 
-def view_number_of_promo_codes_on_day():
+def get_number_of_promo_codes_on_day():
     today = datetime.now().date()
-    all_promo_codes = PromoCodes.select().where(PromoCodes.registration_date == today)
-    number_of_promo_codes = len(all_promo_codes)
+    promo_codes = PromoCodes.select().where(PromoCodes.registration_date == today)
+    number_of_promo_codes = len(promo_codes)
     return number_of_promo_codes
 
 
-def view_number_of_promo_codes_on_week():
+def get_number_of_promo_codes_on_week():
     old_day = datetime.now().date() - timedelta(days=7)
-    all_promo_codes = PromoCodes.select().where(PromoCodes.registration_date > old_day)
-    number_of_promo_codes = len(all_promo_codes)
+    promo_codes = PromoCodes.select().where(PromoCodes.registration_date > old_day)
+    number_of_promo_codes = len(promo_codes)
     return number_of_promo_codes
 
 
-def view_number_of_promo_codes_on_month():
+def get_number_of_promo_codes_on_month():
     this_month = datetime.now().month
     this_year = datetime.now().year
     promo_codes_count = 0
-    all_promo_codes = PromoCodes.select()
-    for promo_code in all_promo_codes:
+    promo_codes = PromoCodes.select()
+    for promo_code in promo_codes:
         if promo_code.registration_date.year == this_year and promo_code.registration_date.month == this_month:
             promo_codes_count += 1
     return promo_codes_count
 
 
-def view_number_of_promo_codes_on_year():
+def get_number_of_promo_codes_on_year():
     this_year = datetime.now().year
     promo_codes_count = 0
-    all_promo_codes = PromoCodes.select()
-    for promo_code in all_promo_codes:
+    promo_codes = PromoCodes.select()
+    for promo_code in promo_codes:
         if promo_code.registration_date.year == this_year:
             promo_codes_count += 1
     return promo_codes_count
 
 
-def view_all_promo_code_list():
+def get_all_promo_code_list():
     result = []
-    all_promo_codes = PromoCodes.select().order_by(PromoCodes.number_of_references.desc())
+    promo_codes = PromoCodes.select().order_by(PromoCodes.number_of_references.desc())
     result.append('школа > промо-код > упоминаний')
-    for promo_code in all_promo_codes:
+    for promo_code in promo_codes:
         result.append(f"{promo_code.school_name} {promo_code.promo_code} {promo_code.number_of_references}")
     return '\n'.join(result)
 
 
-def view_number_of_payed_users():
-    payed_users = Users.select().where(Users.questions_available > QUESTION_AVAILABLE)
+def get_number_of_promo_code_used_users():
+    promo_code_used_users = Users.select().where(Users.promo_code_used is True)
+    promo_code_used = len(promo_code_used_users)
+    return promo_code_used
+
+
+def get_number_of_payed_users():
+    payed_users = Users.select().where(Users.made_payment is True)
     payed_users_count = len(payed_users)
     return payed_users_count
 
 
-def get_conversion():
-    users = view_number_of_users()
-    payed_users = view_number_of_payed_users()
+def get_promo_code_conversion():
+    users = get_number_of_users()
+    promo_code_used_users = get_number_of_promo_code_used_users()
+    try:
+        conversion = round(promo_code_used_users * 100 / users, 2)
+    except ZeroDivisionError:
+        conversion = 0
+    return conversion
+
+
+def get_pay_conversion():
+    users = get_number_of_users()
+    payed_users = get_number_of_payed_users()
     try:
         conversion = round(payed_users * 100 / users, 2)
     except ZeroDivisionError:
         conversion = 0
-    return payed_users, conversion
+    return conversion
 
 
-def view_percent_of_language_choice():
-    users = view_number_of_users()
-    ru_language = 0
-    kz_language = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.language == 'RU':
-            ru_language += 1
-        else:
-            kz_language += 1
-    result_ru = round(ru_language * 100 / users, 2)
-    result_kz = round(kz_language * 100 / users, 2)
+def get_ru_language_users_count():
+    ru_users = Users.select().where(Users.language == 'RU')
+    ru_users_count = len(ru_users)
+    return ru_users_count
+
+
+def get_kz_language_users_count():
+    kz_users = Users.select().where(Users.language == 'KZ')
+    kz_users_count = len(kz_users)
+    return kz_users_count
+
+
+def get_percent_of_language_choice():
+    users = get_number_of_users()
+    ru_users = get_ru_language_users_count()
+    kz_users = get_kz_language_users_count()
+    result_ru = round(ru_users * 100 / users, 2)
+    result_kz = round(kz_users * 100 / users, 2)
+    return result_ru, result_kz
+
+
+def get_russian_users_count():
+    ru_users = Users.select().where(Users.country == 'RU')
+    ru_users_count = len(ru_users)
+    return ru_users_count
+
+
+def get_kazakhstan_users_count():
+    kz_users = Users.select().where(Users.country == 'KZ')
+    kz_users_count = len(kz_users)
+    return kz_users_count
+
+
+def get_percent_of_country_choice():
+    users = get_number_of_users()
+    ru_users = get_russian_users_count()
+    kz_users = get_kazakhstan_users_count()
+    result_ru = round(ru_users * 100 / users, 2)
+    result_kz = round(kz_users * 100 / users, 2)
     return result_ru, result_kz
 
 
 def get_big_statistics():
-    users = view_number_of_users()
-    users_today = view_number_of_users_on_day()
-    users_on_week = view_number_of_users_on_week()
-    users_on_month = view_number_of_users_on_month()
-    users_on_year = view_number_of_users_on_year()
+    users = get_number_of_users()
+    users_today = get_number_of_users_on_day()
+    users_on_week = get_number_of_users_on_week()
+    users_on_month = get_number_of_users_on_month()
+    users_on_year = get_number_of_users_on_year()
 
-    users_online = view_users_online_now()
-    users_online_today = view_users_online_today()
-    users_online_on_this_week = view_users_online_on_this_week()
-    users_online_on_this_month = view_users_online_on_this_month()
-    users_online_on_this_year = view_users_online_on_this_year()
+    users_online = get_users_online_now()
+    users_online_today = get_users_online_today()
+    users_online_on_this_week = get_users_online_on_this_week()
+    users_online_on_this_month = get_users_online_on_this_month()
+    users_online_on_this_year = get_users_online_on_this_year()
 
-    super_promo_code = check_super_promo_code()
+    promo_codes = get_number_of_promo_codes()
+    promo_codes_today = get_number_of_promo_codes_on_day()
+    promo_codes_on_week = get_number_of_promo_codes_on_week()
+    promo_codes_on_month = get_number_of_promo_codes_on_month()
+    promo_codes_on_year = get_number_of_promo_codes_on_year()
 
-    promo_codes = view_number_of_promo_codes()
-    promo_codes_today = view_number_of_promo_codes_on_day()
-    promo_codes_on_week = view_number_of_promo_codes_on_week()
-    promo_codes_on_month = view_number_of_promo_codes_on_month()
-    promo_codes_on_year = view_number_of_promo_codes_on_year()
-
-    payed_users, conversion = get_conversion()
-    ru_users, kz_users = view_percent_of_language_choice()
+    promo_code_conversion = get_promo_code_conversion()
+    pay_conversion = get_pay_conversion()
+    ru_language_users, kz_language_users = get_percent_of_language_choice()
+    users_from_russia, users_from_kazakhstan = get_percent_of_country_choice()
 
     text = [
         f'Зарегистрированных пользователей: {users}',
@@ -639,20 +652,21 @@ def get_big_statistics():
         f'Онлайн за неделю: {users_online_on_this_week}',
         f'Онлайн за месяц: {users_online_on_this_month}',
         f'Онлайн за год: {users_online_on_this_year}',
-        '\n',
-        f'Супер промокод: {super_promo_code}',
         '\n'
         f'Зарегистрировано промо-кодов: {promo_codes}',
         f'Зарегистрировано промо-кодов сегодня: {promo_codes_today}',
         f'Зарегистрировано промо-кодов на этой неделе: {promo_codes_on_week}',
         f'Зарегистрировано промо-кодов в этом месяце: {promo_codes_on_month}',
         f'Зарегистрировано промо-кодов за год: {promo_codes_on_year}',
-        f'',
-        f'Оплатили сервис: {payed_users} пользователей',
-        f'Конверсия: {conversion}%',
-        f'',
-        f'Русскоязычных пользователей: {ru_users}%',
-        f'Казахоязычных пользователей: {kz_users}%'
+        f'Воспользовались промо-кодами: {promo_code_conversion}% пользователей',
+        f'\n',
+        f'Оплатили сервис: {pay_conversion}% пользователей',
+        f'\n',
+        f'Пользователей в России: {users_from_russia}%',
+        f'Пользователей в Казахстане: {users_from_kazakhstan}%',
+        f'Из них:',
+        f'Русскоязычных пользователей: {ru_language_users}%',
+        f'Казахоязычных пользователей: {kz_language_users}%'
     ]
 
     return '\n'.join(text)
@@ -660,7 +674,6 @@ def get_big_statistics():
 
 if __name__ == '__main__':
     create_new_tables(table_names)
-    write_all_questions_on_db('all_questions_ru.json', 'RU')
-    write_all_questions_on_db('all_questions_kz.json', 'KZ')
-    set_default_super_promo_code()
+    # write_all_questions_in_db('all_questions_ru.json', 'RU')
+    # write_all_questions_in_db('all_questions_kz.json', 'KZ')
 

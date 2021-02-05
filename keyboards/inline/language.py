@@ -1,5 +1,4 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
 from keyboards.inline.callback_datas import set_language
 
 language_buttons = InlineKeyboardMarkup(

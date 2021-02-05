@@ -1,7 +1,5 @@
 from aiogram.types import CallbackQuery
-from aiogram import types
-from bot import dp, bot
-from keyboards.inline.callback_datas import get_penalty, next_penalty
+from bot import dp
 from keyboards.inline.penalty import *
 from messages import PENALTY
 

@@ -2,19 +2,17 @@ import os
 from flask import Flask, url_for, request, render_template, send_from_directory, make_response, session
 from werkzeug.utils import redirect
 from werkzeug.exceptions import BadRequestKeyError
-from config import *
-from db_operation import set_new_promo_code, check_promo_code, up_number_of_references, up_user_questions_available, \
-    check_super_promo_code, up_number_of_references_super, uppercase_check
+import config
+from db_operation import set_new_promo_code, check_promo_code, up_number_of_references, uppercase_check
 from messages import MESSAGE, PROMO
 
 app = Flask(__name__)
-app.secret_key = SESSION_SECRET_KEY
 
 app.config.update(dict(
-    DEBUG=True,
-    SECRET_KEY=SESSION_SECRET_KEY,
-    USERNAME=APP_USER_NAME,
-    PASSWORD=APP_PASSWORD
+    DEBUG=config.DEBUG,
+    SECRET_KEY=config.SESSION_SECRET_KEY,
+    USERNAME=config.APP_USER_NAME,
+    PASSWORD=config.APP_PASSWORD
 ))
 
 
@@ -111,7 +109,7 @@ def pay():
                 error_text = user_promo_code + ' ' + promo_code_error
                 return render_template(pay_page, error_text=error_text, bot_name=BOT_NAME,
                                        bot_address=BOT_ADDRESS, telegram_id=telegram_id, user_name=user_name,
-                                       price=PRICE)
+                                       price=BASE_PRICE)
         else:
             # Без промокода. 100% оплата
             resp = make_response(redirect(url_for('pay_operation', language=language)))
@@ -119,7 +117,7 @@ def pay():
             resp.set_cookie('user_name', user_name)
             resp.set_cookie('language', language)
             resp.set_cookie('promo_code_used', promo_code_used)
-            session['price'] = str(PRICE)
+            session['price'] = str(BASE_PRICE)
             session['secret_key'] = SESSION_SECRET_KEY
             return resp
     else:
@@ -132,7 +130,7 @@ def pay():
             else:
                 pay_page = 'pay_ru.html'
             return render_template(pay_page, bot_name=BOT_NAME, bot_address=BOT_ADDRESS, telegram_id=telegram_id,
-                                   user_name=user_name, price=PRICE)
+                                   user_name=user_name, price=BASE_PRICE)
         except BadRequestKeyError:
             return redirect(url_for('pay_error'))
 
