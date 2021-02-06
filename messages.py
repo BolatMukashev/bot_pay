@@ -46,6 +46,18 @@ MESSAGE = {
                          'Біз сіздің Telegram идентификаторыңызды анықтай алмадық. Ботқа кіріңіз.'
 }
 
+BUTTONS = {
+    'lang_RU': '🇷🇺 Русский язык',
+    'lang_KZ': '🇰🇿 Қазақ тілі',
+    'next_RU': 'Далее ❯❯❯',
+    'back_RU': '❮❮❮ Назад',
+    'next_KZ': 'Келесі ❯❯❯',
+    'back_KZ': '❮❮❮ Кері',
+    'start': 'СТАРТ',
+    'russia': '🇷🇺 РОССИЯ',
+    'kazakhstan': '🇰🇿 қазақстан',
+}
+
 STICKERS = {
     'hello': 'CAACAgIAAxkBAAEB1rxgGo2hRDlaGoiEHOZf3mY6C19jKQACKwIAArnzlwv7BQOMjG9ozB4E',
     'repair': 'CAACAgIAAxkBAAEB1rhgGo2MKy7iUaRUUGj5b1LO4V0sHgACMQEAArnzlws-7wljOEZF0x4E',
