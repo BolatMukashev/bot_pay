@@ -15,6 +15,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 class AllStates(StatesGroup):
     MessageForAll: State = State()
     MessageForAllRepair: State = State()
+    SendPromotionalPost: State = State()
 
 
 @dp.message_handler(commands="set_commands", state="*")
@@ -111,6 +112,28 @@ async def command_message_for_all_action(message: types.Message, state: FSMConte
         try:
             await bot.send_sticker(user, STICKERS['message'])
             await bot.send_message(user, my_message)
+        except ChatNotFound:
+            pass
+    await state.finish()
+
+
+@dp.message_handler(commands=["send_promotional_post"], state='*')
+async def command_send_photo(message: types.Message):
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        await message.answer('Отправь рекламное фото и сообщение, оно будет перенаправлено всем пользователям!')
+        await AllStates.SendPromotionalPost.set()
+
+
+@dp.message_handler(state=AllStates.SendPromotionalPost, content_types=['text', 'photo'])
+async def command_send_photo_action(message: types.Message, state: FSMContext):
+    photo_id = message.photo[0].file_id
+    my_message = message.caption
+    await state.update_data(photo_id=photo_id)
+    all_users = all_users_id()
+    for user_id in all_users:
+        try:
+            await bot.send_photo(user_id, photo_id, caption=my_message)
         except ChatNotFound:
             pass
     await state.finish()

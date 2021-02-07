@@ -1,11 +1,20 @@
 MESSAGE = {
-    'start_admin_text': 'Показать статистику:\n/statistics\n'
-                        'Сообщения всем:\n/message_for_all\n'
-                        'Сообщения всем о ремонте:\n/message_for_all_about_repair\n'
-                        'Список всех пользователей:\n/all_users\n'
-                        'Список всех промо-кодов:\n/all_promo_codes\n'
-                        '+3 минуты админу:\n/up_admin_time_limit\n'
-                        'Установить команды:\n/set_commands',
+    'start_admin_text': 'Показать статистику:\n'
+                        '/statistics\n'
+                        'Отправить рекламу всем:\n'
+                        '/send_promotional_post\n'
+                        'Сообщения всем:\n'
+                        '/message_for_all\n'
+                        'Сообщения всем о ремонте:\n'
+                        '/message_for_all_about_repair\n'
+                        'Список всех пользователей:\n'
+                        '/all_users\n'
+                        'Список всех промо-кодов:\n'
+                        '/all_promo_codes\n'
+                        '+3 минуты админу:\n'
+                        '/up_admin_time_limit\n'
+                        'Установить команды:\n'
+                        '/set_commands',
     'start_user_text': 'Добро пожаловать',
     'language_choice': 'Выберите язык\n'
                        '------------------------\n'
