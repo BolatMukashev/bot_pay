@@ -256,20 +256,28 @@ def get_user_language(telegram_id):
     return user.language
 
 
-def get_user_country(telegram_id):
-    user = Users.get(Users.telegram_id == telegram_id)
-    return user.country
-
-
 # user_language = 'RU' or 'KZ'
 def edit_user_language(telegram_id, user_language):
     query = Users.update(language=user_language).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
+def get_user_country(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user.country
+
+
 def edit_user_country(telegram_id, user_country):
     query = Users.update(country=user_country).where(Users.telegram_id == telegram_id)
     query.execute()
+
+
+def get_monetary_unit_by_user_country(telegram_id):
+    user_country = get_user_country(telegram_id)
+    if user_country == 'KZ':
+        return 'тенге'
+    else:
+        return 'рублей'
 
 
 def get_user_time_limit(telegram_id):
@@ -310,6 +318,15 @@ def get_time_visit(telegram_id):
 def get_price_in_rubles_on_user(telegram_id):
     user = Users.get(Users.telegram_id == telegram_id)
     return user.price_in_rubles
+
+
+def get_finally_price(telegram_id):
+    price_in_rubles = get_price_in_rubles_on_user(telegram_id)
+    user_country = get_user_country(telegram_id)
+    if user_country == 'KZ':
+        return round(price_in_rubles * 5)
+    else:
+        return price_in_rubles
 
 
 def change_price_in_rubles_on_user(telegram_id, new_price):

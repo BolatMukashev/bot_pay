@@ -22,7 +22,7 @@ class AllStates(StatesGroup):
 async def cmd_set_commands(message: types.Message):
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
-        commands = [types.BotCommand(command="/question", description="Старт"),
+        commands = [types.BotCommand(command="/question", description="Новый вопрос. Жаңа сұрақ"),
                     types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
                     types.BotCommand(command="/penalty", description="Посмотрить штрафы"),
                     types.BotCommand(command="/promo_code", description="Использовать промокод. Промокодты қолдану"),
@@ -69,12 +69,41 @@ async def command_start(message: types.Message):
         update_sixth_week_promotional_offer_status(user_id)
 
     await bot.send_sticker(telegram_id, STICKERS['hello'])
+    await message.answer(MESSAGE['start_user_text'])
+    if not user_registration_is_over(telegram_id):
+        await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
+
+
+@dp.message_handler(commands=["question"])
+async def command_question(message: types.Message):
+    telegram_id = message.from_user.id
+    user_name = message.from_user.full_name
+    name_to_request = user_name.replace(' ', '_')
+    user_language = get_user_language(telegram_id)
     if telegram_id == config.ADMIN_ID:
         await message.answer(MESSAGE['start_admin_text'])
+    if not user_time_limit_is_over(telegram_id):
+        question = get_random_question(user_language)
+        if config.DEBUG is False and question.image_code:
+            await bot.send_photo(telegram_id, question.image_code)
+        await bot.send_poll(telegram_id,
+                            type='quiz',
+                            is_anonymous=False,
+                            is_closed=False,
+                            question=question['question'],
+                            options=question['options'],
+                            correct_option_id=question['correct_option_id'],
+                            explanation=question['explanation'])
     else:
-        await message.answer(MESSAGE['start_user_text'])
-        if not user_registration_is_over(telegram_id):
-            await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
+        limit_error_message = MESSAGE[f'limit_error_{user_language}']
+        pay_button_text = BUTTONS[f'pay_{user_language}']
+
+        markup = types.InlineKeyboardMarkup()
+        url = config.PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={name_to_request}'
+        pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
+        markup.add(pay_link)
+        await bot.send_message(telegram_id, limit_error_message, reply_markup=markup)
+    update_time_visit(telegram_id)
 
 
 @dp.message_handler(commands=["language"])
@@ -103,7 +132,7 @@ async def command_message_for_all(message: types.Message):
         await AllStates.MessageForAll.set()
 
 
-@dp.message_handler(state=AllStates.MessageForAll,  content_types=types.ContentTypes.TEXT)
+@dp.message_handler(state=AllStates.MessageForAll, content_types=types.ContentTypes.TEXT)
 async def command_message_for_all_action(message: types.Message, state: FSMContext):
     my_message = message.text
     await state.update_data(my_message=my_message)
@@ -147,7 +176,7 @@ async def command_message_for_all_repair(message: types.Message):
         await AllStates.MessageForAllRepair.set()
 
 
-@dp.message_handler(state=AllStates.MessageForAllRepair,  content_types=types.ContentTypes.TEXT)
+@dp.message_handler(state=AllStates.MessageForAllRepair, content_types=types.ContentTypes.TEXT)
 async def command_message_for_all_repair_action(message: types.Message, state: FSMContext):
     my_message = message.text
     await state.update_data(my_message=my_message)
@@ -178,7 +207,7 @@ async def command_all_users(message: types.Message):
 
 
 @dp.message_handler(commands=["all_promo_codes"])
-async def command_all_users(message: types.Message):
+async def command_all_promo_codes(message: types.Message):
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         result = get_all_promo_code_list()
@@ -186,19 +215,21 @@ async def command_all_users(message: types.Message):
 
 
 @dp.message_handler(commands=["pay"])
-async def command_user_do_pay(message: types.Message):
+async def command_pay(message: types.Message):
     telegram_id = message.from_user.id
     user_name = message.from_user.full_name
     user_name = user_name.replace(' ', '_')
     user_language = get_user_language(telegram_id)
-    pay_text = MESSAGE[f'pay_message_{user_language}']
-    language_pay_message = MESSAGE[f'pay_{user_language}']
+    monetary_unit = get_monetary_unit_by_user_country(telegram_id)
+    price = get_finally_price(telegram_id)
+    pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
+    pay_button = BUTTONS[f'pay_{user_language}']
 
     markup = types.InlineKeyboardMarkup()
     url = config.PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={user_name}'
-    pay_link = types.InlineKeyboardButton(text=language_pay_message, url=url)
+    pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
     markup.add(pay_link)
-    await message.answer(pay_text, reply_markup=markup)
+    await message.answer(pay_message_text, reply_markup=markup)
 
 
 @dp.message_handler(commands=["info"])
@@ -240,4 +271,5 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
 
 if __name__ == "__main__":
     from handlers import dp
+
     executor.start_polling(dp, skip_updates=True)
