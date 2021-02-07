@@ -6,7 +6,7 @@ START_button = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text=BUTTONS['start'],
-                                 callback_data=start_button_call.new(st='st', start='start'))
+                                 callback_data=start_button_call.new(start='start', value='None'))
         ]
     ]
 )

@@ -1,5 +1,5 @@
-from peewee import *
 import pymysql
+from peewee import *
 from config import db_config
 from datetime import datetime, timedelta
 
@@ -17,15 +17,19 @@ class BaseModel(Model):
 
 class Users(BaseModel):
     id = PrimaryKeyField(null=False)
-    telegram_id = CharField(null=False, max_length=100, unique=True)
-    full_name = CharField(null=True, max_length=200)
-    country = CharField(null=False, max_length=100, default='RU')
-    language = CharField(null=False, max_length=100, default='RU')
+    telegram_id = IntegerField(null=False, unique=True)
+    full_name = CharField(null=True, max_length=300)
+    country = CharField(null=False, default='RU')
+    language = CharField(null=False, default='RU')
     registration_date = DateTimeField(default=datetime.now().date())
-    last_visit = DateTimeField(default=datetime.now())
+    registration_is_over = BooleanField(null=False, default=False)
     time_limit = DateTimeField(default=datetime.now() + timedelta(days=1))
+    last_visit = DateTimeField(default=datetime.now())
     promo_code_used = BooleanField(null=False, default=False)
+    price_in_rubles = IntegerField(null=False)
     made_payment = BooleanField(null=False, default=False)
+    second_week_promotional_offer = BooleanField(null=False, default=False)
+    sixth_week_promotional_offer = BooleanField(null=False, default=False)
 
     class Meta:
         db_table = "users"

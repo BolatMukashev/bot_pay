@@ -1,21 +1,29 @@
 from aiogram.types import CallbackQuery
 from bot import dp, bot
 from keyboards.inline.callback_datas import start_button_call
-from db_operation import edit_user_language
-from keyboards.inline.country import country_buttons
-from messages import MESSAGE
+from db_operation import get_random_question, update_registration_status, get_user_language
+from config import DEBUG
 
 
-@dp.callback_query_handler(start_button_call.filter(st='st'))
+@dp.callback_query_handler(start_button_call.filter(start='start'))
 async def start_button_handler(call: CallbackQuery, callback_data: dict):
     telegram_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
-    user_language = callback_data.get('value')
-    edit_user_language(telegram_id, user_language)
-    language_ok_message = MESSAGE[f'language_set_ok_{user_language}']
+    user_language = get_user_language(telegram_id)
 
-    await call.answer(language_ok_message, cache_time=1)
-    await call.message.edit_reply_markup()
-    await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=language_ok_message)
-    await bot.send_message(chat_id, text=MESSAGE[f'country_choice_{user_language}'], reply_markup=country_buttons)
+    await bot.delete_message(chat_id=chat_id, message_id=message_id)
+
+    update_registration_status(telegram_id)
+
+    question = get_random_question(user_language)
+    if DEBUG is False and question.image_code:
+        await bot.send_photo(telegram_id, question.image_code)
+    await bot.send_poll(telegram_id,
+                        type='quiz',
+                        is_anonymous=False,
+                        is_closed=False,
+                        question=question['question'],
+                        options=question['options'],
+                        correct_option_id=question['correct_option_id'],
+                        explanation=question['explanation'])

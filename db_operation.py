@@ -8,6 +8,7 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 
+
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
 
 
@@ -223,7 +224,7 @@ def get_all_questions_from_db(user_language):
 # new_user(778899, 'Bolat')
 def new_user(telegram_id, full_name):
     try:
-        user = Users(telegram_id=telegram_id, full_name=full_name)
+        user = Users(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE)
         user.save()
     except peewee.IntegrityError:
         pass
@@ -243,6 +244,11 @@ def all_users_id():
     for user in all_users:
         users_id_list.append(user.telegram_id)
     return users_id_list
+
+
+def get_user_name_by(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user.full_name
 
 
 def get_user_language(telegram_id):
@@ -272,6 +278,15 @@ def get_user_time_limit(telegram_id):
     return date_time
 
 
+def user_time_limit_is_over(telegram_id):
+    today = datetime.now()
+    time_limit = get_user_time_limit(telegram_id)
+    if time_limit < today:
+        return True
+    else:
+        return False
+
+
 def up_user_time_limit_7days(telegram_id):
     query = Users.update(time_limit=datetime.now() + timedelta(days=7)).where(Users.telegram_id == telegram_id)
     query.execute()
@@ -292,6 +307,36 @@ def get_time_visit(telegram_id):
     return user.last_visit
 
 
+def get_price_in_rubles_on_user(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user.price_in_rubles
+
+
+def change_price_in_rubles_on_user(telegram_id, new_price):
+    query = Users.update(price_in_rubles=new_price).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
+def user_registration_is_over(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user.registration_is_over
+
+
+def update_registration_status(telegram_id):
+    query = Users.update(registration_is_over=True).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
+def update_second_week_promotional_offer_status(telegram_id):
+    query = Users.update(second_week_promotional_offer=True).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
+def update_sixth_week_promotional_offer_status(telegram_id):
+    query = Users.update(sixth_week_promotional_offer=True).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
 def update_time_visit(telegram_id):
     query = Users.update(last_visit=datetime.now()).where(Users.telegram_id == telegram_id)
     query.execute()
@@ -299,24 +344,24 @@ def update_time_visit(telegram_id):
 
 def get_loser_list_14days():
     loser_list = []
-    all_users = Users.select()
+    all_users = Users.select().where(Users.second_week_promotional_offer is False)
     for user in all_users:
         telegram_id = user.telegram_id
         time_limit = get_user_time_limit(telegram_id)
         two_week_ago = time_limit + timedelta(days=14)
-        if datetime.now() >= two_week_ago:
+        if datetime.now() > two_week_ago:
             loser_list.append(telegram_id)
     return loser_list
 
 
 def get_loser_list_45days():
     loser_list = []
-    all_users = Users.select()
+    all_users = Users.select().where(Users.sixth_week_promotional_offer is False)
     for user in all_users:
         telegram_id = user.telegram_id
         time_limit = get_user_time_limit(telegram_id)
         two_week_ago = time_limit + timedelta(days=45)
-        if datetime.now() >= two_week_ago:
+        if datetime.now() > two_week_ago:
             loser_list.append(telegram_id)
     return loser_list
 

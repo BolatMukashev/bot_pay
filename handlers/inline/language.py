@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery
 from bot import dp, bot
 from keyboards.inline.callback_datas import set_language
-from db_operation import edit_user_language
+from db_operation import edit_user_language, user_registration_is_over
 from keyboards.inline.country import country_buttons
 from messages import MESSAGE
 
@@ -18,4 +18,5 @@ async def update_language(call: CallbackQuery, callback_data: dict):
     await call.answer(language_ok_message, cache_time=1)
     await call.message.edit_reply_markup()
     await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=language_ok_message)
-    await bot.send_message(chat_id, text=MESSAGE[f'country_choice_{user_language}'], reply_markup=country_buttons)
+    if not user_registration_is_over(telegram_id):
+        await bot.send_message(chat_id, text=MESSAGE[f'country_choice_{user_language}'], reply_markup=country_buttons)
