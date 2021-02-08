@@ -6,7 +6,7 @@ from aiogram.utils.exceptions import ChatNotFound
 from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons1
-from messages import MESSAGE, PENALTY, STICKERS, BUTTONS, OFFERS
+from messages import *
 
 bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -16,6 +16,7 @@ class AllStates(StatesGroup):
     MessageForAll: State = State()
     MessageForAllRepair: State = State()
     SendPromotionalPost: State = State()
+    UsePromoCode: State = State()
 
 
 @dp.message_handler(commands="set_commands", state="*")
@@ -24,10 +25,10 @@ async def cmd_set_commands(message: types.Message):
     if user_id == config.ADMIN_ID:
         commands = [types.BotCommand(command="/question", description="Новый вопрос. Жаңа сұрақ"),
                     types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
-                    types.BotCommand(command="/penalty", description="Посмотрить штрафы"),
+                    types.BotCommand(command="/penalty", description="Посмотреть штрафы. Айыппұлдарды қарау"),
                     types.BotCommand(command="/promo_code", description="Использовать промокод. Промокодты қолдану"),
                     types.BotCommand(command="/pay", description="Оплатить. Төлеу"),
-                    types.BotCommand(command="/info", description="Подсказки")]
+                    types.BotCommand(command="/info", description="Подсказки. Кеңестер")]
         await bot.set_my_commands(commands)
         await message.answer("Команды установлены!")
 
@@ -70,7 +71,7 @@ async def command_start(message: types.Message):
 
     await bot.send_sticker(telegram_id, STICKERS['hello'])
     await message.answer(MESSAGE['start_user_text'])
-    if not user_registration_is_over(telegram_id):
+    if not get_user_registration_status(telegram_id):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
@@ -214,6 +215,38 @@ async def command_all_promo_codes(message: types.Message):
         await message.answer(result)
 
 
+@dp.message_handler(commands=["promo_code"], state='*')
+async def command_promo_code(message: types.Message):
+    telegram_id = message.from_user.id
+    language = get_user_language(telegram_id)
+    user_promo_code_used_status = get_user_promo_code_used_status(telegram_id)
+    if not user_promo_code_used_status:
+        await message.answer(PROMO_CODE[f'promo_code_command_text_{language}'])
+        await AllStates.UsePromoCode.set()
+    else:
+        await message.answer_sticker(STICKERS['NO'])
+        await message.answer(PROMO_CODE[f'promo_code_was_used_{language}'])
+
+
+@dp.message_handler(state=AllStates.UsePromoCode, content_types=types.ContentTypes.TEXT)
+async def command_promo_code_action(message: types.Message, state: FSMContext):
+    telegram_id = message.from_user.id
+    language = get_user_language(telegram_id)
+    user_promo_code = message.text.upper()
+    await state.update_data(user_promo_code=user_promo_code)
+    promo_codes = all_promo_codes()
+    if user_promo_code in promo_codes:
+        up_user_time_limit_7days(telegram_id)
+        up_number_of_references(user_promo_code)
+        update_user_promo_code_used_status(telegram_id)
+        await message.answer_sticker(STICKERS['all_good'])
+        await message.answer(PROMO_CODE[f'promo_code_activated_{language}'])
+    else:
+        await message.answer_sticker(STICKERS['NO'])
+        await message.answer(PROMO_CODE[f'promo_code_error_{language}'])
+    await state.finish()
+
+
 @dp.message_handler(commands=["pay"])
 async def command_pay(message: types.Message):
     telegram_id = message.from_user.id
@@ -229,6 +262,7 @@ async def command_pay(message: types.Message):
     url = config.PAY_SITE_ADDRESS + f'?language={user_language}&telegram_id={telegram_id}&user_name={user_name}'
     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
     markup.add(pay_link)
+
     await message.answer(pay_message_text, reply_markup=markup)
 
 

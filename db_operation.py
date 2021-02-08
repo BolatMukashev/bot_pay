@@ -296,12 +296,22 @@ def user_time_limit_is_over(telegram_id):
 
 
 def up_user_time_limit_7days(telegram_id):
-    query = Users.update(time_limit=datetime.now() + timedelta(days=7)).where(Users.telegram_id == telegram_id)
+    time_limit_is_over = user_time_limit_is_over(telegram_id)
+    if time_limit_is_over:
+        query = Users.update(time_limit=datetime.now() + timedelta(days=7)).where(Users.telegram_id == telegram_id)
+    else:
+        time_limit_date = get_user_time_limit(telegram_id)
+        query = Users.update(time_limit=time_limit_date + timedelta(days=7)).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def up_user_time_limit_1years(telegram_id):
-    query = Users.update(time_limit=datetime.now() + timedelta(days=365)).where(Users.telegram_id == telegram_id)
+    time_limit_is_over = user_time_limit_is_over(telegram_id)
+    if time_limit_is_over:
+        query = Users.update(time_limit=datetime.now() + timedelta(days=365)).where(Users.telegram_id == telegram_id)
+    else:
+        time_limit_date = get_user_time_limit(telegram_id)
+        query = Users.update(time_limit=time_limit_date + timedelta(days=365)).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
@@ -334,7 +344,7 @@ def change_price_in_rubles_on_user(telegram_id, new_price):
     query.execute()
 
 
-def user_registration_is_over(telegram_id):
+def get_user_registration_status(telegram_id):
     user = Users.get(Users.telegram_id == telegram_id)
     return user.registration_is_over
 
@@ -351,6 +361,16 @@ def update_second_week_promotional_offer_status(telegram_id):
 
 def update_sixth_week_promotional_offer_status(telegram_id):
     query = Users.update(sixth_week_promotional_offer=True).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
+def get_user_promo_code_used_status(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user.promo_code_used
+
+
+def update_user_promo_code_used_status(telegram_id):
+    query = Users.update(promo_code_used=True).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
@@ -403,11 +423,19 @@ def check_promo_code(promo_code):
 
 
 def set_new_promo_code(school_name, secret_key):
-    new_promo_code = PromoCodes(school_name=school_name,
-                                secret_key=secret_key,
-                                promo_code=secret_key
-                                )
-    new_promo_code.save()
+    try:
+        new_promo_code = PromoCodes(school_name=school_name,
+                                    secret_key=secret_key,
+                                    promo_code=secret_key
+                                    )
+        new_promo_code.save()
+    except peewee.IntegrityError:
+        print('!!! Этот секретный ключ уже был использован !!!')
+
+
+def edit_promo_code(secret_key, new_promo_code):
+    query = PromoCodes.update(promo_code=new_promo_code).where(PromoCodes.secret_key == secret_key)
+    query.execute()
 
 
 def get_number_of_references(promo_code):
@@ -721,5 +749,7 @@ def get_big_statistics():
 
 if __name__ == '__main__':
     create_new_tables(table_names)
+    # set_new_promo_code('Тестовая школа2', 'вавыававыавыаЫВВЫФВФЫ')
+    # edit_promo_code('FdfdsfdsfDFdcdff', 'TEST_PROMO')
     # write_all_questions_in_db('all_questions_ru.json', 'RU')
     # write_all_questions_in_db('all_questions_kz.json', 'KZ')
