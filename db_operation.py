@@ -766,6 +766,23 @@ def get_percent_of_country_choice():
     return result_ru, result_kz
 
 
+def get_active_auto_schools():
+    auto_schools = AutoSchools.select().where(AutoSchools.secret_key != AutoSchools.promo_code)
+    return auto_schools
+
+
+def get_length_active_auto_schools():
+    auto_schools = get_active_auto_schools()
+    return len(auto_schools)
+
+
+def get_active_auto_schools_conversion():
+    all_auto_schools = len(get_all_auto_schools_on_db())
+    active_auto_schools = get_length_active_auto_schools()
+    conversion = round(active_auto_schools * 100 / all_auto_schools, 2)
+    return conversion
+
+
 def get_big_statistics():
     users = get_number_of_users()
     users_today = get_number_of_users_on_day()
@@ -790,6 +807,9 @@ def get_big_statistics():
     ru_language_users, kz_language_users = get_percent_of_language_choice()
     users_from_russia, users_from_kazakhstan = get_percent_of_country_choice()
 
+    active_auto_schools = get_length_active_auto_schools()
+    active_auto_schools_conversion = get_active_auto_schools_conversion()
+
     text = [
         f'Зарегистрированных пользователей: {users}',
         f'Зарегистрировались сегодня: {users_today}',
@@ -809,6 +829,9 @@ def get_big_statistics():
         f'Зарегистрировано промо-кодов в этом месяце: {promo_codes_on_month}',
         f'Зарегистрировано промо-кодов за год: {promo_codes_on_year}',
         f'Воспользовались промо-кодами: {promo_code_conversion}% пользователей',
+        f'\n',
+        f'Количество активных автошкол: {active_auto_schools}%',
+        f'Конверсия автошкол: {active_auto_schools_conversion}%',
         f'\n',
         f'Оплатили сервис: {pay_conversion}% пользователей',
         f'\n',

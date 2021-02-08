@@ -82,4 +82,5 @@ def all_db_testing(db_list):
 # all_db_testing(db_list)
 
 # set_auto_schools_in_db(auto_schools)
-print(get_auto_schools_on_dict_format())
+# print(get_auto_schools_on_dict_format())
+print(get_length_active_auto_schools())
