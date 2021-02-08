@@ -1,6 +1,7 @@
 import json
 import peewee
 import random
+import string
 from db_models import *
 from datetime import datetime, timedelta
 import config
@@ -111,7 +112,7 @@ def translate_db_to_kz_language(db_name, json_file_name):
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
 
-table_names = [Users, QuestionsRU, QuestionsKZ, PromoCodes]
+table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools]
 
 
 def create_new_tables(db_models):
@@ -408,7 +409,7 @@ def get_loser_list_45days():
 
 def all_promo_codes():
     promo_codes_list = []
-    promo_codes = PromoCodes.select()
+    promo_codes = AutoSchools.select()
     for promo_code in promo_codes:
         promo_codes_list.append(promo_code.promo_code)
     return promo_codes_list
@@ -422,31 +423,105 @@ def check_promo_code(promo_code):
         return False
 
 
-def set_new_promo_code(school_name, secret_key):
-    try:
-        new_promo_code = PromoCodes(school_name=school_name,
-                                    secret_key=secret_key,
-                                    promo_code=secret_key
-                                    )
-        new_promo_code.save()
-    except peewee.IntegrityError:
-        print('!!! Этот секретный ключ уже был использован !!!')
-
-
 def edit_promo_code(secret_key, new_promo_code):
-    query = PromoCodes.update(promo_code=new_promo_code).where(PromoCodes.secret_key == secret_key)
+    query = AutoSchools.update(promo_code=new_promo_code).where(AutoSchools.secret_key == secret_key)
     query.execute()
 
 
+def add_new_auto_school(school_name, country, city, phone, email, secret_key, promo_code):
+    new_promo_code = AutoSchools(school_name=school_name,
+                                 country=country,
+                                 city=city,
+                                 phone=phone,
+                                 email=email,
+                                 secret_key=secret_key,
+                                 promo_code=promo_code
+                                 )
+    new_promo_code.save()
+
+
+# промокод меняет владелец автошколы, доступ к промкоду по secret_key
+def set_auto_schools_in_db(auto_schools):
+    for auto_school in auto_schools:
+        school_name = auto_school['school_name']
+        country = auto_school['country']
+        city = auto_school['city']
+        phone = pickle.dumps(auto_school['phones'], pickle.HIGHEST_PROTOCOL)
+        email = pickle.dumps(auto_school['emails'], pickle.HIGHEST_PROTOCOL)
+        secret_key = get_unique_secret_key()
+        promo_code = secret_key
+        add_new_auto_school(school_name, country, city, phone, email, secret_key, promo_code)
+
+
+def get_all_auto_schools_on_db():
+    all_auto_schools = AutoSchools.select()
+    return all_auto_schools
+
+
+def get_auto_schools_on_dict_format():
+    all_schools = []
+    schools = get_all_auto_schools_on_db()
+    for school in schools:
+        school_id = school.id
+        school_name = school.school_name
+        country = school.country
+        city = school.city
+        phone = pickle.loads(school.phone)
+        email = pickle.loads(school.email)
+        secret_key = school.secret_key
+        promo_code = school.promo_code
+        registration_date = school.registration_date
+        number_of_references = school.number_of_references
+
+        data = {'id': school_id, 'school_name': school_name, 'country': country, 'city': city, 'phone': phone,
+                'email': email, 'secret_key': secret_key, 'promo_code': promo_code,
+                'registration_date': registration_date, 'number_of_references': number_of_references}
+
+        all_schools.append(data)
+
+    return all_schools
+
+
+def all_secret_keys():
+    secret_keys_list = []
+    promo_codes = AutoSchools.select()
+    for promo_code in promo_codes:
+        secret_keys_list.append(promo_code.secret_key)
+    return secret_keys_list
+
+
+def check_secret_key(secret_key):
+    secret_keys = all_secret_keys()
+    if secret_key in secret_keys:
+        return True
+    else:
+        return False
+
+
+def get_random_secret_key():
+    letters_and_digits = string.ascii_letters + string.digits
+    secret_key = ''.join((random.choice(letters_and_digits) for _ in range(22)))
+    return secret_key
+
+
+def get_unique_secret_key():
+    while True:
+        secret_key = get_random_secret_key()
+        if check_secret_key(secret_key):
+            continue
+        else:
+            return secret_key
+
+
 def get_number_of_references(promo_code):
-    promo_code = PromoCodes.get(PromoCodes.promo_code == promo_code)
+    promo_code = AutoSchools.get(AutoSchools.promo_code == promo_code)
     number_of_references = promo_code.number_of_references
     return number_of_references
 
 
 def up_number_of_references(promo_code):
-    query = PromoCodes.update(number_of_references=PromoCodes.number_of_references + 1).where(
-        PromoCodes.promo_code == promo_code)
+    query = AutoSchools.update(number_of_references=AutoSchools.number_of_references + 1).where(
+        AutoSchools.promo_code == promo_code)
     query.execute()
 
 
@@ -568,21 +643,21 @@ def get_all_users_list():
 
 
 def get_number_of_promo_codes():
-    promo_codes = PromoCodes.select()
+    promo_codes = AutoSchools.select()
     number_of_promo_codes = len(promo_codes)
     return number_of_promo_codes
 
 
 def get_number_of_promo_codes_on_day():
     today = datetime.now().date()
-    promo_codes = PromoCodes.select().where(PromoCodes.registration_date == today)
+    promo_codes = AutoSchools.select().where(AutoSchools.registration_date == today)
     number_of_promo_codes = len(promo_codes)
     return number_of_promo_codes
 
 
 def get_number_of_promo_codes_on_week():
     old_day = datetime.now().date() - timedelta(days=7)
-    promo_codes = PromoCodes.select().where(PromoCodes.registration_date > old_day)
+    promo_codes = AutoSchools.select().where(AutoSchools.registration_date > old_day)
     number_of_promo_codes = len(promo_codes)
     return number_of_promo_codes
 
@@ -591,7 +666,7 @@ def get_number_of_promo_codes_on_month():
     this_month = datetime.now().month
     this_year = datetime.now().year
     promo_codes_count = 0
-    promo_codes = PromoCodes.select()
+    promo_codes = AutoSchools.select()
     for promo_code in promo_codes:
         if promo_code.registration_date.year == this_year and promo_code.registration_date.month == this_month:
             promo_codes_count += 1
@@ -601,7 +676,7 @@ def get_number_of_promo_codes_on_month():
 def get_number_of_promo_codes_on_year():
     this_year = datetime.now().year
     promo_codes_count = 0
-    promo_codes = PromoCodes.select()
+    promo_codes = AutoSchools.select()
     for promo_code in promo_codes:
         if promo_code.registration_date.year == this_year:
             promo_codes_count += 1
@@ -610,7 +685,7 @@ def get_number_of_promo_codes_on_year():
 
 def get_all_promo_code_list():
     result = []
-    promo_codes = PromoCodes.select().order_by(PromoCodes.number_of_references.desc())
+    promo_codes = AutoSchools.select().order_by(AutoSchools.number_of_references.desc())
     result.append('школа > промо-код > упоминаний')
     for promo_code in promo_codes:
         result.append(f"{promo_code.school_name} {promo_code.promo_code} {promo_code.number_of_references}")

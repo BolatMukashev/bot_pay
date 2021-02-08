@@ -35,16 +35,20 @@ class Users(BaseModel):
         db_table = "users"
 
 
-class PromoCodes(BaseModel):
+class AutoSchools(BaseModel):
     id = PrimaryKeyField(null=False)
     school_name = CharField(null=False, max_length=100)
-    secret_key = CharField(null=False, max_length=100, unique=True)
+    country = CharField(null=False, max_length=100)
+    city = CharField(null=False, max_length=100)
+    phone = BlobField(null=False)
+    email = BlobField(null=False)
     registration_date = DateTimeField(default=datetime.now().date())
+    secret_key = CharField(null=False, max_length=100, unique=True)
     promo_code = CharField(null=False, max_length=100, unique=True)
     number_of_references = IntegerField(null=False, default=0)
 
     class Meta:
-        db_table = "promo_codes"
+        db_table = "auto_schools"
 
 
 class QuestionsRU(BaseModel):

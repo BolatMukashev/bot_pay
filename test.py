@@ -1,6 +1,7 @@
 import json
-from db_operation import get_image_codes_from, add_image_code_to, translate_db_to_kz_language, \
-    get_data_from_json_file, beautiful_print_data_from_dict, create_new_json_file
+from db_operation import *
+from auto_schools import auto_schools
+
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
 
@@ -78,4 +79,7 @@ def all_db_testing(db_list):
         print()
 
 
-all_db_testing(db_list)
+# all_db_testing(db_list)
+
+# set_auto_schools_in_db(auto_schools)
+print(get_auto_schools_on_dict_format())
