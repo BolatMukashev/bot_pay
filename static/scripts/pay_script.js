@@ -12,12 +12,11 @@ if (language === 'KZ') {
 
 var secret_key = $('script[src*="pay_script.js"]').data('secret_key');
 var telegram_id = $('script[src*="pay_script.js"]').data('telegram_id');
-var promo_code = $('script[src*="pay_script.js"]').data('promo_code');
 
-let url = `/accept?secret_key=${secret_key}&telegram_id=${telegram_id}&promo_code=${promo_code}`;
+let url = `/accept?secret_key=${secret_key}&telegram_id=${telegram_id}`;
 
 this.pay = function () {
- var widget = new cp.CloudPayments({language: lang});
+    var widget = new cp.CloudPayments({ language: lang });
     widget.pay('charge', // или 'auth' - двухстадийная, возврат в течении 7 дней
         { //options
             publicId: 'test_api_00000000000000000000001', //id из личного кабинета
@@ -36,18 +35,18 @@ this.pay = function () {
                 //действие при успешной оплате
                 var zap = new XMLHttpRequest();
                 zap.open("GET", url, true);
-                zap.onload = function (){ console.log( zap.responseText); }
+                zap.onload = function () { console.log(zap.responseText); }
                 zap.send();
                 document.location.href = '/pay_registered';
-                },
+            },
 
             onFail: function (reason, options) { // fail
                 //действие при неуспешной оплате
-                },
+            },
 
             onComplete: function (paymentResult, options) { //Вызывается как только виджет получает от api.cloudpayments
-             // ответ с результатом транзакции. Положительный или отрицательный - неважно
-             //например вызов вашей аналитики Facebook Pixel
+                // ответ с результатом транзакции. Положительный или отрицательный - неважно
+                //например вызов вашей аналитики Facebook Pixel
             }
         }
     )

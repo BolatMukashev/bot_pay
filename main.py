@@ -3,8 +3,8 @@ from flask import Flask, url_for, request, render_template, send_from_directory,
 from werkzeug.utils import redirect
 from werkzeug.exceptions import BadRequestKeyError
 import config
-from db_operation import set_new_promo_code, check_promo_code, up_number_of_references, uppercase_check
-from messages import MESSAGE, PROMO
+from db_operation import check_promo_code, up_number_of_references, uppercase_check
+from messages import MESSAGE, PROMO_CODE
 
 app = Flask(__name__)
 
@@ -41,11 +41,11 @@ def promo_code():
                 set_new_promo_code(school_name, user_promo_code, secret_code, bank_account, agree)
                 return redirect(url_for('promo_code_registered', user_promo_code=user_promo_code))
             else:
-                error_text = PROMO['registered']
+                error_text = PROMO_CODE['registered']
                 return render_template('promo_code.html', error_text=error_text, school_name=school_name,
                                        secret_code=secret_code, bank_account=bank_account)
         else:
-            error_text = PROMO['error']
+            error_text = PROMO_CODE['error']
             return render_template('promo_code.html', error_text=error_text, school_name=school_name,
                                    secret_code=secret_code, bank_account=bank_account)
     else:
@@ -62,7 +62,8 @@ def offer():
 @app.route('/promo_code_registered')
 def promo_code_registered():
     user_promo_code = request.args["user_promo_code"]
-    return render_template('promo_code_registered.html', BOT_ADDRESS=BOT_ADDRESS, user_promo_code=user_promo_code)
+    return render_template('promo_code_registered.html', BOT_ADDRESS=config.BOT_ADDRESS,
+                           user_promo_code=user_promo_code)
 
 
 @app.route('/pay', methods=['GET', 'POST'])
@@ -93,8 +94,8 @@ def pay():
                 resp.set_cookie('user_name', user_name)
                 resp.set_cookie('language', language)
                 resp.set_cookie('promo_code_used', user_promo_code)
-                session['price'] = str(PRICE_WITH_PROMO_CODE)
-                session['secret_key'] = SESSION_SECRET_KEY
+                session['price'] = str(config.PRICE_WITH_PROMO_CODE)
+                session['secret_key'] = config.SESSION_SECRET_KEY
                 return resp
             elif user_promo_code == check_super_promo_code():               # 'СуперПромокод. 25% оплата'
                 resp = make_response(redirect(url_for('pay_operation', language=language)))
@@ -102,14 +103,14 @@ def pay():
                 resp.set_cookie('user_name', user_name)
                 resp.set_cookie('language', language)
                 resp.set_cookie('promo_code_used', user_promo_code)
-                session['price'] = str(PRICE_WITH_SUPER_PROMO_CODE)
-                session['secret_key'] = SESSION_SECRET_KEY
+                session['price'] = str(config.PRICE_WITH_SUPER_PROMO_CODE)
+                session['secret_key'] = config.SESSION_SECRET_KEY
                 return resp
             else:
                 error_text = user_promo_code + ' ' + promo_code_error
-                return render_template(pay_page, error_text=error_text, bot_name=BOT_NAME,
-                                       bot_address=BOT_ADDRESS, telegram_id=telegram_id, user_name=user_name,
-                                       price=BASE_PRICE)
+                return render_template(pay_page, error_text=error_text, bot_name=config.BOT_NAME,
+                                       bot_address=config.BOT_ADDRESS, telegram_id=telegram_id, user_name=user_name,
+                                       price=config.BASE_PRICE)
         else:
             # Без промокода. 100% оплата
             resp = make_response(redirect(url_for('pay_operation', language=language)))
@@ -117,8 +118,8 @@ def pay():
             resp.set_cookie('user_name', user_name)
             resp.set_cookie('language', language)
             resp.set_cookie('promo_code_used', promo_code_used)
-            session['price'] = str(BASE_PRICE)
-            session['secret_key'] = SESSION_SECRET_KEY
+            session['price'] = str(config.BASE_PRICE)
+            session['secret_key'] = config.SESSION_SECRET_KEY
             return resp
     else:
         try:
@@ -129,8 +130,8 @@ def pay():
                 pay_page = 'pay_kz.html'
             else:
                 pay_page = 'pay_ru.html'
-            return render_template(pay_page, bot_name=BOT_NAME, bot_address=BOT_ADDRESS, telegram_id=telegram_id,
-                                   user_name=user_name, price=BASE_PRICE)
+            return render_template(pay_page, bot_name=config.BOT_NAME, bot_address=config.BOT_ADDRESS,
+                                   telegram_id=telegram_id, user_name=user_name, price=config.BASE_PRICE)
         except BadRequestKeyError:
             return redirect(url_for('pay_error'))
 
@@ -163,11 +164,8 @@ def pay_operation(language):
     price = session.get('price') or None
     secret_key = session.get('secret_key') or None
     if telegram_id:
-        if language == 'KZ':
-            page = 'pay_operation_kz.html'
-        else:
-            page = 'pay_operation_ru.html'
-        return render_template(page, bot_name=BOT_NAME, bot_address=BOT_ADDRESS,
+        page = f'pay_operation_{language}.html'
+        return render_template(page, bot_name=config.BOT_NAME, bot_address=config.BOT_ADDRESS,
                                telegram_id=telegram_id, user_name=user_name, language=language, price=price,
                                promo_code=promo_code_used, secret_key=secret_key)
     else:
@@ -176,7 +174,7 @@ def pay_operation(language):
 
 @app.route('/pay_error')
 def pay_error():
-    return render_template('pay_error.html', BOT_ADDRESS=BOT_ADDRESS, message=MESSAGE['pay_error_message'])
+    return render_template('pay_error.html', BOT_ADDRESS=config.BOT_ADDRESS, message=MESSAGE['pay_error_message'])
 
 
 @app.route('/accept')
@@ -187,7 +185,7 @@ def accept():
         promo_code_used = request.args["promo_code"]
     except BadRequestKeyError:
         return 'all bad'
-    if secret_key != SESSION_SECRET_KEY:
+    if secret_key != config.SESSION_SECRET_KEY:
         return
     up_user_questions_available(telegram_id)
     if promo_code_used != 'Қолданылмаған' or promo_code_used != 'Не использовался':
@@ -201,13 +199,9 @@ def accept():
 @app.route('/pay_registered')
 def pay_registered():
     language = request.cookies.get('language') or 'RU'
-    if language == 'KZ':
-        bot_link = MESSAGE['bot_link_kz']
-        message = MESSAGE['pay_registered_message_kz']
-    else:
-        bot_link = MESSAGE['bot_link_ru']
-        message = MESSAGE['pay_registered_message_ru']
-    return render_template('pay_registered.html', BOT_ADDRESS=BOT_ADDRESS, bot_link=bot_link, message=message)
+    bot_link = MESSAGE[f'bot_link_{language}']
+    message = MESSAGE[f'pay_registered_message_{language}']
+    return render_template('pay_registered.html', BOT_ADDRESS=config.BOT_ADDRESS, bot_link=bot_link, message=message)
 
 
 if __name__ == '__main__':

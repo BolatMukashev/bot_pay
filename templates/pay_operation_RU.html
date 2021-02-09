@@ -27,9 +27,6 @@
                     <div class="block__user">
                         <p id="telegram_id">ID в Telegram: {{ telegram_id }}</p>
                         <p id="user_name">Имя в Telegram: {{ user_name }}</p>
-                        {% if promo_code %}
-                        <p id="promo_code">Использован промкод: {{ promo_code }}</p>
-                        {% endif %}
                     </div>
                     <div class="block__button">
                         <button class='button' id="pay_button_on">Оплатить</button>
@@ -45,8 +42,8 @@
         </div>
     </div>
     <script type="text/javascript" data-price_on_page="{{ price }}" data-language_on_page="{{ language }}"
-            data-secret_key="{{ secret_key }}" data-telegram_id="{{ telegram_id }}" data-promo_code="{{ promo_code }}"
-            src="{{ url_for('static', filename='scripts/pay_script.js') }}"></script>
+        data-secret_key="{{ secret_key }}" data-telegram_id="{{ telegram_id }}" data-country="{{ country }}"
+        src="{{ url_for('static', filename='scripts/pay_script.js') }}"></script>
 </body>
 
 </html>

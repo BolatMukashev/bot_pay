@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/promo_code.css') }}">
+    <link rel="stylesheet" type=text/css href="../static/styles/promo_code.css">
     <!-- "{{ url_for('static', filename='styles/promo_code.css') }}" -->
     <!-- "../static/styles/promo_code.css" -->
     <title>Регистрация ПРОМОКОДА</title>
@@ -18,11 +18,12 @@
                 <form action="" method="post">
                     <div class="small__blockchields">
                         <div class="title">
-                            <h1>НАЗВАНИЕ АВТОШКОЛЫ</h1>
+                            <h2>Введите СЕКРЕТНЫЙ КОД</h2>
                         </div>
                         <div class="block__input">
-                            <input type="text" name='school_name' id='school_name' class="input"
-                                value="{{ school_name }}" placeholder="название автошколы" maxlength="50" required>
+                            <input type="text" name='secret_code' id='secret_code' class="input"
+                                value="{{ secret_code }}" placeholder="введите секретный код" maxlength="50" required
+                                autocomplete="off">
                         </div>
                     </div>
                     <div class="small__blockchields">
@@ -44,40 +45,7 @@
                             <h3 style="color:rgb(216, 0, 90);">{{ error_text }}</h3>
                         </div>
                     </div>
-                    <div class="small__blockchields">
-                        <div class="title">
-                            <h2>Придумайте СЕКРЕТНЫЙ КОД</h2>
-                        </div>
-                        <div class="title">
-                            <h3>Он будет необходим, если Вы захотите изменить номер банковского счета.</h3>
-                        </div>
-                        <div class="block__input">
-                            <input type="text" name='secret_code' id='secret_code' class="input"
-                                value="{{ secret_code }}" placeholder="введи секретный код" maxlength="50" required
-                                autocomplete="off">
-                        </div>
-                    </div>
-                    <div class="small__blockchields">
-                        <div class="title">
-                            <h2>Номер банковского счета</h2>
-                        </div>
-                        <div class="title">
-                            <h3>На это счет будут начисляться бонусные деньги</h3>
-                        </div>
-                        <div class="block__input">
-                            <input type="text" name='bank_account' id='bank_account' class="input"
-                                value="{{ bank_account }}" placeholder="номер банковского счета" minlength="20"
-                                maxlength="20" required>
-                        </div>
-                    </div>
-                    <div class="small__blockchields block__mini">
-                        <div class="checkbox">
-                            <input class='checkbox__input' type="checkbox" name="agree" id="agree" value='True' checked>
-                            <label class="checkbox__label" for="agree"
-                                title="Имя Вашей школы будет использовано в рекламных целях. Например, будет размещено на сайте платформы">Дать
-                                согласие на рекламу (опционально)</label>
-                        </div>
-                    </div>
+
                     <div class="small__blockchields">
                         <div class="block__offer">
                             <p>Нажимая кнопку <b>ЗАРЕГИСТРИРОВАТЬ</b>,<br>
