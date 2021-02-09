@@ -847,7 +847,6 @@ def get_big_statistics():
 
 if __name__ == '__main__':
     create_new_tables(table_names)
-    # set_new_promo_code('Тестовая школа2', 'вавыававыавыаЫВВЫФВФЫ')
     # edit_promo_code('FdfdsfdsfDFdcdff', 'TEST_PROMO')
     # write_all_questions_in_db('all_questions_ru.json', 'RU')
     # write_all_questions_in_db('all_questions_kz.json', 'KZ')

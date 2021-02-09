@@ -69,8 +69,8 @@ def test_explanations_in_db(db_name):
         print('all good')
 
 
-def all_db_testing(db_list):
-    for idd, el in enumerate(db_list):
+def all_db_testing(questions_list):
+    for idd, el in enumerate(questions_list):
         print(f'Data base {idd + 1} testing...........')
         test_questions_in_db(el)
         test_answers_in_db(el)

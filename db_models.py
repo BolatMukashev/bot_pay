@@ -46,6 +46,7 @@ class AutoSchools(BaseModel):
     secret_key = CharField(null=False, max_length=100, unique=True)
     promo_code = CharField(null=False, max_length=100, unique=True)
     number_of_references = IntegerField(null=False, default=0)
+    notified = BlobField(null=False)
 
     class Meta:
         db_table = "auto_schools"

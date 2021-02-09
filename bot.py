@@ -8,7 +8,11 @@ from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons1
 from messages import *
 
-bot = Bot(token=config.BOT_TOKEN)
+
+if config.DEBUG:
+    bot = Bot(token=config.TEST_BOT_TOKEN)
+else:
+    bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 

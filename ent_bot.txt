@@ -1,0 +1,10 @@
+# пользователь дает реферальную ссылку на бота:
+https://t.me/skillbox_speach_bot?start=11112222
+
+# на команду /start вешаем проверку
+res = message.text.replace('/start', '').strip()
+    if res:
+        print(res)
+
+# добавляем +1 к упоминанию пользователя по user_id
+# когда упоминаний > 3 или ОПЛАЧЕНО=True доступ открыт
