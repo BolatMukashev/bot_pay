@@ -1,6 +1,7 @@
 import json
 from db_operation import *
 from auto_schools import auto_schools
+from pprint import pprint
 
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
@@ -83,4 +84,9 @@ def all_db_testing(questions_list):
 
 # set_auto_schools_in_db(auto_schools)
 # print(get_auto_schools_on_dict_format())
-print(get_length_active_auto_schools())
+# print(get_length_active_auto_schools())
+
+# data = get_data_from_json_file('all_questions_ru.json')
+# print(len(data))
+#
+# pprint(data, depth=3, width=300)
