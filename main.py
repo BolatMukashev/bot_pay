@@ -1,10 +1,10 @@
 import os
-from flask import Flask, url_for, request, render_template, send_from_directory, make_response, session
+from flask import Flask, url_for, request, render_template, send_from_directory, make_response
 from werkzeug.utils import redirect
 from werkzeug.exceptions import BadRequestKeyError
 import config
 from db_operation import *
-from messages import MESSAGE, PROMO_CODE
+from messages import MESSAGE
 
 app = Flask(__name__)
 
@@ -28,6 +28,7 @@ def index():
 @app.route('/promo_code', methods=['GET', 'POST'])
 def promo_code():
     if request.method == 'POST':
+        # edit_promo_code('FdfdsfdsfDFdcdff', 'TEST_PROMO')
         error_text = ''
         secret_key = ''
         return render_template('promo_code.html', error_text=error_text, secret_key=secret_key)

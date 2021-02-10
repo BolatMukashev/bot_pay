@@ -10,6 +10,29 @@ from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 
 
+# ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
+
+
+table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools]
+
+
+def create_new_tables(db_models):
+    try:
+        db.connect()
+        db.create_tables(db_models)
+        print('Таблицы созданы...')
+    except peewee.InternalError as px:
+        print(str(px))
+
+
+def create_database(db_name):
+    try:
+        conn.cursor().execute(f'create database {db_name}')
+        print('База данных успешно создана...')
+    except pymysql.err.ProgrammingError:
+        print('База данных уже была создана ранее...')
+
+
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
 
 
@@ -109,20 +132,6 @@ def translate_db_to_kz_language(db_name, json_file_name):
     print('Yippee! Translation finished!!!')
 
 
-# ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
-
-
-table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools]
-
-
-def create_new_tables(db_models):
-    try:
-        db.connect()
-        db.create_tables(db_models)
-    except peewee.InternalError as px:
-        print(str(px))
-
-
 # ВОПРОСЫ ------------------------------------------------------------------------------------------------------------
 
 
@@ -169,6 +178,7 @@ def questions_to_db(raw_db, language):
 def write_all_questions_in_db(json_file_name, language):
     data = get_data_from_json_file(json_file_name)
     questions_to_db(data, language)
+    print(f'Вопросы добавлены в таблицу {language}...')
 
 
 def choose_db_by_language(user_language):
@@ -851,7 +861,8 @@ def get_big_statistics():
 
 
 if __name__ == '__main__':
+    create_database(config.db_config["db_name"])
     create_new_tables(table_names)
-    # edit_promo_code('FdfdsfdsfDFdcdff', 'TEST_PROMO')
-    # write_all_questions_in_db('all_questions_ru.json', 'RU')
-    # write_all_questions_in_db('all_questions_kz.json', 'KZ')
+    #write_all_questions_in_db('all_questions_ru.json', 'RU')
+    write_all_questions_in_db('all_questions_kz.json', 'KZ')
+    print('Все готово!')

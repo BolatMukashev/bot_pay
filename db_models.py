@@ -4,6 +4,11 @@ from config import db_config
 from datetime import datetime, timedelta
 
 
+conn = pymysql.connect(host=db_config['host'],
+                       user=db_config['user'],
+                       password=db_config['password'])
+
+
 db = MySQLDatabase(db_config['db_name'],
                    user=db_config['user'],
                    password=db_config['password'],

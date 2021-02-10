@@ -7,6 +7,7 @@ from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons1
 from messages import *
+from time import sleep
 
 
 if config.DEBUG:
