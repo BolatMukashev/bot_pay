@@ -275,8 +275,13 @@ def edit_user_country(telegram_id, user_country):
 
 def get_monetary_unit_by_user_country(telegram_id):
     user_country = get_user_country(telegram_id)
+    user_language = get_user_language(telegram_id)
     if user_country == 'KZ':
         return 'тенге'
+    elif user_country == 'RU' and user_language == 'RU':
+        return 'рублей'
+    elif user_country == 'RU' and user_language == 'KZ':
+        return 'рубль'
     else:
         return 'рублей'
 

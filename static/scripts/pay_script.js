@@ -1,19 +1,26 @@
+var telegram_id = $('script[src*="pay_script.js"]').data('telegram_id');
+var secret_key = $('script[src*="pay_script.js"]').data('secret_key');
+
 var price = $('script[src*="pay_script.js"]').data('price_on_page');
 var priceInt = Number(price)
 
-var language = $('script[src*="pay_script.js"]').data('language_on_page');
-var lang = 'ru-RU';
-var description_message = 'Плата за доступ к образовательной платформе на базе мессенджера Telegram';
-
-if (language === 'KZ') {
+var user_language = $('script[src*="pay_script.js"]').data('language_on_page');
+if (user_language === 'KZ') {
     lang = 'kk-KZ';
     description_message = 'Telegram мессенджері негізінде білім беру платформасына кіру ақысы';
+} else {
+    var lang = 'ru-RU';
+    var description_message = 'Плата за доступ к образовательной платформе на базе мессенджера Telegram';
 };
 
-var secret_key = $('script[src*="pay_script.js"]').data('secret_key');
-var telegram_id = $('script[src*="pay_script.js"]').data('telegram_id');
+var user_country = $('script[src*="pay_script.js"]').data('country_on_page');
+if (user_country === 'KZ') {
+    user_currency = 'KZT';
+} else {
+    user_currency = 'RUB';
+};
 
-let url = `/accept?secret_key=${secret_key}&telegram_id=${telegram_id}`;
+let url = `/accept?telegram_id=${telegram_id}&secret_key=${secret_key}`;
 
 this.pay = function () {
     var widget = new cp.CloudPayments({ language: lang });
@@ -22,7 +29,7 @@ this.pay = function () {
             publicId: 'test_api_00000000000000000000001', //id из личного кабинета
             description: description_message, //назначение
             amount: priceInt, //сумма
-            currency: 'KZT', //валюта
+            currency: user_currency, //валюта
             invoiceId: '', //номер заказа  (необязательно)
             accountId: 'user@example.com', //идентификатор плательщика (необязательно)
             skin: "modern", //дизайн виджета (необязательно)
@@ -37,7 +44,7 @@ this.pay = function () {
                 zap.open("GET", url, true);
                 zap.onload = function () { console.log(zap.responseText); }
                 zap.send();
-                document.location.href = '/pay_registered';
+                document.location.href = `/pay_registered/${user_language}`;
             },
 
             onFail: function (reason, options) { // fail
