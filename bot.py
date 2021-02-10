@@ -7,7 +7,6 @@ from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons1
 from messages import *
-from time import sleep
 
 
 if config.DEBUG:
@@ -244,6 +243,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
         up_user_time_limit_7days(telegram_id)
         up_number_of_references(user_promo_code)
         update_user_promo_code_used_status(telegram_id)
+        change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_14DAYS)
         await message.answer_sticker(STICKERS['all_good'])
         await message.answer(PROMO_CODE[f'promo_code_activated_{language}'])
     else:

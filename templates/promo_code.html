@@ -20,9 +20,14 @@
                         <div class="title">
                             <h2>Введите СЕКРЕТНЫЙ КОД</h2>
                         </div>
+                        {% if secret_key_error %}
+                        <div class="error__text">
+                            <h3 style="color:rgb(216, 0, 90);">{{ secret_key_error }}</h3>
+                        </div>
+                        {% endif %}
                         <div class="block__input">
-                            <input type="text" name='secret_code' id='secret_code' class="input"
-                                value="{{ secret_code }}" placeholder="введите секретный код" maxlength="50" required
+                            <input type="text" name='secret_key' id='secret_key' class="input"
+                                value="{{ secret_key }}" placeholder="введите секретный код" maxlength="50" required
                                 autocomplete="off">
                         </div>
                     </div>
@@ -41,9 +46,11 @@
                             <input type="text" name='promo_code' id='promo_code' class="input uppercase"
                                 placeholder="введи промокод" maxlength="20" required autocomplete="off">
                         </div>
+                        {% if promo_code_error %}
                         <div class="error__text">
-                            <h3 style="color:rgb(216, 0, 90);">{{ error_text }}</h3>
+                            <h3 style="color:rgb(216, 0, 90);">{{ promo_code_error }}</h3>
                         </div>
+                        {% endif %}
                     </div>
 
                     <div class="small__blockchields">

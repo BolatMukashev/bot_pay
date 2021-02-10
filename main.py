@@ -28,10 +28,18 @@ def index():
 @app.route('/promo_code', methods=['GET', 'POST'])
 def promo_code():
     if request.method == 'POST':
-        # edit_promo_code('FdfdsfdsfDFdcdff', 'TEST_PROMO')
-        error_text = ''
-        secret_key = ''
-        return render_template('promo_code.html', error_text=error_text, secret_key=secret_key)
+        secret_key = request.form['secret_key']
+        new_promo_code = request.form['promo_code'].upper()
+        if check_secret_key(secret_key):
+            if not check_promo_code(new_promo_code):
+                edit_promo_code(secret_key, new_promo_code)
+                return redirect(url_for('promo_code_registered', new_promo_code=new_promo_code))
+            else:
+                promo_code_error = 'Этот ПРОМОКОД зянят. Попробуйте другой.'
+                return render_template('promo_code.html', secret_key=secret_key, promo_code_error=promo_code_error)
+        else:
+            secret_key_error = 'Секретный ключ не найден'
+            return render_template('promo_code.html', secret_key_error=secret_key_error)
     else:
         return render_template('promo_code.html')
 
@@ -43,11 +51,9 @@ def offer():
                                mimetype='application/pdf')
 
 
-@app.route('/promo_code_registered')
-def promo_code_registered():
-    user_promo_code = request.args["user_promo_code"]
-    return render_template('promo_code_registered.html', BOT_ADDRESS=config.BOT_ADDRESS,
-                           user_promo_code=user_promo_code)
+@app.route('/promo_code_registered/<new_promo_code>')
+def promo_code_registered(new_promo_code):
+    return render_template('promo_code_registered.html', BOT_ADDRESS=config.BOT_ADDRESS, new_promo_code=new_promo_code)
 
 
 @app.route('/pay')
