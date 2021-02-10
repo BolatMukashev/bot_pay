@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" type=text/css href="../static/styles/pay_operation.css">
+    <!-- "{{ url_for('static', filename='styles/pay.css') }}" -->
+    <!-- "../static/styles/pay.css" -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
+    {% if user_language == 'KZ' %}
+    <title>Төлем</title>
+    {% else %}
+    <title>Оплата</title>
+    {% endif %}
+</head>
+
+<body>
+    <div class="block">
+        <div class="block__row">
+            <div class="block__element">
+                {% if user_language == 'KZ' %}
+                <div class="block__content">
+                    <div class="block__title">
+                        <h2>
+                            Telegram мессенджердегі (<a href="{{ bot_address }}">{{ bot_name }}</a>)<br>
+                            білім беру платформасына кіру үшін төлем
+                        </h2>
+                        <h2 class="large__title">Бағасы: {{ price }} {{ monetary_unit }}</h2>
+                    </div>
+                    <div class="block__user">
+                        <p id="telegram_id">Telegram ID: {{ telegram_id }}</p>
+                        <p id="user_name">Аты-жөні: {{ user_name }}</p>
+                    </div>
+                    <div class="block__button">
+                        <button class='button' id="pay_button_on">Төлеу</button>
+                    </div>
+                    <div class="block__about">
+                        <p class="link__about"><a href="/pay_instructions" target="blank">Төлем тәртібі</a></p>
+                        <p class="link__about"><a href="/confidence_politics" target="blank">Құпиялылық саясаты</a></p>
+                        <p class="link__about"><a href="/about_us" target="blank">Біз туралы</a></p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="block__content">
+                    <div class="block__title">
+                        <h1>Оплатить</h1>
+                        <h2>доступ к образовательной платформе</h2>
+                        <h2>в мессенджере Telegram (<a href="{{ bot_address }}">{{ bot_name }}</a>)</h2>
+                        <h2 class="large__title">Цена: {{ price }} {{ monetary_unit }}</h2>
+                    </div>
+                    <div class="block__user">
+                        <p id="telegram_id">ID в Telegram: {{ telegram_id }}</p>
+                        <p id="user_name">Имя: {{ user_name }}</p>
+                    </div>
+                    <div class="block__button">
+                        <button class='button' id="pay_button_on">Оплатить</button>
+                    </div>
+                    <div class="block__about">
+                        <p class="link__about"><a href="/pay_instructions" target="blank">Процедура оплаты</a></p>
+                        <p class="link__about"><a href="/confidence_politics" target="blank">Политика
+                                конфиденциальности</a></p>
+                        <p class="link__about"><a href="/about_us" target="blank">О нас</a></p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" data-price_on_page="{{ price }}" data-language_on_page="{{ user_language }}"
+        data-secret_key="{{ secret_key }}" data-telegram_id="{{ telegram_id }}" data-country_on_page="{{ user_country }}"
+        src="{{ url_for('static', filename='scripts/pay_script.js') }}"></script>
+</body>
+
+</html>
