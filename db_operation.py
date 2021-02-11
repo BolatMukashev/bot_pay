@@ -9,7 +9,6 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 
-
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
 
@@ -389,6 +388,11 @@ def update_user_promo_code_used_status(telegram_id):
     query.execute()
 
 
+def update_user_made_payment_status(telegram_id):
+    query = Users.update(made_payment=True).where(Users.telegram_id == telegram_id)
+    query.execute()
+
+
 def update_time_visit(telegram_id):
     query = Users.update(last_visit=datetime.now()).where(Users.telegram_id == telegram_id)
     query.execute()
@@ -396,7 +400,7 @@ def update_time_visit(telegram_id):
 
 def get_loser_list_14days():
     loser_list = []
-    all_users = Users.select().where(Users.second_week_promotional_offer is False)
+    all_users = Users.select().where(Users.second_week_promotional_offer == 0)
     for user in all_users:
         telegram_id = user.telegram_id
         time_limit = get_user_time_limit(telegram_id)
@@ -408,7 +412,7 @@ def get_loser_list_14days():
 
 def get_loser_list_45days():
     loser_list = []
-    all_users = Users.select().where(Users.sixth_week_promotional_offer is False)
+    all_users = Users.select().where(Users.sixth_week_promotional_offer == 0)
     for user in all_users:
         telegram_id = user.telegram_id
         time_limit = get_user_time_limit(telegram_id)
@@ -442,12 +446,12 @@ def edit_promo_code(secret_key, new_promo_code):
     query.execute()
 
 
-def add_new_auto_school(school_name, country, city, phone, email, secret_key, promo_code):
+def add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code):
     new_promo_code = AutoSchools(school_name=school_name,
                                  country=country,
                                  city=city,
-                                 phone=phone,
-                                 email=email,
+                                 phones=phones,
+                                 emails=emails,
                                  secret_key=secret_key,
                                  promo_code=promo_code
                                  )
@@ -460,11 +464,11 @@ def set_auto_schools_in_db(auto_schools):
         school_name = auto_school['school_name']
         country = auto_school['country']
         city = auto_school['city']
-        phone = pickle.dumps(auto_school['phones'], pickle.HIGHEST_PROTOCOL)
-        email = pickle.dumps(auto_school['emails'], pickle.HIGHEST_PROTOCOL)
+        phones = pickle.dumps(auto_school['phones'], pickle.HIGHEST_PROTOCOL)
+        emails = pickle.dumps(auto_school['emails'], pickle.HIGHEST_PROTOCOL)
         secret_key = get_unique_secret_key()
         promo_code = secret_key
-        add_new_auto_school(school_name, country, city, phone, email, secret_key, promo_code)
+        add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code)
 
 
 def get_all_auto_schools_on_db():
@@ -473,7 +477,7 @@ def get_all_auto_schools_on_db():
 
 
 def get_not_notified_auto_schools():
-    auto_schools = AutoSchools.select().where(AutoSchools.notified is False)
+    auto_schools = AutoSchools.select().where(AutoSchools.notified == 0)
     return auto_schools
 
 
@@ -484,8 +488,8 @@ def format_auto_schools_on_dict_format(auto_schools_on_db):
         school_name = school.school_name
         country = school.country
         city = school.city
-        phones = pickle.loads(school.phone)
-        emails = pickle.loads(school.email)
+        phones = pickle.loads(school.phones)
+        emails = pickle.loads(school.emails)
         registration_date = school.registration_date
         secret_key = school.secret_key
         promo_code = school.promo_code
@@ -722,13 +726,13 @@ def get_all_promo_code_list():
 
 
 def get_number_of_promo_code_used_users():
-    promo_code_used_users = Users.select().where(Users.promo_code_used is True)
+    promo_code_used_users = Users.select().where(Users.promo_code_used == 1)
     promo_code_used = len(promo_code_used_users)
     return promo_code_used
 
 
 def get_number_of_payed_users():
-    payed_users = Users.select().where(Users.made_payment is True)
+    payed_users = Users.select().where(Users.made_payment == 1)
     payed_users_count = len(payed_users)
     return payed_users_count
 
@@ -878,5 +882,4 @@ if __name__ == '__main__':
     create_database(config.db_config["db_name"])
     create_new_tables(table_names)
     # write_all_questions_in_db('all_questions_ru.json', 'RU')
-    write_all_questions_in_db('all_questions_kz.json', 'KZ')
-    print('Все готово!')
+    # write_all_questions_in_db('all_questions_kz.json', 'KZ')

@@ -109,6 +109,7 @@ def accept():
     if secret_key != config.SESSION_SECRET_KEY:
         return
     up_user_time_limit_1years(telegram_id)
+    update_user_made_payment_status(telegram_id)
     return 'All good!'
 
 
