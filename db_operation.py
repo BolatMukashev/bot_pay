@@ -515,6 +515,12 @@ def get_not_notified_auto_schools_emails():
     return all_emails
 
 
+def edit_notified_status(schools):
+    for school in schools:
+        query = AutoSchools.update(notified=1).where(AutoSchools.id == school.id)
+        query.execute()
+
+
 def all_secret_keys():
     secret_keys_list = []
     promo_codes = AutoSchools.select()

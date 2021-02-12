@@ -7,6 +7,7 @@ from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons1
 from messages import *
+from gmail import send_emails_to_schools
 import io
 
 
@@ -275,6 +276,17 @@ async def command_help(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(MESSAGE[f'info_{user_language}'])
+
+
+@dp.message_handler(commands=["send_emails_to_schools"])
+async def command_send_emails_to_schools(message: types.Message):
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        not_notified_emails_list = get_not_notified_auto_schools_emails()
+        answer = send_emails_to_schools(not_notified_emails_list)
+        schools = get_not_notified_auto_schools()
+        edit_notified_status(schools)
+        await message.answer(answer)
 
 
 @dp.poll_answer_handler()
