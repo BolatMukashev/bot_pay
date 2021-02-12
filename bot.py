@@ -319,7 +319,6 @@ async def scan_message(message: types.Message):
             await message.answer('Не корректный набор данных!')
 
 
-
 if __name__ == "__main__":
     from handlers import dp
 

@@ -82,14 +82,4 @@ def all_db_testing(questions_list):
 
 # all_db_testing(db_list)
 
-# set_auto_schools_in_db(auto_schools)
-new_user(1122, 'sdsad')
-new_user(223366, 'dsdsadsd')
-print(get_number_of_promo_code_used_users())
-# print(get_auto_schools_on_dict_format())
-# print(get_length_active_auto_schools())
-
-# data = get_data_from_json_file('all_questions_ru.json')
-# print(len(data))
-#
 # pprint(data, depth=3, width=300)
