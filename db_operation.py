@@ -481,9 +481,9 @@ def get_not_notified_auto_schools():
     return auto_schools
 
 
-def format_auto_schools_on_dict_format(auto_schools_on_db):
+def format_auto_schools_on_dict_format(auto_schools_in_db):
     all_schools = []
-    for school in auto_schools_on_db:
+    for school in auto_schools_in_db:
         school_id = school.id
         school_name = school.school_name
         country = school.country

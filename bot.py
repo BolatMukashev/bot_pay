@@ -7,6 +7,7 @@ from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty import penalty_buttons1
 from messages import *
+import io
 
 
 if config.DEBUG:
@@ -302,6 +303,21 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
         markup.add(pay_link)
         await bot.send_message(telegram_id, limit_error_message, reply_markup=markup)
     update_time_visit(telegram_id)
+
+
+@dp.message_handler(content_types=['document'])
+async def scan_message(message: types.Message):
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        document = message.document.file_id
+        file = await bot.download_file_by_id(document)
+        data = json.load(io.TextIOWrapper(file, encoding='utf-8'))
+        try:
+            set_auto_schools_in_db(data)
+            await message.answer('Информация об автошколах была добавлена в базу...')
+        except KeyError:
+            await message.answer('Не корректный набор данных!')
+
 
 
 if __name__ == "__main__":
