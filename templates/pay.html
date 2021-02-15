@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" type=text/css href="../static/styles/pay_operation.css">
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/pay.css') }}">
     <!-- "{{ url_for('static', filename='styles/pay.css') }}" -->
     <!-- "../static/styles/pay.css" -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -70,7 +70,8 @@
         </div>
     </div>
     <script type="text/javascript" data-price_on_page="{{ price }}" data-language_on_page="{{ user_language }}"
-        data-secret_key="{{ secret_key }}" data-telegram_id="{{ telegram_id }}" data-country_on_page="{{ user_country }}"
+        data-secret_key="{{ secret_key }}" data-telegram_id="{{ telegram_id }}"
+        data-country_on_page="{{ user_country }}"
         src="{{ url_for('static', filename='scripts/pay_script.js') }}"></script>
 </body>
 

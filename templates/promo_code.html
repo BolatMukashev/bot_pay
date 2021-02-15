@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" type=text/css href="../static/styles/promo_code.css">
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/promo_code.css') }}">
     <!-- "{{ url_for('static', filename='styles/promo_code.css') }}" -->
     <!-- "../static/styles/promo_code.css" -->
     <title>Регистрация ПРОМОКОДА</title>
@@ -26,9 +26,8 @@
                         </div>
                         {% endif %}
                         <div class="block__input">
-                            <input type="text" name='secret_key' id='secret_key' class="input"
-                                value="{{ secret_key }}" placeholder="введите секретный код" maxlength="50" required
-                                autocomplete="off">
+                            <input type="text" name='secret_key' id='secret_key' class="input" value="{{ secret_key }}"
+                                placeholder="введите секретный код" maxlength="50" required autocomplete="off">
                         </div>
                     </div>
                     <div class="small__blockchields">
@@ -39,7 +38,7 @@
                             <h3>
                                 Заглавными буквами, на английском языке<br>
                                 не более 20 символов.<br>
-                                Примеры: PDD_SCHOOL, QAZAQ-AVTO, KOLESA
+                                Примеры: PDD_SCHOOL, BEST-AVTO, KOLESA
                             </h3>
                         </div>
                         <div class="block__input">

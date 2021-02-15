@@ -5,25 +5,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" type=text/css href="../static/styles/index.css">
+    <!-- "{{ url_for('static', filename='styles/index.css') }}" -->
+    <!-- "../static/styles/index.css" -->
     <title>Главная страница</title>
 </head>
 
 <body>
     <div class="block">
         <div class="block__row">
-            <div class="block__info">
-                <div class="info">Какая то информация</div>
-            </div>
-            <div class="block__element">
-                <div class="block__content">
+            <div class="block__content">
+                <div class="block__element">
+                    <div class="title">Образовательная платформа</div>
+                    <div class="text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Delectus distinctio
+                        aspernatur nemo. Veritatis nihil molestias, autem eum porro dicta. Quaerat necessitatibus iusto
+                        ut dolores ab earum. Consequuntur atque ducimus magnam.</div>
+                    <div class="images images__iphone">
+                        <div class="image"><img class="iphone1" src="../static/images/iphone.png" alt=""></div>
+                        <div class="image"><img class="iphone2" src="../static/images/iphone.png" alt=""></div>
+                        <div class="image"><img class="iphone3" src="../static/images/iphone.png" alt=""></div>
+                    </div>
+                </div>
+                <div class="block__button">
                     <a href="/promo_code">
-                        <button class='main__button'>Регистрация автошколы</button>
+                        <button class='main__button'>Зарегистрировать<br>ПРОМОКОД</button>
                     </a>
                 </div>
-            </div>
-            <div class="block__contact">
-                <div class="info">Контактные данные</div>
+                <div class="block__element">
+                    <div class="title">Выгодно всем</div>
+                    <div class="text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora praesentium ipsa
+                        illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
+                        iste, cupiditate vitae modi.</div>
+                    <div class="images">
+                        <div class="img__user img__user1"></div>
+                        <div class="img__user img__user2"></div>
+                    </div>
+                </div>
+                <div class="block__element">
+                    <div class="title">Почему Telegram?</div>
+                    <div class="text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora praesentium ipsa
+                        illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
+                        iste, cupiditate vitae modi.</div>
+                    <div class="images">
+                        <div class="image"><img src="../static/images/500users-700.png" alt="" sizes="
+                            (min-width: 700px) 700w,
+                            (min-width: 450px) 450w,
+                            (min-width: 320px) 320w
+                            " srcset="
+                            ../static/images/500users-700.png 700w,
+                            ../static/images/500users-450.png 450w,
+                            ../static/images/500users-320.png 320w,
+                            ">
+                        </div>
+                        <div class="image"><img src="../static/images/chat-700.png" alt="" sizes="
+                            (min-width: 700px) 700w,
+                            (min-width: 450px) 450w,
+                            (min-width: 320px) 320w
+                            " srcset="
+                            ../static/images/chat-700.png 700w,
+                            ../static/images/chat-450.png 450w,
+                            ../static/images/chat-320.png 320w,
+                            ">
+                        </div>
+                    </div>
+                </div>
+                <div class="block__element">
+                    <div class="title">Кроссплатформенность</div>
+                    <div class="text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora praesentium ipsa
+                        illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
+                        iste, cupiditate vitae modi.</div>
+                    <div class="images">
+                        <div class="image"><img src="../static/images/ipad-740.png" alt="" sizes="
+                            (min-width: 800px) 800w,
+                            (min-width: 430px) 430w,
+                            (min-width: 300px) 300w
+                            " srcset="
+                            ../static/images/ipad-740.png 800w,
+                            ../static/images/ipad-430.png 430w,
+                            ../static/images/ipad-300.png 300w,
+                            ">
+                        </div>
+                        <div class="image"><img src="../static/images/macbook-740.png" alt="" sizes="
+                            (min-width: 800px) 800w,
+                            (min-width: 430px) 430w,
+                            (min-width: 300px) 300w
+                            " srcset="
+                            ../static/images/macbook-740.png 800w,
+                            ../static/images/macbook-430.png 430w,
+                            ../static/images/macbook-300.png 300w,
+                            ">
+                        </div>
+                    </div>
+                </div>
+                <div class="block__element">
+                    <div class="title">Бот</div>
+                    <div class="text">Не верь на слово, проверь в деле</div>
+                    <div class="block__bot">
+                        <div class="image"><img src="../static/images/bot.gif" alt="" height="300px"></div>
+                        <a href="{{ bot_address }}">
+                            <button class='main__button simple__button'>Открыть бота</button>
+                        </a>
+                    </div>
+                </div>
+                <div class="block__element">
+                </div>
             </div>
         </div>
     </div>

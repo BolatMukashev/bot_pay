@@ -44,14 +44,18 @@ input::-webkit-inner-spin-button {
 
 /* родитель */
 .block {
-    background: url('../images/bg.webp') center;
+    width: 100%;
+    height: 100%;
+    background: url('/static/images/bg.webp') center;
     background-size: cover;
 }
 
 /* блок-контейнер */
 .flex__block {
-    min-height: 550px;
     display:flex;
+    position: relative;
+    width: 100%;
+    height:100%;
     justify-content:center;
     align-items:center;
 }
@@ -78,6 +82,10 @@ input::-webkit-inner-spin-button {
     line-height: calc(180% + 20 * ((100vw - 320px) / (1780 - 320)));
 }
 
+.title {
+    margin-bottom: calc(5px + 15 * ((100vw - 320px) / (1780 - 320)));
+}
+
 h1 {
     margin: 10px 0 20px 0;
     font-size: calc(20px + 14 * ((100vw - 320px) / (1780 - 320)));
@@ -85,7 +93,6 @@ h1 {
 }
 
 h2 {
-    margin: 10px 0px 0px 0px;
     font-size: calc(18px + 12 * ((100vw - 320px) / (1780 - 320)));
     font-weight: 600;
 }
@@ -157,7 +164,7 @@ h3 {
 input.uppercase { text-transform: uppercase; }
 
 .block__offer p {
-    font-size: calc(18px + 10 * ((100vw - 320px) / (1780 - 320)));
+    font-size: calc(16px + 10 * ((100vw - 320px) / (1780 - 320)));
 }
 
 a {

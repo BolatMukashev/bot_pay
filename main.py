@@ -22,7 +22,7 @@ path_to_documents = os.path.join(path, 'documents')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', bot_address=config.BOT_ADDRESS)
 
 
 @app.route('/promo_code', methods=['GET', 'POST'])

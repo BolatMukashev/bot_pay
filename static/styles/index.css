@@ -45,9 +45,8 @@ input::-webkit-inner-spin-button {
 
 /* родитель */
 .block{
-    height: 100%;
     width: 100%;
-    background: url('/static/images/bg.webp') center;
+    background-color: black;
     background-size: cover;
 }
 
@@ -58,55 +57,100 @@ input::-webkit-inner-spin-button {
     width: 100%;
     height:100%;
     justify-content:center;
-    align-items:center;
-}
 
-.block__info, .block__contact {
-    display: flex;
-    position: absolute;
-    width: calc(280px + 220 * ((100vw - 320px) / (1780 - 320)));
-    height: 50px;
-    left: auto;
-    border: 1px solid white;
-    text-align: center;
-    align-items:center;
-    justify-content:center;
-}
-
-.block__info {
-    top: 50px;
-}
-
-.info {
-    color: white;
-    position: relative;
-    font-size: 24px;
-}
-
-.block__contact {
-    bottom: 50px;
 }
 
 /* flex-элемент */
-.block__element{
-    display:flex;
-    align-items:center;
-    min-height: 300px;
+.block__content {
+    width: 100%;
+}
+
+.block__element {
+    display: flex;
+    text-align: center;
+    flex-direction:column;
+    position: relative;
+    width: 100%;
+    /* border: 2px solid greenyellow; */
+}
+
+.title {
+    font-weight: 800;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: white;
+    font-size: calc(26px + 20 * ((100vw - 320px) / (1780 - 320)));
+    padding: 40px 0 20px 0;
+}
+
+.text {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: white;
+    font-size: calc(14px + 14 * ((100vw - 320px) / (1780 - 320)));
+    padding: 10px;
+    line-height: calc(180% - 50 * ((100vw - 568px) / (7000 - 568)));
+}
+
+.images {
+    width: 100%;
+    display: flex;
+    justify-content:space-evenly;
+    text-align: center;
+    flex-direction:row;
+    flex-wrap:wrap;
+    padding: 40px 0 40px 0;
+}
+
+/* высота 475px ширина 712px */
+.image {
+    margin-bottom: 40px;
+}
+
+@media (max-width: 708px) {
+    .iphone3 {display: none;}
+}
+
+@media (max-width: 473px) {
+    .iphone2 {display: none;};
+    .images__iphone {justify-content: center;}
+}
+
+.img__user {
+    width: 712px;
+    height: calc(200px + 275 * ((100vw - 320px) / (1780 - 320)));
+    border: 4px solid white;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.img__user1 {
+    background-image: url('../images/instructor.jpg');
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.img__user2 {
+    background-image: url("../images/student.jpg");
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+img {
+    max-width: 800px;
 }
 
 /* контент */
-.block__content{
-    display:flex;
-    flex-direction:column;
+.block__button{
+    position: relative;
+    width: 100%;
     color: white;
     text-align: center;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     line-height: 250%;
-    padding: calc(0px + 20 * ((100vw - 320px) / (1780 - 320)));
 }
 
 .main__button {
-    margin: 20px 0px;
     height: calc(80px + 30 * ((100vw - 320px) / (1780 - 320)));
     width: calc(270px + 240 * ((100vw - 320px) / (1780 - 320)));
     border-radius: 5px;
@@ -119,6 +163,7 @@ input::-webkit-inner-spin-button {
     transition-duration: 0.5s;
     box-shadow: 0px 3px 0px black;
     position: relative;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 .main__button:hover {
@@ -130,21 +175,23 @@ input::-webkit-inner-spin-button {
     transform: scale(0.95);
 }
 
-h1 {
-    line-height: 150%;
-    margin: 30px 0 50px 0;
-    font-size: calc(20px + 10 * ((100vw - 320px) / (1780 - 320)));
-    font-weight: 900;
-    text-shadow: 0px 1px 0px black;
+
+.block__bot {
+    display: flex;
+    text-align: center;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap:wrap;
+    position: relative;
+    width: 100%;
+    align-items:center;
 }
 
-h1>b {
-    color: rgb(122, 51, 194);
+.simple__button {
+    border-radius: 100px;
 }
 
-p {
-    text-shadow: 0px 1px 0px black;
-    padding: 10px;
-    line-height: 120%;
-    font-size: calc(16px + 8 * ((100vw - 320px) / (1780 - 320)));
+
+.block__element:last-child {
+    height: 400px;
 }
