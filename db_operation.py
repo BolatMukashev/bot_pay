@@ -64,6 +64,40 @@ def translate_list_to_kz(questions_list):
     return translated_list
 
 
+def translate_dict_to_kz_language(ru_question):
+    try:
+        question = translate_to_kz(ru_question['question']).strip()
+        all_answers = translate_list_to_kz(ru_question['all_answers'])
+        correct_answer = translate_to_kz(ru_question['correct_answer']).strip()
+        explanation = translate_to_kz(ru_question['explanation']).strip()
+        image_code = ru_question['image_code']
+        kz_question = {'question': question, 'all_answers': all_answers, 'correct_answer': correct_answer,
+                       'image_code': image_code, 'explanation': explanation}
+        return kz_question
+    except google_new_transError:
+        return False
+
+
+def translate_penalty_to_kz_language(ru_penalty):
+    try:
+        small_title = translate_to_kz(ru_penalty['small_title']).strip()
+        title = translate_to_kz(ru_penalty['title']).strip()
+        answers = translate_list_to_kz(ru_penalty['answers'])
+        description = translate_to_kz(ru_penalty['description']).strip()
+        kz_penalty = {'small_title': small_title, 'title': title, 'answers': answers, 'description': description}
+        return kz_penalty
+    except google_new_transError:
+        return False
+
+
+def translate_penalty_to_kz(penalty):
+    all_penalty = []
+    for el in penalty:
+        data = translate_penalty_to_kz_language(el)
+        all_penalty.append(data)
+    return all_penalty
+
+
 def beautiful_print_data_from_db(db_name):
     print(json.dumps(db_name, sort_keys=True, indent=4, ensure_ascii=False))
 
@@ -96,20 +130,6 @@ def create_null_json_file(json_file_name):
     null_list = []
     with open(json_file_name, 'w', encoding='utf-8') as json_file:
         json.dump(null_list, json_file, ensure_ascii=False)
-
-
-def translate_dict_to_kz_language(ru_question):
-    try:
-        question = translate_to_kz(ru_question['question']).strip()
-        all_answers = translate_list_to_kz(ru_question['all_answers'])
-        correct_answer = translate_to_kz(ru_question['correct_answer']).strip()
-        explanation = translate_to_kz(ru_question['explanation']).strip()
-        image_code = ru_question['image_code']
-        kz_question = {'question': question, 'all_answers': all_answers, 'correct_answer': correct_answer,
-                       'image_code': image_code, 'explanation': explanation}
-        return kz_question
-    except google_new_transError:
-        return False
 
 
 def translate_db_to_kz_language(db_name, json_file_name):

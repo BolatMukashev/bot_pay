@@ -5,7 +5,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound
 from db_operation import *
 from keyboards.inline.language import language_buttons
-from keyboards.inline.penalty import penalty_buttons1
+from keyboards.inline.penalty_RU import penalty_buttons_ru_1
+from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
 from messages import *
 from gmail import send_emails_to_schools
 import io
@@ -120,7 +121,12 @@ async def command_language(message: types.Message):
 
 @dp.message_handler(commands=["penalty"])
 async def command_penalty(message: types.Message):
-    await message.answer(PENALTY['title'], reply_markup=penalty_buttons1)
+    telegram_id = message.from_user.id
+    language = get_user_language(telegram_id)
+    if language == 'RU':
+        await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_ru_1)
+    if language == 'KZ':
+        await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_kz_1)
 
 
 @dp.message_handler(commands=["statistics"])
