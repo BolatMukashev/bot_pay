@@ -30,7 +30,7 @@ html_message = [
 ]
 
 html = ''.join(html_message)
-filepath = "Kazakhstan_gory_2.jpg"
+filepath = "static/images/Kazakhstan_gory_2.jpg"
 basename = os.path.basename(filepath)
 filesize = os.path.getsize(filepath)
 

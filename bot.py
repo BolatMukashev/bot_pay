@@ -7,6 +7,7 @@ from db_operation import *
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty_RU import penalty_buttons_ru_1
 from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
+from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from messages import *
 from gmail import send_emails_to_schools
 import io
@@ -123,10 +124,14 @@ async def command_language(message: types.Message):
 async def command_penalty(message: types.Message):
     telegram_id = message.from_user.id
     language = get_user_language(telegram_id)
-    if language == 'RU':
-        await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_ru_1)
-    if language == 'KZ':
-        await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_kz_1)
+    country = get_user_country(telegram_id)
+    if country == 'RU':
+        await message.answer(PENALTY_RUSSIA['title'], reply_markup=russian_penalty_titles)
+    else:
+        if language == 'RU':
+            await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_ru_1)
+        if language == 'KZ':
+            await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_kz_1)
 
 
 @dp.message_handler(commands=["statistics"])
