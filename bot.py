@@ -13,6 +13,7 @@ from gmail import send_emails_to_schools
 import io
 
 from static.html_messages.hello_auto_school import hello_auto_school_message
+from static.html_messages.new_functions_and_offers import new_func_and_offers_message
 
 if config.DEBUG:
     bot = Bot(token=config.TEST_BOT_TOKEN)
@@ -27,6 +28,7 @@ class AllStates(StatesGroup):
     SendPromotionalPost: State = State()
     UsePromoCode: State = State()
     DeleteAutoSchool: State = State()
+    SendEmailToAllAutoSchools: State = State()
 
 
 @dp.message_handler(commands="set_commands", state="*")
@@ -163,6 +165,28 @@ async def command_message_for_all_action(message: types.Message, state: FSMConte
             await bot.send_message(user, my_message)
         except ChatNotFound:
             pass
+    await state.finish()
+
+
+@dp.message_handler(commands=["send_email_for_all_auto_schools"], state='*')
+async def command_send_email_for_all_auto_schools(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == config.ADMIN_ID:
+        await message.answer('Пиши своё сообщение, но помни что оно уйдет всем Автошколам!!!')
+        await AllStates.SendEmailToAllAutoSchools.set()
+
+
+@dp.message_handler(state=AllStates.SendEmailToAllAutoSchools, content_types=types.ContentTypes.TEXT)
+async def command_send_email_for_all_auto_schools_action(message: types.Message, state: FSMContext):
+    my_message = message.text
+    await state.update_data(my_message=my_message)
+    emails = get_all_auto_schools_emails()
+    title = 'PDD GOOD BOT'
+    sub_title = 'Произошли изменения'
+    html = new_func_and_offers_message(my_message)
+    my_message = 'Прочти обязательно!'
+    send_emails_to_schools(emails, title, sub_title, html, my_message)
+    await message.answer('Сообщения о изменениях были отправлены автошколам!')
     await state.finish()
 
 
@@ -323,7 +347,7 @@ async def command_send_hello_emails_to_new_schools(message: types.Message):
             my_message = 'Прочти обязательно!'
             send_emails_to_schools(emails, title, sub_title, html, my_message)
             edit_notified_status(school_id)
-        await message.answer('Сообщения автошколам были отправлены!')
+        await message.answer('Приветственные сообщения автошколам были отправлены!')
 
 
 @dp.poll_answer_handler()

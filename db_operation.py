@@ -507,6 +507,15 @@ def get_auto_school_emails_by(secret_key):
     return emails
 
 
+def get_all_auto_schools_emails():
+    schools = AutoSchools.select()
+    emails = []
+    for school in schools:
+        email = pickle.loads(school.emails)
+        emails.extend(email)
+    return emails
+
+
 def delete_auto_schools_by(secret_key):
     query = AutoSchools.delete().where(AutoSchools.secret_key == secret_key)
     query.execute()

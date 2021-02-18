@@ -1,24 +1,28 @@
 MESSAGE = {
-    'start_admin_text': 'Показать статистику:\n'
-                        '/statistics\n'
-                        'Отправить сообщения Автошколам:\n'
-                        '/send_hello_emails_to_new_schools\n'
-                        'Отправить рекламу всем:\n'
-                        '/send_promotional_post\n'
-                        'Сообщения всем:\n'
-                        '/message_for_all\n'
-                        'Сообщения всем о ремонте:\n'
-                        '/message_for_all_about_repair\n'
-                        'Список всех пользователей:\n'
-                        '/all_users\n'
-                        'Список всех промо-кодов:\n'
-                        '/all_promo_codes\n'
-                        '+3 минуты админу:\n'
-                        '/up_admin_time_limit\n'
-                        'Удалить Автошколу из базы:\n'
-                        '/delete_auto_school\n'
-                        'Установить команды:\n'
-                        '/set_commands',
+    'start_admin_text': """
+    Показать статистику:
+    /statistics
+    Отправить рекламу всем:
+    /send_promotional_post
+    Сообщения всем:
+    /message_for_all
+    Сообщения всем о ремонте:
+    /message_for_all_about_repair
+    Список всех пользователей:
+    /all_users
+    Список всех промо-кодов:
+    /all_promo_codes
+    +3 минуты админу:
+    /up_admin_time_limit
+    Отправить приветственное сообщениe:
+    /send_hello_emails_to_new_schools
+    Отправить email всем Автошколам:
+    /send_email_for_all_auto_schools
+    Удалить Автошколу из базы:
+    /delete_auto_school
+    Установить команды:
+    /set_commands
+    """,
     'start_user_text': 'Добро пожаловать',
     'language_choice': 'Выберите язык\n'
                        '------------------------\n'
