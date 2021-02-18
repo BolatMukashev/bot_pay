@@ -12,6 +12,7 @@ from messages import *
 from gmail import send_emails_to_schools
 import io
 
+from static.html_messages.hello_auto_school import hello_auto_school_message
 
 if config.DEBUG:
     bot = Bot(token=config.TEST_BOT_TOKEN)
@@ -307,15 +308,22 @@ async def command_help(message: types.Message):
     await message.answer(MESSAGE[f'info_{user_language}'])
 
 
-@dp.message_handler(commands=["send_emails_to_schools"])
-async def command_send_emails_to_schools(message: types.Message):
+@dp.message_handler(commands=["send_hello_emails_to_new_schools"])
+async def command_send_hello_emails_to_new_schools(message: types.Message):
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
-        not_notified_emails_list = get_not_notified_auto_schools_emails()
-        answer = send_emails_to_schools(not_notified_emails_list)
         schools = get_not_notified_auto_schools()
-        edit_notified_status(schools)
-        await message.answer(answer)
+        for school in schools:
+            school_id = school.id
+            secret_key = school.secret_key
+            emails = pickle.loads(school.emails)
+            title = 'PDD GOOD BOT'
+            sub_title = 'Новая образовательная платформа'
+            html = hello_auto_school_message(secret_key)
+            my_message = 'Прочти обязательно!'
+            send_emails_to_schools(emails, title, sub_title, html, my_message)
+            edit_notified_status(school_id)
+        await message.answer('Сообщения автошколам были отправлены!')
 
 
 @dp.poll_answer_handler()

@@ -496,6 +496,17 @@ def get_all_auto_schools_on_db():
     return all_auto_schools
 
 
+def get_auto_school_by(secret_key):
+    school = AutoSchools.get(AutoSchools.secret_key == secret_key)
+    return school
+
+
+def get_auto_school_emails_by(secret_key):
+    school = AutoSchools.get(AutoSchools.secret_key == secret_key)
+    emails = pickle.loads(school.emails)
+    return emails
+
+
 def delete_auto_schools_by(secret_key):
     query = AutoSchools.delete().where(AutoSchools.secret_key == secret_key)
     query.execute()
@@ -540,10 +551,9 @@ def get_not_notified_auto_schools_emails():
     return all_emails
 
 
-def edit_notified_status(schools):
-    for school in schools:
-        query = AutoSchools.update(notified=1).where(AutoSchools.id == school.id)
-        query.execute()
+def edit_notified_status(school_id):
+    query = AutoSchools.update(notified=1).where(AutoSchools.id == school_id)
+    query.execute()
 
 
 def all_secret_keys():

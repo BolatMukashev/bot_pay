@@ -4,7 +4,9 @@ from werkzeug.utils import redirect
 from werkzeug.exceptions import BadRequestKeyError
 import config
 from db_operation import *
+from gmail import send_emails_to_schools
 from messages import MESSAGE
+from static.html_messages.you_promo_code_registered import you_promo_code_registered_message
 
 app = Flask(__name__)
 
@@ -33,6 +35,12 @@ def promo_code():
         if check_secret_key(secret_key):
             if not check_promo_code(new_promo_code):
                 edit_promo_code(secret_key, new_promo_code)
+                emails = get_auto_school_emails_by(secret_key)
+                title = 'PDD GOOD BOT'
+                sub_title = 'Промокод изменен!'
+                html = you_promo_code_registered_message(new_promo_code)
+                my_message = 'Прочти обязательно!'
+                send_emails_to_schools(emails, title, sub_title, html, my_message)
                 return redirect(url_for('promo_code_registered', new_promo_code=new_promo_code))
             else:
                 promo_code_error = 'Этот ПРОМОКОД зянят. Попробуйте другой.'

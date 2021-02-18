@@ -13,38 +13,29 @@ import config
 
 server = 'smtp.gmail.com'
 user = 'pdd.good.bot@gmail.com'
+
 if config.DEBUG:
     password = config.GMAIL_WINDOWS_PASSWORD
 else:
     password = config.GMAIL_LINUX_PASSWORD
 
 sender = user
-subject = 'Только для yaneangel'
-text = 'Текст сообщения'
 
-html_message = [
-    '<html><head></head><body>',
-    '<p>' + text + '</p>',
-    '<p><img src="https://avatarko.ru/img/kartinka/33/multfilm_lyagushka_32117.jpg" alt="Письма мастера дзен"></p>',
-    '</body></html>'
-]
-
-html = ''.join(html_message)
 filepath = "static/images/Kazakhstan_gory_2.jpg"
 basename = os.path.basename(filepath)
 filesize = os.path.getsize(filepath)
 
 
-def send_emails_to_schools(recipients_list):
+def send_emails_to_schools(recipients_list, title, sub_title, html, my_message):
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = 'PDD GOOD BOT'
+    msg['Subject'] = sub_title
+    msg['From'] = title
     msg['To'] = ', '.join(recipients_list)
     msg['Reply-To'] = sender
     msg['Return-Path'] = sender
     msg['X-Mailer'] = 'Python/' + (python_version())
 
-    part_text = MIMEText(text, 'plain')
+    part_text = MIMEText(my_message, 'plain')
     part_html = MIMEText(html, 'html')
     part_file = MIMEBase('application', 'octet-stream; name="{}"'.format(basename))
     part_file.set_payload(open(filepath, "rb").read())

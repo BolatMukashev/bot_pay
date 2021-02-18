@@ -2,7 +2,7 @@ MESSAGE = {
     'start_admin_text': 'Показать статистику:\n'
                         '/statistics\n'
                         'Отправить сообщения Автошколам:\n'
-                        '/send_emails_to_schools\n'
+                        '/send_hello_emails_to_new_schools\n'
                         'Отправить рекламу всем:\n'
                         '/send_promotional_post\n'
                         'Сообщения всем:\n'
