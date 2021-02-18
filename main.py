@@ -80,17 +80,10 @@ def pay():
                            user_country=user_country, monetary_unit=monetary_unit, secret_key=secret_key)
 
 
-@app.route('/pay_instructions')
-def pay_instructions():
+@app.route('/confidence_and_pay')
+def confidence_and_pay():
     return send_from_directory(directory=path_to_documents,
-                               filename='pay_instructions.pdf',
-                               mimetype='application/pdf')
-
-
-@app.route('/confidence_politics')
-def confidence_politics():
-    return send_from_directory(directory=path_to_documents,
-                               filename='confidence_politics.pdf',
+                               filename='confidence_and_pay.pdf',
                                mimetype='application/pdf')
 
 
@@ -105,9 +98,9 @@ def accept():
         secret_key = request.args["secret_key"]
         telegram_id = request.args["telegram_id"]
     except BadRequestKeyError:
-        return
+        return 'Bad'
     if secret_key != config.SESSION_SECRET_KEY:
-        return
+        return 'Bad'
     up_user_time_limit_1years(telegram_id)
     update_user_made_payment_status(telegram_id)
     return 'All good!'
