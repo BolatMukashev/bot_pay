@@ -25,6 +25,7 @@ class AllStates(StatesGroup):
     MessageForAllRepair: State = State()
     SendPromotionalPost: State = State()
     UsePromoCode: State = State()
+    DeleteAutoSchool: State = State()
 
 
 @dp.message_handler(commands="set_commands", state="*")
@@ -205,6 +206,23 @@ async def command_message_for_all_repair_action(message: types.Message, state: F
             await bot.send_message(user, my_message)
         except ChatNotFound:
             pass
+    await state.finish()
+
+
+@dp.message_handler(commands=["delete_auto_school"], state='*')
+async def command_delete_auto_school(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == config.ADMIN_ID:
+        await message.answer('Напиши секретный ключ автошколы:')
+        await AllStates.DeleteAutoSchool.set()
+
+
+@dp.message_handler(state=AllStates.DeleteAutoSchool, content_types=types.ContentTypes.TEXT)
+async def command_delete_auto_school_action(message: types.Message, state: FSMContext):
+    secret_key = message.text
+    await state.update_data(secret_key=secret_key)
+    delete_auto_schools_by(secret_key)
+    await message.answer('Автошкола успешно удалена из базы!')
     await state.finish()
 
 

@@ -496,6 +496,11 @@ def get_all_auto_schools_on_db():
     return all_auto_schools
 
 
+def delete_auto_schools_by(secret_key):
+    query = AutoSchools.delete().where(AutoSchools.secret_key == secret_key)
+    query.execute()
+
+
 def get_not_notified_auto_schools():
     auto_schools = AutoSchools.select().where(AutoSchools.notified == 0)
     return auto_schools

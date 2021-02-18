@@ -1,7 +1,7 @@
 MESSAGE = {
     'start_admin_text': 'Показать статистику:\n'
                         '/statistics\n'
-                        'Отправить сообщения Автошколам\n'
+                        'Отправить сообщения Автошколам:\n'
                         '/send_emails_to_schools\n'
                         'Отправить рекламу всем:\n'
                         '/send_promotional_post\n'
@@ -15,6 +15,8 @@ MESSAGE = {
                         '/all_promo_codes\n'
                         '+3 минуты админу:\n'
                         '/up_admin_time_limit\n'
+                        'Удалить Автошколу из базы:\n'
+                        '/delete_auto_school\n'
                         'Установить команды:\n'
                         '/set_commands',
     'start_user_text': 'Добро пожаловать',
