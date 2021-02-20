@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/promo_code_registred.css') }}">
+    <!-- "{{ url_for('static', filename='styles/promo_code_registred.css') }}" -->
+    <!-- "../static/styles/promo_code_registred.css" -->
     <title>ПРОМОКОД зарегистрирован</title>
 </head>
 
@@ -13,14 +15,21 @@
     <div class="block">
         <div class="block__row">
             <div class="block__element">
-                <div class="block__content">
-                    <h1>Поздравляем!<br>Ваш ПРОМОКОД <b>{{ new_promo_code }}</b> зарегистрирован.</h1>
-                    <p>Откройте бота и наберите команду <b>/promo_code</b>, чтобы убедиться, что ПРОМОКОД работает:</p>
-                    <p>Вы получите дополнительные 7 дней допуска к нашей образовательной платформе и скидку 50% при покупке годового доступа.</p>
-                    <p><i>Если в дальнейшем Вы захотите изменить этот ПРОМОКОД на другой, воспользуйтесь тем же
-                        СЕКРЕТНЫМ КЛЮЧОМ, которым регистрировали этот ПРОМОКОД. Старый ПРОМОКОД при этом будет удален.</i></p>
-                    <a href="{{ BOT_ADDRESS }}"><button class='main__button'>Открыть бота</button></a>
-                </div>
+                <h1>Поздравляем!</h1>
+            </div>
+            <div class="block__element">
+                <h2>Ваш ПРОМОКОД <b>{{ new_promo_code }}</b> зарегистрирован.</h2>
+            </div>
+            <div class="block__element simple__text">
+                <p>Откройте бота и наберите команду <b>/promo_code</b>, чтобы убедиться, что ПРОМОКОД работает:</p>
+                <p>Вы получите дополнительные 7 дней допуска к нашей образовательной платформе и скидку 50% при
+                    покупке годового доступа.</p>
+                <p><i>Если в дальнейшем Вы захотите изменить этот ПРОМОКОД на другой, воспользуйтесь тем же
+                        СЕКРЕТНЫМ КЛЮЧОМ, которым регистрировали этот ПРОМОКОД. Старый ПРОМОКОД при этом будет
+                        удален.</i></p>
+            </div>
+            <div class="block__element">
+                <a href="{{ BOT_ADDRESS }}"><button class='main__button'>Открыть бота</button></a>
             </div>
         </div>
     </div>

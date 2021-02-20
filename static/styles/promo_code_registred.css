@@ -45,70 +45,51 @@ input::-webkit-inner-spin-button {
 
 /* родитель */
 .block{
-    height: 100%;
     width: 100%;
+    height: 100%;
+    background-color: black;
     background: url('/static/images/bg.webp') center;
     background-size: cover;
 }
 
 /* flex-контейнер */
 .block__row{
-    display:flex;
-    position: relative;
     width: 100%;
-    height:100%;
-    justify-content:center;
-    align-items:center;
-}
-
-.block__info, .block__contact {
-    display: flex;
-    position: absolute;
-    width: calc(280px + 220 * ((100vw - 320px) / (1780 - 320)));
-    height: 50px;
-    left: auto;
-    border: 1px solid white;
-    text-align: center;
-    align-items:center;
-    justify-content:center;
-}
-
-.block__info {
-    top: 50px;
-}
-
-.info {
-    color: white;
-    position: relative;
-    font-size: 24px;
-}
-
-.block__contact {
-    bottom: 50px;
-}
-
-/* flex-элемент */
-.block__element{
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display:flex;
+    justify-content:center;
     align-items:center;
-    min-height: 300px;
-    border: 2px solid white;
-    background: rgba(0, 0, 0, 0.8);
-}
-
-@media (max-width: 425px) {
-    .block__element {border: none; background:none;};
+    flex-direction:column;
 }
 
 /* контент */
-.block__content{
-    display:flex;
-    flex-direction:column;
+.block__element{
+    width: 100%;
     color: white;
     text-align: center;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    line-height: 250%;
-    padding: calc(0px + 20 * ((100vw - 320px) / (1780 - 320)));
+    padding: calc(5px + 20 * ((100vw - 320px) / (1780 - 320)));
+}
+
+h1, h2 {
+    font-size: calc(20px + 10 * ((100vw - 320px) / (1780 - 320)));
+    font-weight: 900;
+    text-shadow: 0px 1px 0px black;
+}
+
+h2 b {
+    color: rgb(122, 51, 194);
+}
+
+p b {
+    color: rgb(51, 161, 194);
+}
+
+p {
+    text-shadow: 0px 1px 0px black;
+    padding: 10px;
+    font-size: calc(16px + 8 * ((100vw - 320px) / (1780 - 320)));
 }
 
 .main__button {
@@ -134,23 +115,4 @@ input::-webkit-inner-spin-button {
 
 .main__button:active {
     transform: scale(0.95);
-}
-
-h1 {
-    line-height: 150%;
-    margin: 30px 0 50px 0;
-    font-size: calc(20px + 10 * ((100vw - 320px) / (1780 - 320)));
-    font-weight: 900;
-    text-shadow: 0px 1px 0px black;
-}
-
-h1>b {
-    color: rgb(122, 51, 194);
-}
-
-p {
-    text-shadow: 0px 1px 0px black;
-    padding: 10px;
-    line-height: 120%;
-    font-size: calc(16px + 8 * ((100vw - 320px) / (1780 - 320)));
 }
