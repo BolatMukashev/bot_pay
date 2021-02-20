@@ -608,15 +608,15 @@ def up_number_of_references(promo_code):
     query.execute()
 
 
-def filter_by(text):
-    text = text.upper()
-    text = [c for c in text if c in 'QWERTYUIOPASDFGHJKLZXCVBNM.-_, 1234567890+#№$!%&?*']
-    return ''.join(text)
+def correct_letters_filter(promo_code):
+    promo_code = promo_code.upper()
+    correct_promo_code = [c for c in promo_code if c in 'QWERTYUIOPASDFGHJKLZXCVBNM.-_, 1234567890+#№$!%&?*']
+    return ''.join(correct_promo_code)
 
 
-def uppercase_check(text):
-    upper_text = filter_by(text)
-    if text == upper_text:
+def promo_code_check_to_correct(promo_code):
+    correct_promo_code = correct_letters_filter(promo_code)
+    if promo_code == correct_promo_code:
         return True
     else:
         return False
