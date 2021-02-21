@@ -23,12 +23,12 @@
                         aspernatur nemo. Veritatis nihil molestias, autem eum porro dicta. Quaerat necessitatibus iusto
                         ut dolores ab earum. Consequuntur atque ducimus magnam.</div>
                     <div class="images images__iphone">
-                        <div class="image animate__animated animate__pulse animate__delay-1s"><img class="iphone1" src="../static/images/iphone.png" alt=""></div>
-                        <div class="image animate__animated animate__pulse animate__delay-2s"><img class="iphone2" src="../static/images/iphone.png" alt=""></div>
-                        <div class="image animate__animated animate__pulse animate__delay-3s"><img class="iphone3" src="../static/images/iphone.png" alt=""></div>
+                        <div class="image iphone iphone1"></div>
+                        <div class="image iphone iphone2"></div>
+                        <div class="image iphone iphone3"></div>
                     </div>
                 </div>
-                <div class="block__button animate__animated animate__infinite infinite animate__pulse animate__slow" id="button">
+                <div class="block__button" id="button">
                     <a href="/promo_code">
                         <button class='main__button'>Зарегистрировать<br>ПРОМОКОД</button>
                     </a>
@@ -39,8 +39,8 @@
                         illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
                         iste, cupiditate vitae modi.</div>
                     <div class="images">
-                        <div class="img__user img__user1" id="instructor"></div>
-                        <div class="img__user img__user2" id="student"></div>
+                        <div class="image instructor" id="instructor"></div>
+                        <div class="image student" id="student"></div>
                     </div>
                 </div>
                 <div class="block__element">
@@ -49,26 +49,8 @@
                         illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
                         iste, cupiditate vitae modi.</div>
                     <div class="images">
-                        <div class="image" id="telegram500"><img src="../static/images/500users-700.png" alt="" sizes="
-                            (min-width: 700px) 700w,
-                            (min-width: 450px) 450w,
-                            (min-width: 320px) 320w
-                            " srcset="
-                            ../static/images/500users-700.png 700w,
-                            ../static/images/500users-450.png 450w,
-                            ../static/images/500users-320.png 320w,
-                            ">
-                        </div>
-                        <div class="image" id="telegram_chat"><img src="../static/images/chat-700.png" alt="" sizes="
-                            (min-width: 700px) 700w,
-                            (min-width: 450px) 450w,
-                            (min-width: 320px) 320w
-                            " srcset="
-                            ../static/images/chat-700.png 700w,
-                            ../static/images/chat-450.png 450w,
-                            ../static/images/chat-320.png 320w,
-                            ">
-                        </div>
+                        <div class="image telegram500" id="telegram500"></div>
+                        <div class="image telegram_chat" id="telegram_chat"></div>
                     </div>
                 </div>
                 <div class="block__element">
@@ -77,33 +59,15 @@
                         illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
                         iste, cupiditate vitae modi.</div>
                     <div class="images">
-                        <div class="image" id="ipad"><img src="../static/images/ipad-740.png" alt="" sizes="
-                            (min-width: 800px) 800w,
-                            (min-width: 430px) 430w,
-                            (min-width: 300px) 300w
-                            " srcset="
-                            ../static/images/ipad-740.png 800w,
-                            ../static/images/ipad-430.png 430w,
-                            ../static/images/ipad-300.png 300w,
-                            ">
-                        </div>
-                        <div class="image" id="macbook"><img src="../static/images/macbook-740.png" alt="" sizes="
-                            (min-width: 800px) 800w,
-                            (min-width: 430px) 430w,
-                            (min-width: 300px) 300w
-                            " srcset="
-                            ../static/images/macbook-740.png 800w,
-                            ../static/images/macbook-430.png 430w,
-                            ../static/images/macbook-300.png 300w,
-                            ">
-                        </div>
+                        <div class="image ipad" id="ipad"></div>
+                        <div class="image macbook" id="macbook"></div>
                     </div>
                 </div>
                 <div class="block__element block__element5">
                     <div class="title" id="title5">Бот</div>
                     <div class="text" id="text5">Не верь на слово, проверь в деле</div>
                     <div class="block__bot">
-                        <div class="image"><img src="../static/images/bot.gif" alt="" height="300px"></div>
+                        <div class="image bot__image"></div>
                         <a href="{{ bot_address }}">
                             <button class='main__button simple__button'>Открыть бота</button>
                         </a>
@@ -115,6 +79,5 @@
         </div>
     </div>
 </body>
-<!-- <script src="https://code.jquery.com/jquery-1.8.0.min.js"></script> -->
 <script src="{{ url_for('static', filename='scripts/element_view.js') }}"></script>
 </html>
