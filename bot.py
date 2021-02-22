@@ -172,7 +172,7 @@ async def command_message_for_all_action(message: types.Message, state: FSMConte
 async def command_send_email_for_all_auto_schools(message: types.Message):
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
-        await message.answer('Пиши своё сообщение, но помни что оно уйдет всем Автошколам!!!')
+        await message.answer('Отправь сообщение в виде HTML кода, но помни что оно уйдет всем Автошколам!!!')
         await AllStates.SendEmailToAllAutoSchools.set()
 
 
@@ -181,11 +181,9 @@ async def command_send_email_for_all_auto_schools_action(message: types.Message,
     my_message = message.text
     await state.update_data(my_message=my_message)
     emails = get_all_auto_schools_emails()
-    title = 'PDD GOOD BOT'
-    sub_title = 'Произошли изменения'
+    message_subtitle = 'Произошли изменения'
     html = new_func_and_offers_message(my_message)
-    my_message = 'Прочти обязательно!'
-    send_emails_to_schools(emails, title, sub_title, html, my_message)
+    send_emails_to_schools(emails, message_subtitle, html)
     await message.answer('Сообщения о изменениях были отправлены автошколам!')
     await state.finish()
 

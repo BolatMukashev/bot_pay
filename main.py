@@ -1,8 +1,7 @@
 import os
-from flask import Flask, url_for, request, render_template, send_from_directory, make_response
+from flask import Flask, url_for, request, render_template, send_from_directory
 from werkzeug.utils import redirect
 from werkzeug.exceptions import BadRequestKeyError
-import config
 from db_operation import *
 from gmail import send_emails_to_schools
 from messages import MESSAGE
@@ -37,11 +36,9 @@ def promo_code():
                 if promo_code_check_to_correct(new_promo_code):
                     edit_promo_code(secret_key, new_promo_code)
                     emails = get_auto_school_emails_by(secret_key)
-                    title = 'PDD GOOD BOT'
                     sub_title = 'Промокод изменен!'
                     html = you_promo_code_registered_message(new_promo_code)
-                    my_message = 'Прочти обязательно!'
-                    send_emails_to_schools(emails, title, sub_title, html, my_message)
+                    send_emails_to_schools(emails, sub_title, html)
                     return redirect(url_for('promo_code_registered', new_promo_code=new_promo_code))
                 else:
                     promo_code_error = 'Только английские символы'
