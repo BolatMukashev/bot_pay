@@ -105,10 +105,20 @@ input::-webkit-inner-spin-button {
 }
 
 .iphone {
-    border: 2px solid white;
     width: 235px;
     height: calc(275px + 200 * ((100vw - 320px) / (1780 - 320)));
-    background: url('/static/images/iphone.png') center/contain no-repeat;
+}
+
+.iphone1 {
+    background: url('/static/images/iphone1.png') center/contain no-repeat;
+}
+
+.iphone2 {
+    background: url('/static/images/iphone2.png') center/contain no-repeat;
+}
+
+.iphone3 {
+    background: url('/static/images/iphone3.png') center/contain no-repeat;
 }
 
 .ipad {
@@ -158,7 +168,6 @@ input::-webkit-inner-spin-button {
 }
 
 .bot__image {
-    border: 2px solid white;
     width: 320px;
     height: calc(275px + 200 * ((100vw - 320px) / (1780 - 320)));
     background: url('/static/images/bot.gif') center/contain no-repeat;
