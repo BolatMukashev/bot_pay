@@ -1,9 +1,10 @@
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG = bool(os.getenv('DEBUG'))
+DEBUG = json.loads(os.getenv('DEBUG').lower())
 TEST_BOT_TOKEN = os.getenv('TEST_BOT_TOKEN')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ADDRESS = os.getenv('BOT_ADDRESS')

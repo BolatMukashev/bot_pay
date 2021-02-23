@@ -11,14 +11,15 @@ from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from messages import *
 from gmail import send_emails_to_schools
 import io
-
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
+
 
 if config.DEBUG:
     bot = Bot(token=config.TEST_BOT_TOKEN)
 else:
     bot = Bot(token=config.BOT_TOKEN)
+
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
@@ -97,8 +98,8 @@ async def command_question(message: types.Message):
         await message.answer(MESSAGE['start_admin_text'])
     if not user_time_limit_is_over(telegram_id):
         question = get_random_question(user_language)
-        if config.DEBUG is False and question.image_code:
-            await bot.send_photo(telegram_id, question.image_code)
+        if config.DEBUG is False and question['image_code']:
+            await bot.send_photo(telegram_id, question['image_code'])
         await bot.send_poll(telegram_id,
                             type='quiz',
                             is_anonymous=False,
@@ -339,11 +340,9 @@ async def command_send_hello_emails_to_new_schools(message: types.Message):
             school_id = school.id
             secret_key = school.secret_key
             emails = pickle.loads(school.emails)
-            title = 'PDD GOOD BOT'
             sub_title = 'Новая образовательная платформа'
             html = hello_auto_school_message(secret_key)
-            my_message = 'Прочти обязательно!'
-            send_emails_to_schools(emails, title, sub_title, html, my_message)
+            send_emails_to_schools(emails, sub_title, html)
             edit_notified_status(school_id)
         await message.answer('Приветственные сообщения автошколам были отправлены!')
 
@@ -354,8 +353,8 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
     user_language = get_user_language(telegram_id)
     if not user_time_limit_is_over(telegram_id):
         question = get_random_question(user_language)
-        if config.DEBUG is False and question.image_code:
-            await bot.send_photo(telegram_id, question.image_code)
+        if config.DEBUG is False and question['image_code']:
+            await bot.send_photo(telegram_id, question['image_code'])
         await quiz_answer.bot.send_poll(telegram_id,
                                         type='quiz',
                                         is_anonymous=False,
