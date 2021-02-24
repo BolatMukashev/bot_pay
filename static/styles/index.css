@@ -46,7 +46,7 @@ input::-webkit-inner-spin-button {
 /* родитель */
 .block{
     width: 100%;
-    background: url('/static/images/bg3.png') 0 0/400px 330px repeat;
+    background: url('/static/images/bg4.png') 0 0/400px 330px repeat;
 }
 
 /* flex-контейнер */
@@ -137,6 +137,10 @@ input::-webkit-inner-spin-button {
     background: url('/static/images/macbook-740.png') center/contain no-repeat;
 }
 
+.win {
+    background: url('/static/images/win.png') center/contain no-repeat;
+}
+
 .instructor {
     background: url('/static/images/instructor.jpg') center/contain no-repeat;
     border: 4px solid white;
@@ -149,22 +153,23 @@ input::-webkit-inner-spin-button {
     border-radius: 20px;
 }
 
-.ipad, .macbook, .instructor, .student, .telegram500, .telegram_chat {
+
+.ipad, .macbook, .instructor, .student, .telegram500, .telegram_chat, .win {
     min-width: 320px;
     width: 45%;
     height: calc(275px + 200 * ((100vw - 320px) / (1780 - 320)));
 }
 
-.instructor, .student, .ipad, .macbook {
+.instructor, .student, .ipad, .macbook, .win, .telegram500, .telegram_chat {
     min-width: 620px;
 }
 
 @media (max-width: 650px) {
-    .instructor, .student, .ipad, .macbook {min-width: 450px;}
+    .instructor, .student, .ipad, .macbook, .win, .telegram500, .telegram_chat {min-width: 450px;}
 }
 
 @media (max-width: 460px) {
-    .instructor, .student, .ipad, .macbook {min-width: 300px;}
+    .instructor, .student, .ipad, .macbook, .win, .telegram500, .telegram_chat {min-width: 300px;}
 }
 
 .bot__image {
@@ -184,26 +189,29 @@ input::-webkit-inner-spin-button {
 
 /* контент */
 .block__button{
-    position: relative;
     width: 100%;
     color: white;
     text-align: center;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     line-height: 250%;
+    position: fixed;
+    bottom: 40px;
+    left: 0px;
+    z-index: 5;
 }
 
 .main__button {
     height: calc(80px + 30 * ((100vw - 320px) / (1780 - 320)));
-    width: calc(240px + 270 * ((100vw - 320px) / (1780 - 320)));
-    border-radius: 5px;
+    width: calc(240px + 220 * ((100vw - 320px) / (1780 - 320)));
+    border-radius: 80px;
     font-size: calc(20px + 10 * ((100vw - 320px) / (1780 - 320)));
     font-weight: 900;
     color: rgb(255, 255, 255);
     text-shadow: 0px 1px 0px black;
     letter-spacing: 1px;
-    background: linear-gradient(90deg, rgba(5,110,46,1) 0%, rgba(0,161,55,1) 27%, rgba(63,255,145,1) 100%);
+    background: linear-gradient(90deg, rgb(5, 33, 110) 0%, rgb(0, 38, 161) 27%, rgb(63, 108, 255) 100%);
     transition-duration: 0.5s;
-    box-shadow: 0px 3px 0px black;
+    box-shadow: 0px 5px 10px rgb(1, 1, 70);
     position: relative;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
@@ -226,10 +234,12 @@ input::-webkit-inner-spin-button {
     flex-wrap: wrap;
     width: 100%;
     align-items:center;
+    
 }
 
 .simple__button {
     border-radius: 70px;
+    box-shadow: 0px 0px 0px rgb(1, 1, 70);
 }
 
 

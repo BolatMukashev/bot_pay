@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" type=text/css href="../static/styles/index.css">
     <!-- "{{ url_for('static', filename='styles/index.css') }}" -->
     <!-- "../static/styles/index.css" -->
     <title>Главная страница</title>
@@ -19,7 +19,8 @@
             <div class="block__content">
                 <div class="block__element">
                     <div class="title animate__animated animate__fadeInDown">Образовательная платформа</div>
-                    <div class="text animate__animated animate__fadeIn animate__delay-1s">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Delectus distinctio
+                    <div class="text animate__animated animate__fadeIn animate__delay-1s">Lorem ipsum, dolor sit amet
+                        consectetur adipisicing elit. Delectus distinctio
                         aspernatur nemo. Veritatis nihil molestias, autem eum porro dicta. Quaerat necessitatibus iusto
                         ut dolores ab earum. Consequuntur atque ducimus magnam.</div>
                     <div class="images images__iphone">
@@ -35,37 +36,53 @@
                 </div>
                 <div class="block__element">
                     <div class="title" id="title2">Выгодно всем</div>
-                    <div class="text" id="text2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora praesentium ipsa
-                        illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
-                        iste, cupiditate vitae modi.</div>
+                    <div class="text" id="text2">Применяя современных технологий в процессе обучения, Вы растете в
+                        глазах окружающих.<br>
+                        Студенты же получают удобный инструмент для самостоятельного изучения ПДД и
+                        подготовке к тестированию.
+                    </div>
                     <div class="images">
                         <div class="image instructor" id="instructor"></div>
                         <div class="image student" id="student"></div>
                     </div>
                 </div>
                 <div class="block__element">
-                    <div class="title" id="title3">Почему Telegram?</div>
-                    <div class="text" id="text3">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora praesentium ipsa
-                        illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
-                        iste, cupiditate vitae modi.</div>
+                    <div class="title" id="title3">Ваше Преимущество</div>
+                    <div class="text" id="text3">Активировав у нас Промокод, Вы получаете преимущество над другими
+                        Автошколами.<br>
+                        Чем больше у Вас бесплатных "плюшек" и бонусов, тем охотнее люди выбирают Вас<br>
+                        и в последствии, чаще советуют Вас своим друзьям!
+                    </div>
+                    <div class="images">
+                        <div class="image win" id="win"></div>
+                    </div>
+                </div>
+                <div class="block__element">
+                    <div class="title" id="title4">Почему Telegram?</div>
+                    <div class="text" id="text4">На сегодняшний день Telegram самая быстрорастущая социальная сеть.<br>
+                        На начало 2021 года ежемесячная аудитория Telegram превысила 500 млн активных пользователей.<br>
+                        Telegram обладает всеми необходимые инструментами для создания Платформ, подобных нашей.
+                    </div>
                     <div class="images">
                         <div class="image telegram500" id="telegram500"></div>
                         <div class="image telegram_chat" id="telegram_chat"></div>
                     </div>
                 </div>
                 <div class="block__element">
-                    <div class="title" id="title4">Кроссплатформенность</div>
-                    <div class="text" id="text4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora praesentium ipsa
-                        illum optio quis ad deserunt ea laudantium porro magni fugit harum facere, beatae voluptates ex,
-                        iste, cupiditate vitae modi.</div>
+                    <div class="title" id="title5">Кроссплатформенность</div>
+                    <div class="text" id="text5">Нужен только Telegram! Нет необходимости что-то постоянно скачивать и
+                        обновлять.<br>
+                        Не важно какое у Вас устройство, будь то телефон на Android или IOS, компьютер Windows или Mac -
+                        Telegram есть везде!
+                    </div>
                     <div class="images">
                         <div class="image ipad" id="ipad"></div>
                         <div class="image macbook" id="macbook"></div>
                     </div>
                 </div>
                 <div class="block__element block__element5">
-                    <div class="title" id="title5">Бот</div>
-                    <div class="text" id="text5">Не верь на слово, проверь в деле</div>
+                    <div class="title" id="title6">Бот</div>
+                    <div class="text" id="text6">Не верь на слово, проверь в деле</div>
                     <div class="block__bot">
                         <div class="image bot__image"></div>
                         <a href="{{ bot_address }}">
@@ -79,5 +96,7 @@
         </div>
     </div>
 </body>
+<!-- Анимации -->
 <script src="{{ url_for('static', filename='scripts/element_view.js') }}"></script>
+
 </html>

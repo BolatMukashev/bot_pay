@@ -48,6 +48,11 @@ def add_image_code_to(db_name, image_code_list):
     return db_name
 
 
+def edit_image_code(old_code, new_code):
+    QuestionsRU.update(image_code=new_code).where(QuestionsRU.image_code == old_code).execute()
+    QuestionsKZ.update(image_code=new_code).where(QuestionsKZ.image_code == old_code).execute()
+
+
 # ПЕРЕВОД ------------------------------------------------------------------------------------------------------------
 
 
@@ -859,6 +864,11 @@ def get_length_active_auto_schools():
     return len(auto_schools)
 
 
+def get_all_auto_schools_length():
+    all_auto_schools = len(get_all_auto_schools_on_db())
+    return all_auto_schools
+
+
 def get_active_auto_schools_conversion():
     all_auto_schools = len(get_all_auto_schools_on_db())
     active_auto_schools = get_length_active_auto_schools()
@@ -890,6 +900,7 @@ def get_big_statistics():
     ru_language_users, kz_language_users = get_percent_of_language_choice()
     users_from_russia, users_from_kazakhstan = get_percent_of_country_choice()
 
+    all_auto_schools = get_all_auto_schools_length()
     active_auto_schools = get_length_active_auto_schools()
     active_auto_schools_conversion = get_active_auto_schools_conversion()
 
@@ -913,7 +924,8 @@ def get_big_statistics():
         f'Зарегистрировано промо-кодов за год: {promo_codes_on_year}',
         f'Воспользовались промо-кодами: {promo_code_conversion}% пользователей',
         f'\n',
-        f'Количество активных автошкол: {active_auto_schools}%',
+        f'Всего зарегистрировано автошкол: {all_auto_schools}',
+        f'Количество активных автошкол: {active_auto_schools}',
         f'Конверсия автошкол: {active_auto_schools_conversion}%',
         f'\n',
         f'Оплатили сервис: {pay_conversion}% пользователей',
