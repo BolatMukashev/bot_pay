@@ -274,6 +274,15 @@ async def command_all_promo_codes(message: types.Message):
         await message.answer(result)
 
 
+@dp.message_handler(commands=["backup_all_data"])
+async def command_backup_all_data(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == config.ADMIN_ID:
+        backup_users()
+        backup_auto_schools()
+        await message.answer('Бэкап был произведен')
+
+
 @dp.message_handler(commands=["promo_code"], state='*')
 async def command_promo_code(message: types.Message):
     telegram_id = message.from_user.id

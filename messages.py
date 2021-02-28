@@ -20,6 +20,8 @@ MESSAGE = {
     /send_email_for_all_auto_schools
     Удалить Автошколу из базы:
     /delete_auto_school
+    Бэкап данных:
+    /backup_all_data
     Установить команды:
     /set_commands
     """,

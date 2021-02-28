@@ -1,3 +1,4 @@
+import os
 import json
 import peewee
 import random
@@ -8,6 +9,7 @@ import config
 import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
+
 
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
@@ -128,7 +130,7 @@ def edit_data_in_json_file(json_file_name, new_data):
 
 def create_new_json_file(json_file_name, questions_list):
     with open(json_file_name, 'w', encoding='utf-8') as json_file:
-        json.dump(questions_list, json_file, ensure_ascii=False)
+        json.dump(questions_list, json_file, ensure_ascii=False, default=str)
 
 
 def create_null_json_file(json_file_name):
@@ -447,6 +449,21 @@ def get_loser_list_45days():
     return loser_list
 
 
+def get_all_users_on_dict_format():
+    all_users_list = []
+    all_users = Users.select()
+    for user in all_users:
+        simple_user = {'id': user.id, 'telegram_id': user.telegram_id, 'full_name': user.full_name,
+                       'country': user.country, 'language': user.language, 'registration_date': user.registration_date,
+                       'registration_is_over': user.registration_is_over, 'time_limit': user.time_limit,
+                       'last_visit': user.last_visit, 'promo_code_used': user.promo_code_used,
+                       'price_in_rubles': user.price_in_rubles, 'made_payment': user.made_payment,
+                       'second_week_promotional_offer': user.second_week_promotional_offer,
+                       'sixth_week_promotional_offer': user.sixth_week_promotional_offer}
+        all_users_list.append(simple_user)
+    return all_users_list
+
+
 # ПРОМО КОДЫ ---------------------------------------------------------------------------------------------------------
 
 
@@ -531,34 +548,28 @@ def get_not_notified_auto_schools():
     return auto_schools
 
 
-def format_auto_schools_on_dict_format(auto_schools_in_db):
+def get_all_auto_schools_on_dict_format(auto_schools_in_db):
     all_schools = []
     for school in auto_schools_in_db:
-        school_id = school.id
-        school_name = school.school_name
-        country = school.country
-        city = school.city
-        phones = pickle.loads(school.phones)
-        emails = pickle.loads(school.emails)
-        registration_date = school.registration_date
-        secret_key = school.secret_key
-        promo_code = school.promo_code
-        number_of_references = school.number_of_references
-        notified = school.notified
-
-        data = {'id': school_id, 'school_name': school_name, 'country': country, 'city': city, 'phones': phones,
-                'emails': emails, 'registration_date': registration_date, 'secret_key': secret_key,
-                'promo_code': promo_code, 'number_of_references': number_of_references, 'notified': notified}
-
+        data = {'id': school.id,
+                'school_name': school.school_name,
+                'country': school.country,
+                'city': school.city,
+                'phones': pickle.loads(school.phones),
+                'emails': pickle.loads(school.emails),
+                'registration_date': school.registration_date,
+                'secret_key': school.secret_key,
+                'promo_code': school.promo_code,
+                'number_of_references': school.number_of_references,
+                'notified': school.notified}
         all_schools.append(data)
-
     return all_schools
 
 
 def get_not_notified_auto_schools_emails():
     all_emails = []
     auto_schools = get_not_notified_auto_schools()
-    schools = format_auto_schools_on_dict_format(auto_schools)
+    schools = get_all_auto_schools_on_dict_format(auto_schools)
     for school in schools:
         for email in school['emails']:
             all_emails.append(email)
@@ -625,6 +636,36 @@ def promo_code_check_to_correct(promo_code):
         return True
     else:
         return False
+
+
+# БЭКАП ДАННЫХ -------------------------------------------------------------------------------------------------------
+
+
+def backup_users():
+    all_users = get_all_users_on_dict_format()
+    file_name = 'users.json'
+    this_path = os.getcwd()
+    path = os.path.join(this_path, 'backup', file_name)
+    create_new_json_file(path, all_users)
+
+
+def backup_auto_schools():
+    auto_schools = get_all_auto_schools_on_db()
+    all_auto_schools = get_all_auto_schools_on_dict_format(auto_schools)
+    file_name = 'auto_schools.json'
+    this_path = os.getcwd()
+    path = os.path.join(this_path, 'backup', file_name)
+    create_new_json_file(path, all_auto_schools)
+
+
+def convert_str_to_datetime(date_time_str):
+    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+    return date_time_obj
+
+
+def convert_str_to_date(date_time_str):
+    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+    return date_time_obj.date()
 
 
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
