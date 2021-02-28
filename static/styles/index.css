@@ -78,7 +78,8 @@ input::-webkit-inner-spin-button {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     color: white;
     font-size: calc(26px + 20 * ((100vw - 320px) / (1780 - 320)));
-    padding: 40px 0 20px 0;
+    padding-top: calc(20px + 20 * ((100vw - 320px) / (1780 - 320)));;
+    padding-bottom: 20px;
 }
 
 .text {
@@ -200,10 +201,9 @@ input::-webkit-inner-spin-button {
     z-index: 5;
 }
 
-.main__button {
+.button {
     height: calc(80px + 30 * ((100vw - 320px) / (1780 - 320)));
     width: calc(240px + 220 * ((100vw - 320px) / (1780 - 320)));
-    border-radius: 80px;
     font-size: calc(20px + 10 * ((100vw - 320px) / (1780 - 320)));
     font-weight: 900;
     color: rgb(255, 255, 255);
@@ -211,9 +211,13 @@ input::-webkit-inner-spin-button {
     letter-spacing: 1px;
     background: linear-gradient(90deg, rgb(5, 33, 110) 0%, rgb(0, 38, 161) 27%, rgb(63, 108, 255) 100%);
     transition-duration: 0.5s;
-    box-shadow: 0px 5px 10px rgb(1, 1, 70);
     position: relative;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.main__button {
+    border-radius: 80px;
+    box-shadow: 0px 5px 10px rgb(1, 1, 70);
 }
 
 .main__button:hover {
@@ -240,6 +244,15 @@ input::-webkit-inner-spin-button {
 .simple__button {
     border-radius: 70px;
     box-shadow: 0px 0px 0px rgb(1, 1, 70);
+}
+
+.simple__button:hover {
+    opacity: 0.8;
+    box-shadow: 0px 3px 5px black;
+}
+
+.simple__button:active {
+
 }
 
 
