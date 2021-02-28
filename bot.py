@@ -280,7 +280,12 @@ async def command_backup_all_data(message: types.Message):
     if user_id == config.ADMIN_ID:
         backup_users()
         backup_auto_schools()
-        await message.answer('Бэкап был произведен')
+        path_1 = path_to_users_backup()
+        path_2 = path_to_auto_schools_backup()
+        with open(path_1, 'rb') as users_json_file:
+            await message.answer_document(users_json_file)
+        with open(path_2, 'rb') as auto_schools_json_file:
+            await message.answer_document(auto_schools_json_file)
 
 
 @dp.message_handler(commands=["promo_code"], state='*')

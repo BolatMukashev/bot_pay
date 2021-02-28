@@ -266,6 +266,24 @@ def new_user(telegram_id, full_name):
         pass
 
 
+def set_user_on_db(telegram_id, full_name, country, language, registration_date, registration_is_over, time_limit,
+                   last_visit, promo_code_used, price_in_rubles, made_payment, second_week_promotional_offer,
+                   sixth_week_promotional_offer):
+    registration_date = convert_str_to_datetime(registration_date)
+    time_limit = convert_str_to_datetime(time_limit)
+    last_visit = convert_str_to_datetime(last_visit)
+    try:
+        user = Users(telegram_id=telegram_id, full_name=full_name, country=country, language=language,
+                     registration_date=registration_date, registration_is_over=registration_is_over,
+                     time_limit=time_limit, last_visit=last_visit, promo_code_used=promo_code_used,
+                     price_in_rubles=price_in_rubles, made_payment=made_payment,
+                     second_week_promotional_offer=second_week_promotional_offer,
+                     sixth_week_promotional_offer=sixth_week_promotional_offer)
+        user.save()
+    except peewee.IntegrityError:
+        pass
+
+
 def check_id(telegram_id):
     all_users = all_users_id()
     if telegram_id in all_users:
@@ -641,20 +659,30 @@ def promo_code_check_to_correct(promo_code):
 # БЭКАП ДАННЫХ -------------------------------------------------------------------------------------------------------
 
 
-def backup_users():
-    all_users = get_all_users_on_dict_format()
+def path_to_users_backup():
     file_name = 'users.json'
     this_path = os.getcwd()
     path = os.path.join(this_path, 'backup', file_name)
+    return path
+
+
+def path_to_auto_schools_backup():
+    file_name = 'auto_schools.json'
+    this_path = os.getcwd()
+    path = os.path.join(this_path, 'backup', file_name)
+    return path
+
+
+def backup_users():
+    all_users = get_all_users_on_dict_format()
+    path = path_to_users_backup()
     create_new_json_file(path, all_users)
 
 
 def backup_auto_schools():
     auto_schools = get_all_auto_schools_on_db()
     all_auto_schools = get_all_auto_schools_on_dict_format(auto_schools)
-    file_name = 'auto_schools.json'
-    this_path = os.getcwd()
-    path = os.path.join(this_path, 'backup', file_name)
+    path = path_to_auto_schools_backup()
     create_new_json_file(path, all_auto_schools)
 
 
@@ -666,6 +694,12 @@ def convert_str_to_datetime(date_time_str):
 def convert_str_to_date(date_time_str):
     date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
     return date_time_obj.date()
+
+
+def set_users_from_backup():
+    path = path_to_users_backup()
+    data = get_data_from_json_file(path)
+    return data
 
 
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
