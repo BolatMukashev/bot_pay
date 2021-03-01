@@ -10,7 +10,6 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 
-
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
 
@@ -204,7 +203,7 @@ def questions_to_db(raw_db, language):
 def write_all_questions_in_db(json_file_name, language):
     data = get_data_from_json_file(json_file_name)
     questions_to_db(data, language)
-    print(f'Вопросы добавлены в таблицу {language}...')
+    print(f'Вопросы добавлены в таблицу {language}...\nНе забудь закомментировать эту строку кода!')
 
 
 def choose_db_by_language(user_language):
@@ -273,10 +272,17 @@ def set_user_on_db(telegram_id, full_name, country, language, registration_date,
     time_limit = convert_str_to_datetime(time_limit)
     last_visit = convert_str_to_datetime(last_visit)
     try:
-        user = Users(telegram_id=telegram_id, full_name=full_name, country=country, language=language,
-                     registration_date=registration_date, registration_is_over=registration_is_over,
-                     time_limit=time_limit, last_visit=last_visit, promo_code_used=promo_code_used,
-                     price_in_rubles=price_in_rubles, made_payment=made_payment,
+        user = Users(telegram_id=telegram_id,
+                     full_name=full_name,
+                     country=country,
+                     language=language,
+                     registration_date=registration_date,
+                     registration_is_over=registration_is_over,
+                     time_limit=time_limit,
+                     last_visit=last_visit,
+                     promo_code_used=promo_code_used,
+                     price_in_rubles=price_in_rubles,
+                     made_payment=made_payment,
                      second_week_promotional_offer=second_week_promotional_offer,
                      sixth_week_promotional_offer=sixth_week_promotional_offer)
         user.save()
@@ -471,11 +477,18 @@ def get_all_users_on_dict_format():
     all_users_list = []
     all_users = Users.select()
     for user in all_users:
-        simple_user = {'id': user.id, 'telegram_id': user.telegram_id, 'full_name': user.full_name,
-                       'country': user.country, 'language': user.language, 'registration_date': user.registration_date,
-                       'registration_is_over': user.registration_is_over, 'time_limit': user.time_limit,
-                       'last_visit': user.last_visit, 'promo_code_used': user.promo_code_used,
-                       'price_in_rubles': user.price_in_rubles, 'made_payment': user.made_payment,
+        simple_user = {'id': user.id,
+                       'telegram_id': user.telegram_id,
+                       'full_name': user.full_name,
+                       'country': user.country,
+                       'language': user.language,
+                       'registration_date': user.registration_date,
+                       'registration_is_over': user.registration_is_over,
+                       'time_limit': user.time_limit,
+                       'last_visit': user.last_visit,
+                       'promo_code_used': user.promo_code_used,
+                       'price_in_rubles': user.price_in_rubles,
+                       'made_payment': user.made_payment,
                        'second_week_promotional_offer': user.second_week_promotional_offer,
                        'sixth_week_promotional_offer': user.sixth_week_promotional_offer}
         all_users_list.append(simple_user)
@@ -507,15 +520,15 @@ def edit_promo_code(secret_key, new_promo_code):
 
 
 def add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code):
-    new_promo_code = AutoSchools(school_name=school_name,
-                                 country=country,
-                                 city=city,
-                                 phones=phones,
-                                 emails=emails,
-                                 secret_key=secret_key,
-                                 promo_code=promo_code
-                                 )
-    new_promo_code.save()
+    new_auto_school = AutoSchools(school_name=school_name,
+                                  country=country,
+                                  city=city,
+                                  phones=phones,
+                                  emails=emails,
+                                  secret_key=secret_key,
+                                  promo_code=promo_code
+                                  )
+    new_auto_school.save()
 
 
 # промокод меняет владелец автошколы, доступ к промкоду по secret_key
@@ -529,6 +542,25 @@ def set_auto_schools_in_db(auto_schools):
         secret_key = get_unique_secret_key()
         promo_code = secret_key
         add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code)
+
+
+def add_auto_school_on_db(school_name, country, city, phones, emails, registration_date, secret_key, promo_code,
+                          number_of_references, notified):
+    auto_school = AutoSchools(school_name=school_name,
+                              country=country,
+                              city=city,
+                              phones=pickle.dumps(phones, pickle.HIGHEST_PROTOCOL),
+                              emails=pickle.dumps(emails, pickle.HIGHEST_PROTOCOL),
+                              registration_date=convert_str_to_date(registration_date),
+                              secret_key=secret_key,
+                              promo_code=promo_code,
+                              number_of_references=number_of_references,
+                              notified=notified
+                              )
+    try:
+        auto_school.save()
+    except peewee.IntegrityError:
+        pass
 
 
 def get_all_auto_schools_on_db():
@@ -698,8 +730,22 @@ def convert_str_to_date(date_time_str):
 
 def set_users_from_backup():
     path = path_to_users_backup()
-    data = get_data_from_json_file(path)
-    return data
+    users = get_data_from_json_file(path)
+    for user in users:
+        set_user_on_db(user['telegram_id'], user['full_name'], user['country'], user['language'],
+                       user['registration_date'], user['registration_is_over'], user['time_limit'],
+                       user['last_visit'], user['promo_code_used'], user['price_in_rubles'], user['made_payment'],
+                       user['second_week_promotional_offer'], user['sixth_week_promotional_offer'])
+
+
+def set_auto_schools_from_backup():
+    path = path_to_auto_schools_backup()
+    auto_schools = get_data_from_json_file(path)
+    for auto_school in auto_schools:
+        add_auto_school_on_db(auto_school['school_name'], auto_school['country'], auto_school['city'],
+                              auto_school['phones'], auto_school['emails'], auto_school['registration_date'],
+                              auto_school['secret_key'], auto_school['promo_code'], auto_school['number_of_references'],
+                              auto_school['notified'])
 
 
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
@@ -1018,5 +1064,7 @@ def get_big_statistics():
 if __name__ == '__main__':
     create_database(config.db_config["db_name"])
     create_new_tables(table_names)
-    # write_all_questions_in_db('all_questions_ru.json', 'RU')
-    # write_all_questions_in_db('all_questions_kz.json', 'KZ')
+    set_users_from_backup()
+    set_auto_schools_from_backup()
+    # write_all_questions_in_db('backup/all_questions_ru.json', 'RU')
+    # write_all_questions_in_db('backup/all_questions_kz.json', 'KZ')
