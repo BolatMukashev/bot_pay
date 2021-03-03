@@ -131,12 +131,14 @@ async def command_penalty(message: types.Message):
     language = get_user_language(telegram_id)
     country = get_user_country(telegram_id)
     if country == 'RU':
-        await message.answer(PENALTY_RUSSIA['title'], reply_markup=russian_penalty_titles)
+        data = get_data_from_json_file('backup/penalty_russia.json')
+        await message.answer(data['title'], reply_markup=russian_penalty_titles)
     else:
+        data = get_data_from_json_file(f'backup/penalty_kazakhstan_{language}.json')
         if language == 'RU':
-            await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_ru_1)
+            await message.answer(data['title'], reply_markup=penalty_buttons_ru_1)
         if language == 'KZ':
-            await message.answer(PENALTY[f'penalty_{language}']['title'], reply_markup=penalty_buttons_kz_1)
+            await message.answer(data['title'], reply_markup=penalty_buttons_kz_1)
 
 
 @dp.message_handler(commands=["statistics"])

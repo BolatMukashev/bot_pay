@@ -1,10 +1,12 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from keyboards.inline.callback_datas import russia_pen_titles, russia_pen_buttons
-from messages import PENALTY_RUSSIA
+from keyboards.inline.callback_datas import russia_pen_titles
+from db_operation import get_data_from_json_file
+
+data = get_data_from_json_file('backup/penalty_russia.json')
 
 button_type = 'lty'
 
-small_title_list = [list(x.keys())[0] for x in PENALTY_RUSSIA['values']]
+small_title_list = [list(x.keys())[0] for x in data['values']]
 
 russian_penalty_titles = InlineKeyboardMarkup()
 for el_id, el in enumerate(small_title_list):

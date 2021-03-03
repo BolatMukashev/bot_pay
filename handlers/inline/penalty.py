@@ -1,9 +1,11 @@
 from aiogram.types import CallbackQuery
 from bot import dp
-from keyboards.inline.penalty_RU import *
-from keyboards.inline.penalty_KZ import *
-from messages import PENALTY
-from db_operation import get_user_language
+from keyboards.inline.callback_datas import get_penalty, next_penalty
+from keyboards.inline.penalty_RU import penalty_buttons_ru_1, penalty_buttons_ru_2, penalty_buttons_ru_3,\
+    penalty_buttons_ru_4, penalty_buttons_ru_5
+from keyboards.inline.penalty_KZ import penalty_buttons_kz_1, penalty_buttons_kz_2, penalty_buttons_kz_3, \
+    penalty_buttons_kz_4, penalty_buttons_kz_5
+from db_operation import get_user_language, get_data_from_json_file
 
 
 @dp.callback_query_handler(get_penalty.filter(type='penalty'))
@@ -11,7 +13,8 @@ async def get_penalty(call: CallbackQuery, callback_data: dict):
     telegram_id = call.from_user.id
     language = get_user_language(telegram_id)
     answer_id = int(callback_data.get('value'))
-    values = PENALTY[f'penalty_{language}']['items'][answer_id]
+    data = get_data_from_json_file(f'backup/penalty_kazakhstan_{language}.json')
+    values = data['items'][answer_id]
     text = [values['title']] + values['answers']
     text.append(values['description'])
     await call.message.answer('\n\n'.join(text))

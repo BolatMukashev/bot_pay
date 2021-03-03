@@ -1,12 +1,15 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from keyboards.inline.callback_datas import get_penalty, next_penalty
-from messages import PENALTY, BUTTONS
+from messages import BUTTONS
+from db_operation import get_data_from_json_file
 
 language = 'KZ'
 button_type = 'kzt'
 
+data = get_data_from_json_file(f'backup/penalty_kazakhstan_{language}.json')
+
 small_title_list = []
-for el in PENALTY[f'penalty_{language}']['items']:
+for el in data['items']:
     small_title_list.append(el['small_title'])
 
 

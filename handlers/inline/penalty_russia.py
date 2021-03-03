@@ -2,15 +2,19 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBut
 from bot import dp
 from keyboards.inline.callback_datas import russia_pen_titles, russia_pen_buttons, next_penalty, go_back_penalty
 from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
-from messages import PENALTY_RUSSIA, BUTTONS
+from messages import BUTTONS
+from db_operation import get_data_from_json_file
+
+
+data = get_data_from_json_file('backup/penalty_russia.json')
 
 
 @dp.callback_query_handler(russia_pen_titles.filter(type='rus_penalty_1lvl'))
 async def set_rus_penalty_values(call: CallbackQuery, callback_data: dict):
     type_id = int(callback_data.get('type_id'))
     russian_penalty_values = InlineKeyboardMarkup()
-    for element in PENALTY_RUSSIA['values'][type_id]:
-        for el_id, el in enumerate(PENALTY_RUSSIA['values'][type_id][element]):
+    for element in data['values'][type_id]:
+        for el_id, el in enumerate(data['values'][type_id][element]):
             new_button = InlineKeyboardButton(text=el['simple_title'],
                                               callback_data=russia_pen_buttons.new(type='rus_penalty_2lvl',
                                                                                    type_id=type_id,
@@ -26,9 +30,9 @@ async def set_rus_penalty_values(call: CallbackQuery, callback_data: dict):
 @dp.callback_query_handler(russia_pen_buttons.filter(type='rus_penalty_2lvl'))
 async def set_rus_penalty_values(call: CallbackQuery, callback_data: dict):
     type_id = int(callback_data.get('type_id'))
-    penalty_type = list(PENALTY_RUSSIA['values'][type_id].keys())[0]
+    penalty_type = list(data['values'][type_id].keys())[0]
     value_id = int(callback_data.get('value_id'))
-    answer = PENALTY_RUSSIA['values'][type_id][penalty_type][value_id]
+    answer = data['values'][type_id][penalty_type][value_id]
     message = f'{answer["title"]}\n\nШтраф:\n{answer["penalty"]}'
     await call.message.answer(message)
 
