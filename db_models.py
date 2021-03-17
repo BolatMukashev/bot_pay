@@ -5,14 +5,16 @@ from datetime import datetime, timedelta
 
 
 conn = pymysql.connect(host=db_config['host'],
+                       port=db_config['port'],
                        user=db_config['user'],
                        password=db_config['password'])
 
 
 db = MySQLDatabase(db_config['db_name'],
+                   host=db_config['host'],
+                   port=db_config['port'],
                    user=db_config['user'],
-                   password=db_config['password'],
-                   host=db_config['host'])
+                   password=db_config['password'])
 
 
 class BaseModel(Model):

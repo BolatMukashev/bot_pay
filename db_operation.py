@@ -1066,5 +1066,5 @@ if __name__ == '__main__':
     create_new_tables(table_names)
     set_users_from_backup()
     set_auto_schools_from_backup()
-    # write_all_questions_in_db('backup/all_questions_ru.json', 'RU')
-    # write_all_questions_in_db('backup/all_questions_kz.json', 'KZ')
+    write_all_questions_in_db('backup/all_questions_ru.json', 'RU')
+    write_all_questions_in_db('backup/all_questions_kz.json', 'KZ')

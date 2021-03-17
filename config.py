@@ -17,16 +17,21 @@ PRICE_AFTER_45DAYS = int(os.getenv('PRICE_AFTER_45DAYS'))
 APP_USER_NAME = os.getenv('APP_USER_NAME')
 APP_PASSWORD = os.getenv('APP_PASSWORD')
 SESSION_SECRET_KEY = os.getenv('SESSION_SECRET_KEY')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 GMAIL_WINDOWS_PASSWORD = os.getenv('GMAIL_WINDOWS_PASSWORD')
 GMAIL_LINUX_PASSWORD = os.getenv('GMAIL_LINUX_PASSWORD')
+DB_NAME = os.getenv('DB_NAME')
+DB_USER_NAME = os.getenv('DB_USER_NAME')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = int(os.getenv('DB_PORT'))
+DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 
 db_config = {
-    'db_name': 'pdd_bot',
-    'user': 'root',
-    'password': DB_PASSWORD,
-    'host': 'localhost',
+    'db_name': DB_NAME,
+    'host': DB_HOST,
+    'port': DB_PORT,
+    'user': DB_USER_NAME,
+    'password': DB_PASSWORD
 }
