@@ -1,0 +1,13 @@
+[Unit]
+Description=TelegramBot
+After=network.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/bot_pay
+Environment="PYTHONPATH=/home/ec2-user/bot_pay"
+ExecStart=/home/ec2-user/bot_pay/.venv/bin/python /home/ec2-user/bot_pay/bot.py
+
+[Install]
+WantedBy=multi-user.target
