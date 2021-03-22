@@ -3,11 +3,11 @@ Description=TelegramBot
 After=network.target
 
 [Service]
-User=ec2-user
-Group=ec2-user
-WorkingDirectory=/home/ec2-user/bot_pay
-Environment="PYTHONPATH=/home/ec2-user/bot_pay"
-ExecStart=/home/ec2-user/bot_pay/.venv/bin/python /home/ec2-user/bot_pay/bot.py
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/bot_pay
+Environment="PYTHONPATH=/home/ubuntu/bot_pay"
+ExecStart=/home/ubuntu/bot_pay/.venv/bin/python /home/ubuntu/bot_pay/bot.py
 
 [Install]
 WantedBy=multi-user.target

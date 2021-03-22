@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve myproject
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/bot_pay
+Environment="PATH=/home/ubuntu/bot_pay/.venv/bin"
+ExecStart=/home/ubuntu/bot_pay/.venv/bin/uwsgi --ini bot_pay.ini
+
+[Install]
+WantedBy=multi-user.target
