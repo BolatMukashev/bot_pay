@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name 54.93.82.11;
+    server_name pddgoodbot.ru www.pddgoodbot.ru 3.126.95.246;
 location / {
         include uwsgi_params;
         uwsgi_pass unix:/home/ubuntu/bot_pay/bot_pay.sock;
