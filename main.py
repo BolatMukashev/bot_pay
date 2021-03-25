@@ -69,11 +69,12 @@ def promo_code_registered(new_promo_code):
 def pay():
     try:
         telegram_id = request.args["telegram_id"]
-        user_name = get_user_name_by(telegram_id)
-        user_language = get_user_language(telegram_id)
-        user_country = get_user_country(telegram_id)
-        price = get_finally_price(telegram_id)
-        monetary_unit = get_monetary_unit_by_user_country(telegram_id)
+        user = get_user_by(telegram_id)
+        user_name = user.full_name
+        user_language = user.language
+        user_country = user.country
+        price = get_finally_price_by(user.price_in_rubles, user_country)
+        monetary_unit = get_monetary_unit(user_country, user_language)
         secret_key = config.SESSION_SECRET_KEY
     except BadRequestKeyError:
         telegram_id = 'undefiled'

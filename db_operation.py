@@ -306,6 +306,11 @@ def all_users_id():
     return users_id_list
 
 
+def get_user_by(telegram_id):
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user
+
+
 def get_user_name_by(telegram_id):
     user = Users.get(Users.telegram_id == telegram_id)
     return user.full_name
@@ -335,6 +340,17 @@ def edit_user_country(telegram_id, user_country):
 def get_monetary_unit_by_user_country(telegram_id):
     user_country = get_user_country(telegram_id)
     user_language = get_user_language(telegram_id)
+    if user_country == 'KZ':
+        return 'тенге'
+    elif user_country == 'RU' and user_language == 'RU':
+        return 'рублей'
+    elif user_country == 'RU' and user_language == 'KZ':
+        return 'рубль'
+    else:
+        return 'рублей'
+
+
+def get_monetary_unit(user_country, user_language):
     if user_country == 'KZ':
         return 'тенге'
     elif user_country == 'RU' and user_language == 'RU':
@@ -398,6 +414,13 @@ def get_price_in_rubles_on_user(telegram_id):
 def get_finally_price(telegram_id):
     price_in_rubles = get_price_in_rubles_on_user(telegram_id)
     user_country = get_user_country(telegram_id)
+    if user_country == 'KZ':
+        return round(price_in_rubles * 5)
+    else:
+        return price_in_rubles
+
+
+def get_finally_price_by(price_in_rubles, user_country):
     if user_country == 'KZ':
         return round(price_in_rubles * 5)
     else:
