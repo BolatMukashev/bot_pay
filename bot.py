@@ -128,8 +128,9 @@ async def command_language(message: types.Message):
 @dp.message_handler(commands=["penalty"])
 async def command_penalty(message: types.Message):
     telegram_id = message.from_user.id
-    language = get_user_language(telegram_id)
-    country = get_user_country(telegram_id)
+    user = get_user_by(telegram_id)
+    language = user.language
+    country = user.country
     if country == 'RU':
         data = get_data_from_json_file('backup/penalty_russia.json')
         await message.answer(data['title'], reply_markup=russian_penalty_titles)
@@ -293,8 +294,9 @@ async def command_backup_all_data(message: types.Message):
 @dp.message_handler(commands=["promo_code"], state='*')
 async def command_promo_code(message: types.Message):
     telegram_id = message.from_user.id
-    language = get_user_language(telegram_id)
-    user_promo_code_used_status = get_user_promo_code_used_status(telegram_id)
+    user = get_user_by(telegram_id)
+    language = user.language
+    user_promo_code_used_status = user.promo_code_used
     if not user_promo_code_used_status:
         await message.answer(PROMO_CODE[f'promo_code_command_text_{language}'])
         await AllStates.UsePromoCode.set()
@@ -326,9 +328,11 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["pay"])
 async def command_pay(message: types.Message):
     telegram_id = message.from_user.id
-    user_language = get_user_language(telegram_id)
-    monetary_unit = get_monetary_unit_by_user_country(telegram_id)
-    price = get_finally_price(telegram_id)
+    user = get_user_by(telegram_id)
+    user_country = user.country
+    user_language = user.language
+    monetary_unit = get_monetary_unit(user_country, user_language)
+    price = get_finally_price_by(user.price_in_rubles, user_country)
     pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
 
     markup = types.InlineKeyboardMarkup()
