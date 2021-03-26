@@ -51,39 +51,6 @@ async def command_start(message: types.Message):
     telegram_id = message.from_user.id
     full_name = message.from_user.full_name
     new_user(telegram_id, full_name)
-
-    users_list_14 = get_loser_list_14days()
-    for user_id in users_list_14:
-        user_language = get_user_language(user_id)
-
-        markup = types.InlineKeyboardMarkup()
-        url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={telegram_id}'
-        pay_button_text = BUTTONS[f'pay_{user_language}']
-        pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
-        markup.add(pay_link)
-
-        await bot.send_sticker(user_id, STICKERS['come_back'])
-        await bot.send_message(user_id, OFFERS[f'second_week_promotional_offer_{user_language}'], reply_markup=markup)
-
-        change_price_in_rubles_on_user(user_id, config.PRICE_AFTER_14DAYS)
-        update_second_week_promotional_offer_status(user_id)
-
-    users_list_45 = get_loser_list_45days()
-    for user_id in users_list_45:
-        user_language = get_user_language(user_id)
-
-        markup = types.InlineKeyboardMarkup()
-        url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={telegram_id}'
-        pay_button_text = BUTTONS[f'pay_{user_language}']
-        pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
-        markup.add(pay_link)
-
-        await bot.send_sticker(user_id, STICKERS['come_back'])
-        await bot.send_message(user_id, OFFERS[f'sixth_week_promotional_offer_{user_language}'], reply_markup=markup)
-
-        change_price_in_rubles_on_user(user_id, config.PRICE_AFTER_45DAYS)
-        update_sixth_week_promotional_offer_status(user_id)
-
     await bot.send_sticker(telegram_id, STICKERS['hello'])
     await message.answer(MESSAGE['start_user_text'])
     if not get_user_registration_status(telegram_id):
@@ -349,6 +316,45 @@ async def command_help(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(MESSAGE[f'info_{user_language}'])
+
+
+@dp.message_handler(commands=["send_message_from_losers"])
+async def command_send_message_from_losers(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == config.ADMIN_ID:
+        users_list_14 = get_loser_list_14days()
+        for user_id in users_list_14:
+            user_language = get_user_language(user_id)
+
+            markup = types.InlineKeyboardMarkup()
+            url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={user_id}'
+            pay_button_text = BUTTONS[f'pay_{user_language}']
+            pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
+            markup.add(pay_link)
+
+            await bot.send_sticker(user_id, STICKERS['come_back'])
+            await bot.send_message(user_id, OFFERS[f'second_week_promotional_offer_{user_language}'],
+                                   reply_markup=markup)
+
+            change_price_in_rubles_on_user(user_id, config.PRICE_AFTER_14DAYS)
+            update_second_week_promotional_offer_status(user_id)
+
+        users_list_45 = get_loser_list_45days()
+        for user_id in users_list_45:
+            user_language = get_user_language(user_id)
+
+            markup = types.InlineKeyboardMarkup()
+            url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={user_id}'
+            pay_button_text = BUTTONS[f'pay_{user_language}']
+            pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
+            markup.add(pay_link)
+
+            await bot.send_sticker(user_id, STICKERS['come_back'])
+            await bot.send_message(user_id, OFFERS[f'sixth_week_promotional_offer_{user_language}'],
+                                   reply_markup=markup)
+
+            change_price_in_rubles_on_user(user_id, config.PRICE_AFTER_45DAYS)
+            update_sixth_week_promotional_offer_status(user_id)
 
 
 @dp.message_handler(commands=["send_hello_emails_to_new_schools"])

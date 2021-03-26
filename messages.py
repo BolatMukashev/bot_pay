@@ -2,6 +2,8 @@ MESSAGE = {
     'start_admin_text': """
     Показать статистику:
     /statistics
+    Отправить сообщение для неоплативших:
+    /send_message_from_losers
     Отправить рекламу всем:
     /send_promotional_post
     Сообщения всем:

@@ -2,11 +2,11 @@ from aiogram.types import CallbackQuery
 from bot import dp, bot
 from keyboards.inline.callback_datas import start_button_call
 from db_operation import get_random_question, update_registration_status, get_user_language
-from config import DEBUG
+import config
 
 
 @dp.callback_query_handler(start_button_call.filter(start='start'))
-async def start_button_handler(call: CallbackQuery, callback_data: dict):
+async def start_button_handler(call: CallbackQuery):
     telegram_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
@@ -17,8 +17,8 @@ async def start_button_handler(call: CallbackQuery, callback_data: dict):
     update_registration_status(telegram_id)
 
     question = get_random_question(user_language)
-    if DEBUG is False and question.image_code:
-        await bot.send_photo(telegram_id, question.image_code)
+    if config.DEBUG is False and question['image_code']:
+        await bot.send_photo(telegram_id, question['image_code'])
     await bot.send_poll(telegram_id,
                         type='quiz',
                         is_anonymous=False,
