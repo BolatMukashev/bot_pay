@@ -21,8 +21,8 @@ def create_new_tables(db_models):
         db.connect()
         db.create_tables(db_models)
         print('Таблицы созданы...')
-    except peewee.InternalError as px:
-        print(str(px))
+    except peewee.InternalError as err:
+        print(str(err))
 
 
 def create_database(db_name):
@@ -31,6 +31,17 @@ def create_database(db_name):
         print('База данных успешно создана...')
     except pymysql.err.ProgrammingError:
         print('База данных уже была создана ранее...')
+
+
+def database_initialization():
+    if db.init() is True:
+        pass
+    else:
+        db.init(config.db_config['db_name'],
+                host=config.db_config['host'],
+                port=config.db_config['port'],
+                user=config.db_config['user'],
+                password=config.db_config['password'])
 
 
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
@@ -162,6 +173,7 @@ def translate_db_to_kz_language(db_name, json_file_name):
 
 # new_ru_question(question, correct_answer, all_answers, explanation=None, image_code=None)
 def new_ru_question(question, correct_answer, all_answers, explanation=None, image_code=None):
+    database_initialization()
     new_question = QuestionsRU(question=question,
                                correct_answer=correct_answer,
                                all_answers=all_answers,
@@ -172,6 +184,7 @@ def new_ru_question(question, correct_answer, all_answers, explanation=None, ima
 
 
 def new_kz_question(question, correct_answer, all_answers, explanation=None, image_code=None):
+    database_initialization()
     new_question = QuestionsKZ(question=question,
                                correct_answer=correct_answer,
                                all_answers=all_answers,
@@ -188,6 +201,7 @@ def get_table_length(db_name):
 
 
 def questions_to_db(raw_db, language):
+    database_initialization()
     for el in raw_db:
         question = el['question']
         correct_answer = el['correct_answer']
@@ -214,6 +228,7 @@ def choose_db_by_language(user_language):
 
 
 def get_random_question(user_language):
+    database_initialization()
     db_name = choose_db_by_language(user_language)
     table_length = get_table_length(db_name)
     random_id = random.randrange(1, table_length + 1)
@@ -239,6 +254,7 @@ def get_random_question(user_language):
 
 def get_all_questions_from_db(user_language):
     db_name = choose_db_by_language(user_language)
+    database_initialization()
     questions = db_name.select()
     questions_list = []
     for el in questions:
@@ -258,6 +274,7 @@ def get_all_questions_from_db(user_language):
 
 
 def new_user(telegram_id, full_name):
+    database_initialization()
     try:
         user = Users(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE)
         user.save()
@@ -272,6 +289,7 @@ def set_user_on_db(telegram_id, full_name, country, language, registration_date,
     time_limit = convert_str_to_datetime(time_limit)
     last_visit = convert_str_to_datetime(last_visit)
     try:
+        database_initialization()
         user = Users(telegram_id=telegram_id,
                      full_name=full_name,
                      country=country,
@@ -300,6 +318,7 @@ def check_id(telegram_id):
 
 def all_users_id():
     users_id_list = []
+    database_initialization()
     all_users = Users.select()
     for user in all_users:
         users_id_list.append(user.telegram_id)
@@ -307,39 +326,47 @@ def all_users_id():
 
 
 def get_user_by(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user
 
 
 def get_user_name_by(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.full_name
 
 
 def get_user_language(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.language
 
 
 # user_language = 'RU' or 'KZ'
 def edit_user_language(telegram_id, user_language):
+    database_initialization()
     query = Users.update(language=user_language).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def get_user_country(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.country
 
 
 def edit_user_country(telegram_id, user_country):
+    database_initialization()
     query = Users.update(country=user_country).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def get_monetary_unit_by_user_country(telegram_id):
-    user_country = get_user_country(telegram_id)
-    user_language = get_user_language(telegram_id)
+    database_initialization()
+    user = get_user_by(telegram_id)
+    user_country = user.country
+    user_language = user.language
     if user_country == 'KZ':
         return 'тенге'
     elif user_country == 'RU' and user_language == 'RU':
@@ -362,6 +389,7 @@ def get_monetary_unit(user_country, user_language):
 
 
 def get_user_time_limit(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     date_time = user.time_limit
     return date_time
@@ -369,6 +397,7 @@ def get_user_time_limit(telegram_id):
 
 def user_time_limit_is_over(telegram_id):
     today = datetime.now()
+    database_initialization()
     time_limit = get_user_time_limit(telegram_id)
     if time_limit < today:
         return True
@@ -397,23 +426,28 @@ def up_user_time_limit_1years(telegram_id):
 
 
 def up_admin_time_limit_3minute():
+    database_initialization()
     query = Users.update(time_limit=datetime.now() + timedelta(minutes=3)).where(Users.telegram_id == config.ADMIN_ID)
     query.execute()
 
 
 def get_time_visit(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.last_visit
 
 
 def get_price_in_rubles_on_user(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.price_in_rubles
 
 
 def get_finally_price(telegram_id):
-    price_in_rubles = get_price_in_rubles_on_user(telegram_id)
-    user_country = get_user_country(telegram_id)
+    database_initialization()
+    user = get_user_by(telegram_id)
+    price_in_rubles = user.price_in_rubles
+    user_country = user.country
     if user_country == 'KZ':
         return round(price_in_rubles * 5)
     else:
@@ -428,52 +462,62 @@ def get_finally_price_by(price_in_rubles, user_country):
 
 
 def change_price_in_rubles_on_user(telegram_id, new_price):
+    database_initialization()
     query = Users.update(price_in_rubles=new_price).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def get_user_registration_status(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.registration_is_over
 
 
 def update_registration_status(telegram_id):
+    database_initialization()
     query = Users.update(registration_is_over=True).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def update_second_week_promotional_offer_status(telegram_id):
+    database_initialization()
     query = Users.update(second_week_promotional_offer=True).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def update_sixth_week_promotional_offer_status(telegram_id):
+    database_initialization()
     query = Users.update(sixth_week_promotional_offer=True).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def get_user_promo_code_used_status(telegram_id):
+    database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.promo_code_used
 
 
 def update_user_promo_code_used_status(telegram_id):
+    database_initialization()
     query = Users.update(promo_code_used=True).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def update_user_made_payment_status(telegram_id):
+    database_initialization()
     query = Users.update(made_payment=True).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def update_time_visit(telegram_id):
+    database_initialization()
     query = Users.update(last_visit=datetime.now()).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
 def get_loser_list_14days():
     loser_list = []
+    database_initialization()
     all_users = Users.select().where(Users.second_week_promotional_offer == 0)
     for user in all_users:
         telegram_id = user.telegram_id
@@ -486,6 +530,7 @@ def get_loser_list_14days():
 
 def get_loser_list_45days():
     loser_list = []
+    database_initialization()
     all_users = Users.select().where(Users.sixth_week_promotional_offer == 0)
     for user in all_users:
         telegram_id = user.telegram_id
@@ -498,6 +543,7 @@ def get_loser_list_45days():
 
 def get_all_users_on_dict_format():
     all_users_list = []
+    database_initialization()
     all_users = Users.select()
     for user in all_users:
         simple_user = {'id': user.id,
@@ -523,6 +569,7 @@ def get_all_users_on_dict_format():
 
 def all_promo_codes():
     promo_codes_list = []
+    database_initialization()
     promo_codes = AutoSchools.select()
     for promo_code in promo_codes:
         promo_codes_list.append(promo_code.promo_code)
@@ -538,11 +585,13 @@ def check_promo_code(promo_code):
 
 
 def edit_promo_code(secret_key, new_promo_code):
+    database_initialization()
     query = AutoSchools.update(promo_code=new_promo_code).where(AutoSchools.secret_key == secret_key)
     query.execute()
 
 
 def add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code):
+    database_initialization()
     new_auto_school = AutoSchools(school_name=school_name,
                                   country=country,
                                   city=city,
@@ -569,6 +618,7 @@ def set_auto_schools_in_db(auto_schools):
 
 def add_auto_school_on_db(school_name, country, city, phones, emails, registration_date, secret_key, promo_code,
                           number_of_references, notified):
+    database_initialization()
     auto_school = AutoSchools(school_name=school_name,
                               country=country,
                               city=city,
@@ -587,24 +637,28 @@ def add_auto_school_on_db(school_name, country, city, phones, emails, registrati
 
 
 def get_all_auto_schools_on_db():
+    database_initialization()
     all_auto_schools = AutoSchools.select()
     return all_auto_schools
 
 
 def get_auto_school_by(secret_key):
+    database_initialization()
     school = AutoSchools.get(AutoSchools.secret_key == secret_key)
     return school
 
 
 def get_auto_school_emails_by(secret_key):
+    database_initialization()
     school = AutoSchools.get(AutoSchools.secret_key == secret_key)
     emails = pickle.loads(school.emails)
     return emails
 
 
 def get_all_auto_schools_emails():
-    schools = AutoSchools.select()
     emails = []
+    database_initialization()
+    schools = AutoSchools.select()
     for school in schools:
         email = pickle.loads(school.emails)
         emails.extend(email)
@@ -612,11 +666,13 @@ def get_all_auto_schools_emails():
 
 
 def delete_auto_schools_by(secret_key):
+    database_initialization()
     query = AutoSchools.delete().where(AutoSchools.secret_key == secret_key)
     query.execute()
 
 
 def get_not_notified_auto_schools():
+    database_initialization()
     auto_schools = AutoSchools.select().where(AutoSchools.notified == 0)
     return auto_schools
 
@@ -641,6 +697,7 @@ def get_all_auto_schools_on_dict_format(auto_schools_in_db):
 
 def get_not_notified_auto_schools_emails():
     all_emails = []
+    database_initialization()
     auto_schools = get_not_notified_auto_schools()
     schools = get_all_auto_schools_on_dict_format(auto_schools)
     for school in schools:
@@ -650,12 +707,14 @@ def get_not_notified_auto_schools_emails():
 
 
 def edit_notified_status(school_id):
+    database_initialization()
     query = AutoSchools.update(notified=1).where(AutoSchools.id == school_id)
     query.execute()
 
 
 def all_secret_keys():
     secret_keys_list = []
+    database_initialization()
     promo_codes = AutoSchools.select()
     for promo_code in promo_codes:
         secret_keys_list.append(promo_code.secret_key)
@@ -686,12 +745,14 @@ def get_unique_secret_key():
 
 
 def get_number_of_references(promo_code):
+    database_initialization()
     promo_code = AutoSchools.get(AutoSchools.promo_code == promo_code)
     number_of_references = promo_code.number_of_references
     return number_of_references
 
 
 def up_number_of_references(promo_code):
+    database_initialization()
     query = AutoSchools.update(number_of_references=AutoSchools.number_of_references + 1).where(
         AutoSchools.promo_code == promo_code)
     query.execute()
@@ -775,6 +836,7 @@ def set_auto_schools_from_backup():
 
 
 def get_number_of_users():
+    database_initialization()
     all_users = Users.select()
     number_of_users = len(all_users)
     return number_of_users
