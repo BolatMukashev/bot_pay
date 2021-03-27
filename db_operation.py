@@ -34,14 +34,10 @@ def create_database(db_name):
 
 
 def database_initialization():
-    if db.init() is True:
+    try:
+        db.connect()
+    except peewee.OperationalError:
         pass
-    else:
-        db.init(config.db_config['db_name'],
-                host=config.db_config['host'],
-                port=config.db_config['port'],
-                user=config.db_config['user'],
-                password=config.db_config['password'])
 
 
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
