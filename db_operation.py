@@ -34,10 +34,8 @@ def create_database(db_name):
 
 
 def database_initialization():
-    try:
-        db.connect()
-    except peewee.OperationalError:
-        pass
+    if not db.is_closed():
+        db.close()
 
 
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
