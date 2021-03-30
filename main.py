@@ -97,6 +97,13 @@ def confidence_and_pay():
                                mimetype='application/pdf')
 
 
+@app.route('/information_about_online_payments')
+def information_about_online_payments():
+    return send_from_directory(directory=path_to_documents,
+                               filename='information_about_online_payments.pdf',
+                               mimetype='application/pdf')
+
+
 @app.route('/about_us')
 def about_us():
     return render_template('about_us.html')
