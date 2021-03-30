@@ -26,12 +26,12 @@ this.pay = function () {
     var widget = new cp.CloudPayments({ language: lang });
     widget.pay('charge', // или 'auth' - двухстадийная, возврат в течении 7 дней
         { //options
-            publicId: 'test_api_00000000000000000000001', //id из личного кабинета
+            publicId: 'pk_9754c753b1482165aa85d1e17a1f3', //id из личного кабинета
             description: description_message, //назначение
             amount: priceInt, //сумма
             currency: user_currency, //валюта
             invoiceId: '', //номер заказа  (необязательно)
-            accountId: 'user@example.com', //идентификатор плательщика (необязательно)
+            accountId: '', //идентификатор плательщика (необязательно)
             skin: "modern", //дизайн виджета (необязательно)
             data: {
                 myProp: 'myProp value'

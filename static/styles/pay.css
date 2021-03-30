@@ -142,7 +142,7 @@ a {
 }
 
 .link__about {
-    font-size: calc(14px + 10 * ((100vw - 320px) / (1780 - 320)));
+    font-size: calc(12px + 8 * ((100vw - 320px) / (1780 - 320)));
     font-weight: 600;
     text-align: right;
     margin-top: calc(10px + 10 * ((100vw - 320px) / (1780 - 320)));
