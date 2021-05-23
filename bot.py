@@ -46,6 +46,9 @@ async def cmd_set_commands(message: types.Message):
         await message.answer("Команды установлены!")
 
 
+# Получить аргумент из команды /start:
+# start_args = message.get_args()
+
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
     telegram_id = message.from_user.id
