@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for, request, render_template, send_from_directory
+from flask import Flask, url_for, request, render_template, send_from_directory, jsonify
 from werkzeug.utils import redirect
 from werkzeug.exceptions import BadRequestKeyError
 from db_operation import *
@@ -117,6 +117,14 @@ def accept():
     up_user_time_limit_1years(telegram_id)
     update_user_made_payment_status(telegram_id)
     return 'All good!'
+
+
+@app.route('/accept_page/<uuid>', methods=['GET', 'POST'])
+def set_accept(uuid):
+    content = request.json
+    print('Это контент:\n', content)
+    print('Это jsonify:\n', jsonify({"uuid": uuid}))
+    return jsonify({"uuid": uuid})
 
 
 @app.route('/pay_registered/<language>')
