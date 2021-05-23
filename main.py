@@ -119,12 +119,26 @@ def accept():
     return 'All good!'
 
 
+@app.route('/test', methods=['GET', 'POST'])
+def test_fun():
+    print('зашел')
+    return 'зашел'
+
+
+@app.route('/accept_page', methods=['GET', 'POST'])
+def set_accept():
+    # data = request.files['avatar'].read()
+    f = request.files
+    create_new_json_file(os.path.join(os.getcwd(), 'backup', 'new_file.json'), f)
+    return 'file uploaded successfully'
+
+
 @app.route('/accept_page/<uuid>', methods=['GET', 'POST'])
-def set_accept(uuid):
-    content = request.json
-    print('Это контент:\n', content)
-    print('Это jsonify:\n', jsonify({"uuid": uuid}))
-    return jsonify({"uuid": uuid})
+def set_accept2(uuid):
+    # content = request.get_json(silent=True)
+    data = request.files
+    create_new_json_file(os.path.join(os.getcwd(), 'backup', 'new_file.json'), data)
+    return 'Json file'
 
 
 @app.route('/pay_registered/<language>')
