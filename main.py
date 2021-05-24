@@ -127,10 +127,11 @@ def test_fun():
 
 @app.route('/accept_page', methods=['GET', 'POST'])
 def set_accept():
-    # data = request.files['avatar'].read()
-    f = request.files
-    create_new_json_file(os.path.join(os.getcwd(), 'backup', 'new_file.json'), f)
-    return 'file uploaded successfully'
+    json_data = request.json
+    telegram_id = int(json_data['description'])
+    create_new_json_file(os.path.join(os.getcwd(), 'backup', 'pay_data.json'), telegram_id)
+    res = json.dumps({"accepted": True})
+    return res
 
 
 @app.route('/accept_page/<uuid>', methods=['GET', 'POST'])
