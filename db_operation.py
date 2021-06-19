@@ -267,7 +267,7 @@ def get_all_questions_from_db(user_language):
 # ПОЛЬЗОВАТЕЛЬ -------------------------------------------------------------------------------------------------------
 
 
-def new_user(telegram_id, full_name):
+def new_user(telegram_id: int, full_name: str) -> None:
     database_initialization()
     try:
         user = Users(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE)
@@ -303,20 +303,16 @@ def set_user_on_db(telegram_id, full_name, country, language, registration_date,
 
 
 def check_id(telegram_id):
-    all_users = all_users_id()
+    all_users = get_all_users_telegram_id()
     if telegram_id in all_users:
         return True
     else:
         return False
 
 
-def all_users_id():
-    users_id_list = []
-    database_initialization()
-    all_users = Users.select()
-    for user in all_users:
-        users_id_list.append(user.telegram_id)
-    return users_id_list
+def valid_id(telegram_id):
+    if str(telegram_id).isdigit():
+        return True
 
 
 def get_user_by(telegram_id):
@@ -338,6 +334,7 @@ def get_user_language(telegram_id):
 
 
 # user_language = 'RU' or 'KZ'
+# database_initialization - надо бы в декоратор завернуть
 def edit_user_language(telegram_id, user_language):
     database_initialization()
     query = Users.update(language=user_language).where(Users.telegram_id == telegram_id)
@@ -399,23 +396,14 @@ def user_time_limit_is_over(telegram_id):
         return False
 
 
-def up_user_time_limit_7days(telegram_id):
+def up_user_time_limit_days(telegram_id, days: int) -> None:
+    """Продлить доступ к боту на n дней"""
     time_limit_is_over = user_time_limit_is_over(telegram_id)
     if time_limit_is_over:
-        query = Users.update(time_limit=datetime.now() + timedelta(days=7)).where(Users.telegram_id == telegram_id)
+        query = Users.update(time_limit=datetime.now() + timedelta(days=days)).where(Users.telegram_id == telegram_id)
     else:
         time_limit_date = get_user_time_limit(telegram_id)
-        query = Users.update(time_limit=time_limit_date + timedelta(days=7)).where(Users.telegram_id == telegram_id)
-    query.execute()
-
-
-def up_user_time_limit_1years(telegram_id):
-    time_limit_is_over = user_time_limit_is_over(telegram_id)
-    if time_limit_is_over:
-        query = Users.update(time_limit=datetime.now() + timedelta(days=365)).where(Users.telegram_id == telegram_id)
-    else:
-        time_limit_date = get_user_time_limit(telegram_id)
-        query = Users.update(time_limit=time_limit_date + timedelta(days=365)).where(Users.telegram_id == telegram_id)
+        query = Users.update(time_limit=time_limit_date + timedelta(days=days)).where(Users.telegram_id == telegram_id)
     query.execute()
 
 
@@ -507,6 +495,17 @@ def update_time_visit(telegram_id):
     database_initialization()
     query = Users.update(last_visit=datetime.now()).where(Users.telegram_id == telegram_id)
     query.execute()
+
+
+def get_all_users_telegram_id() -> list:
+    """Получить telegram_id всех пользователей"""
+    all_telegram_id = []
+    database_initialization()
+    all_users = Users.select()
+    for user in all_users:
+        telegram_id = user.telegram_id
+        all_telegram_id.append(telegram_id)
+    return all_telegram_id
 
 
 def get_loser_list_14days():

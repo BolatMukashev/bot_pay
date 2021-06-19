@@ -11,6 +11,8 @@ from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from messages import *
 from gmail import send_emails_to_schools
 import io
+
+from pay_system import PayLink
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
 
@@ -45,13 +47,18 @@ async def cmd_set_commands(message: types.Message):
         await bot.set_my_commands(commands)
         await message.answer("Команды установлены!")
 
-
+# https://t.me/skillbox_speach_bot?start=test
 # Получить аргумент из команды /start:
 # start_args = message.get_args()
+# пригласи друга и получи +1 день бесплатного пользования!
+
 
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
     telegram_id = message.from_user.id
+    start_args = message.get_args()
+    if valid_id(start_args) and not check_id(telegram_id):
+        up_user_time_limit_days(start_args, 1)
     full_name = message.from_user.full_name
     new_user(telegram_id, full_name)
     await bot.send_sticker(telegram_id, STICKERS['hello'])
@@ -80,13 +87,7 @@ async def command_question(message: types.Message):
                             explanation=question['explanation'])
     else:
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
-        pay_button_text = BUTTONS[f'pay_{user_language}']
-
-        markup = types.InlineKeyboardMarkup()
-        url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={telegram_id}'
-        pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
-        markup.add(pay_link)
-        await bot.send_message(telegram_id, limit_error_message, reply_markup=markup)
+        await bot.send_message(telegram_id, limit_error_message)
     update_time_visit(telegram_id)
 
 
@@ -132,7 +133,7 @@ async def command_message_for_all(message: types.Message):
 async def command_message_for_all_action(message: types.Message, state: FSMContext):
     my_message = message.text
     await state.update_data(my_message=my_message)
-    users = all_users_id()
+    users = get_all_users_telegram_id()
     for user in users:
         try:
             await bot.send_sticker(user, STICKERS['message'])
@@ -175,7 +176,7 @@ async def command_send_photo_action(message: types.Message, state: FSMContext):
     photo_id = message.photo[0].file_id
     my_message = message.caption
     await state.update_data(photo_id=photo_id)
-    all_users = all_users_id()
+    all_users = get_all_users_telegram_id()
     for user_id in all_users:
         try:
             await bot.send_photo(user_id, photo_id, caption=my_message)
@@ -196,7 +197,7 @@ async def command_message_for_all_repair(message: types.Message):
 async def command_message_for_all_repair_action(message: types.Message, state: FSMContext):
     my_message = message.text
     await state.update_data(my_message=my_message)
-    users = all_users_id()
+    users = get_all_users_telegram_id()
     for user in users:
         try:
             await bot.send_sticker(user, STICKERS['repair'])
@@ -283,7 +284,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     await state.update_data(user_promo_code=user_promo_code)
     promo_codes = all_promo_codes()
     if user_promo_code in promo_codes:
-        up_user_time_limit_7days(telegram_id)
+        up_user_time_limit_days(telegram_id, 3)
         up_number_of_references(user_promo_code)
         update_user_promo_code_used_status(telegram_id)
         change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_14DAYS)
@@ -297,16 +298,19 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["pay"])
 async def command_pay(message: types.Message):
+    """user.country поменял на KZ ибо доступен прием платежей только в тенге, сорян"""
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    user_country = user.country
+    user_country = 'KZ'
     user_language = user.language
     monetary_unit = get_monetary_unit(user_country, user_language)
     price = get_finally_price_by(user.price_in_rubles, user_country)
     pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
+    pay_link = PayLink(login=config.KASSA_24_LOGIN, password=config.KASSA_24_PASSWORD,
+                       telegram_id=telegram_id, price_in_tenge=price)
+    url = pay_link.get_pay_url()
 
     markup = types.InlineKeyboardMarkup()
-    url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={telegram_id}'
     pay_button = BUTTONS[f'pay_{user_language}']
     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
     markup.add(pay_link)
@@ -321,43 +325,57 @@ async def command_help(message: types.Message):
     await message.answer(MESSAGE[f'info_{user_language}'])
 
 
+@dp.message_handler(commands=["up_time_limit_for_all_at_3day"])
+async def command_up_time_limit_for_all_at_3day(message: types.Message):
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        all_users_id = get_all_users_telegram_id()
+        for user_id in all_users_id:
+            up_user_time_limit_days(user_id, 3)
+        await message.answer('+3 дня использования всем пользователям АКТИВИРОВАНО!')
+
+
 @dp.message_handler(commands=["send_message_from_losers"])
 async def command_send_message_from_losers(message: types.Message):
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         users_list_14 = get_loser_list_14days()
-        for user_id in users_list_14:
-            user_language = get_user_language(user_id)
+        for telegram_id in users_list_14:
+            user_language = get_user_language(telegram_id)
+            pay_link = PayLink(login=config.KASSA_24_LOGIN, password=config.KASSA_24_PASSWORD,
+                               telegram_id=telegram_id, price_in_tenge=config.PRICE_AFTER_14DAYS)
+            url = pay_link.get_pay_url()
 
             markup = types.InlineKeyboardMarkup()
-            url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={user_id}'
             pay_button_text = BUTTONS[f'pay_{user_language}']
             pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
             markup.add(pay_link)
 
-            await bot.send_sticker(user_id, STICKERS['come_back'])
-            await bot.send_message(user_id, OFFERS[f'second_week_promotional_offer_{user_language}'],
+            await bot.send_sticker(telegram_id, STICKERS['come_back'])
+            await bot.send_message(telegram_id, OFFERS[f'second_week_promotional_offer_{user_language}'],
                                    reply_markup=markup)
 
-            change_price_in_rubles_on_user(user_id, config.PRICE_AFTER_14DAYS)
-            update_second_week_promotional_offer_status(user_id)
+            change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_14DAYS)
+            update_second_week_promotional_offer_status(telegram_id)
 
         users_list_45 = get_loser_list_45days()
-        for user_id in users_list_45:
-            user_language = get_user_language(user_id)
+        for telegram_id in users_list_45:
+            user_language = get_user_language(telegram_id)
+            pay_link = PayLink(login=config.KASSA_24_LOGIN, password=config.KASSA_24_PASSWORD,
+                               telegram_id=telegram_id, price_in_tenge=config.PRICE_AFTER_45DAYS)
+            url = pay_link.get_pay_url()
 
             markup = types.InlineKeyboardMarkup()
-            url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={user_id}'
             pay_button_text = BUTTONS[f'pay_{user_language}']
             pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
             markup.add(pay_link)
 
-            await bot.send_sticker(user_id, STICKERS['come_back'])
-            await bot.send_message(user_id, OFFERS[f'sixth_week_promotional_offer_{user_language}'],
+            await bot.send_sticker(telegram_id, STICKERS['come_back'])
+            await bot.send_message(telegram_id, OFFERS[f'sixth_week_promotional_offer_{user_language}'],
                                    reply_markup=markup)
 
-            change_price_in_rubles_on_user(user_id, config.PRICE_AFTER_45DAYS)
-            update_sixth_week_promotional_offer_status(user_id)
+            change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_45DAYS)
+            update_sixth_week_promotional_offer_status(telegram_id)
 
 
 @dp.message_handler(commands=["send_hello_emails_to_new_schools"])
@@ -394,13 +412,7 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
                                         explanation=question['explanation'])
     else:
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
-
-        markup = types.InlineKeyboardMarkup()
-        url = config.PAY_SITE_ADDRESS + '?' + f'telegram_id={telegram_id}'
-        pay_button_text = BUTTONS[f'pay_{user_language}']
-        pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
-        markup.add(pay_link)
-        await bot.send_message(telegram_id, limit_error_message, reply_markup=markup)
+        await bot.send_message(telegram_id, limit_error_message)
     update_time_visit(telegram_id)
 
 

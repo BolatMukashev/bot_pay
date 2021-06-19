@@ -1,10 +1,7 @@
-import os
-from flask import Flask, url_for, request, render_template, send_from_directory, jsonify
+from flask import Flask, url_for, request, render_template, send_from_directory
 from werkzeug.utils import redirect
-from werkzeug.exceptions import BadRequestKeyError
 from db_operation import *
 from gmail import send_emails_to_schools
-from messages import MESSAGE
 from static.html_messages.you_promo_code_registered import you_promo_code_registered_message
 
 app = Flask(__name__)
@@ -65,89 +62,23 @@ def promo_code_registered(new_promo_code):
     return render_template('promo_code_registered.html', BOT_ADDRESS=config.BOT_ADDRESS, new_promo_code=new_promo_code)
 
 
-@app.route('/pay')
-def pay():
-    try:
-        telegram_id = request.args["telegram_id"]
-        user = get_user_by(telegram_id)
-        user_name = user.full_name
-        user_language = user.language
-        user_country = user.country
-        price = get_finally_price_by(user.price_in_rubles, user_country)
-        monetary_unit = get_monetary_unit(user_country, user_language)
-        secret_key = config.SESSION_SECRET_KEY
-    except BadRequestKeyError:
-        telegram_id = 'undefiled'
-        user_name = 'undefiled'
-        user_language = 'RU'
-        user_country = 'RU'
-        price = config.BASE_PRICE
-        monetary_unit = 'рублей'
-        secret_key = None
-
-    return render_template('pay.html', bot_name=config.BOT_NAME, bot_address=config.BOT_ADDRESS, price=price,
-                           user_language=user_language, telegram_id=telegram_id, user_name=user_name,
-                           user_country=user_country, monetary_unit=monetary_unit, secret_key=secret_key)
-
-
-@app.route('/confidence_and_pay')
-def confidence_and_pay():
-    return render_template('confidence_and_pay.html')
-
-
-@app.route('/information_about_online_payments')
-def information_about_online_payments():
-    return render_template('information_about_online_payments.html')
-
-
 @app.route('/about_us')
 def about_us():
     return render_template('about_us.html')
 
 
-@app.route('/accept')
-def accept():
-    try:
-        secret_key = request.args["secret_key"]
-        telegram_id = request.args["telegram_id"]
-    except BadRequestKeyError:
-        return 'Bad'
-    if secret_key != config.SESSION_SECRET_KEY:
-        return 'Bad'
-    up_user_time_limit_1years(telegram_id)
-    update_user_made_payment_status(telegram_id)
-    return 'All good!'
-
-
-@app.route('/test', methods=['GET', 'POST'])
-def test_fun():
-    print('зашел')
-    return 'зашел'
-
-
 @app.route('/accept_page', methods=['GET', 'POST'])
 def set_accept():
-    json_data = request.json
-    telegram_id = int(json_data['description'])
-    create_new_json_file(os.path.join(os.getcwd(), 'backup', 'pay_data.json'), telegram_id)
+    """telegram_id - int or str?
+    для проверки, сохраняем файл с id в папке backup сайта:
+    file_name = os.path.join(os.getcwd(), 'backup', 'pay_data.json')
+    create_new_json_file(file_name, telegram_id)
+    """
+    telegram_id = request.json['metadata']['telegram_id']
+    up_user_time_limit_days(telegram_id, 365)
+    update_user_made_payment_status(telegram_id)
     res = json.dumps({"accepted": True})
     return res
-
-
-@app.route('/accept_page/<uuid>', methods=['GET', 'POST'])
-def set_accept2(uuid):
-    # content = request.get_json(silent=True)
-    data = request.files
-    create_new_json_file(os.path.join(os.getcwd(), 'backup', 'new_file.json'), data)
-    return 'Json file'
-
-
-@app.route('/pay_registered/<language>')
-def pay_registered(language):
-    button_text = MESSAGE[f'bot_link_{language}']
-    message = MESSAGE[f'pay_registered_message_{language}']
-    return render_template('pay_registered.html', BOT_ADDRESS=config.BOT_ADDRESS,
-                           message=message, button_text=button_text)
 
 
 if __name__ == '__main__':
