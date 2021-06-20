@@ -37,6 +37,7 @@ class AllStates(StatesGroup):
 
 @dp.message_handler(commands="set_commands", state="*")
 async def cmd_set_commands(message: types.Message):
+    """Установить команды в боковой панели"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         commands = [types.BotCommand(command="/question", description="Новый вопрос. Жаңа сұрақ"),
@@ -57,6 +58,7 @@ async def cmd_set_commands(message: types.Message):
 
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
+    """Начало работы, приветственное сообщение и вызов меню регистрации пользователя"""
     telegram_id = message.from_user.id
     start_args = message.get_args()
     if valid_id(start_args) and not check_id(telegram_id):
@@ -69,8 +71,10 @@ async def command_start(message: types.Message):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
+# изменить с учетом добавления кэша
 @dp.message_handler(commands=["question"])
 async def command_question(message: types.Message):
+    """Получить новый вопрос из базы"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     if telegram_id == config.ADMIN_ID:
@@ -95,11 +99,13 @@ async def command_question(message: types.Message):
 
 @dp.message_handler(commands=["language"])
 async def command_language(message: types.Message):
+    """Вызвать меню смены языка"""
     await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
 @dp.message_handler(commands=["penalty"])
 async def command_penalty(message: types.Message):
+    """Раздел со штрафами. Показывает все штрафы по категориям"""
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
     language = user.language
@@ -117,6 +123,7 @@ async def command_penalty(message: types.Message):
 
 @dp.message_handler(commands=["statistics"])
 async def command_statistics(message: types.Message):
+    """Показать статистику по пользователям, промо-кодам"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         result = get_big_statistics()
@@ -125,6 +132,7 @@ async def command_statistics(message: types.Message):
 
 @dp.message_handler(commands=["message_for_all"], state='*')
 async def command_message_for_all(message: types.Message):
+    """Отправить сообщение всем пользователям"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         await message.answer('Пиши своё сообщение, но помни что оно уйдет всем пользователям!!!')
@@ -147,6 +155,7 @@ async def command_message_for_all_action(message: types.Message, state: FSMConte
 
 @dp.message_handler(commands=["send_email_for_all_auto_schools"], state='*')
 async def command_send_email_for_all_auto_schools(message: types.Message):
+    """Отправить email сообщение всем автошколам об изменениях в работе бота или политики"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         await message.answer('Отправь сообщение в виде HTML кода, но помни что оно уйдет всем Автошколам!!!')
@@ -165,8 +174,10 @@ async def command_send_email_for_all_auto_schools_action(message: types.Message,
     await state.finish()
 
 
+# переделать, отдельная команда для Ру пользователей, отдельная для КЗ
 @dp.message_handler(commands=["send_promotional_post"], state='*')
 async def command_send_photo(message: types.Message):
+    """Отправить рекламное сообщение всем пользователям - фото+подпись"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
         await message.answer('Отправь рекламное фото и сообщение, оно будет перенаправлено всем пользователям!')
@@ -189,6 +200,7 @@ async def command_send_photo_action(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["message_for_all_about_repair"], state='*')
 async def command_message_for_all_repair(message: types.Message):
+    """Отправить сообщение о ремонте всем пользователем + стикер с ремонтными работами"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         await message.answer('Пиши своё сообщение о РЕМОНТНЫХ РАБОТАХ, но помни что оно уйдет всем пользователям!!!')
@@ -211,6 +223,7 @@ async def command_message_for_all_repair_action(message: types.Message, state: F
 
 @dp.message_handler(commands=["delete_auto_school"], state='*')
 async def command_delete_auto_school(message: types.Message):
+    """Удалить Автошколу по запросу"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         await message.answer('Напиши секретный ключ автошколы:')
@@ -228,6 +241,7 @@ async def command_delete_auto_school_action(message: types.Message, state: FSMCo
 
 @dp.message_handler(commands=["up_admin_time_limit"])
 async def command_up_admin_q_a(message: types.Message):
+    """Добавить 3 минуты к времени использования админу, для тестов"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         up_admin_time_limit_3minute()
@@ -236,6 +250,7 @@ async def command_up_admin_q_a(message: types.Message):
 
 @dp.message_handler(commands=["all_users"])
 async def command_all_users(message: types.Message):
+    """Получить список всех зарегистрированных пользователь в базе данных"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         result = get_all_users_list()
@@ -244,6 +259,7 @@ async def command_all_users(message: types.Message):
 
 @dp.message_handler(commands=["all_promo_codes"])
 async def command_all_promo_codes(message: types.Message):
+    """Получить список всех зарегистрированных промо-кодов из базы данных"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         result = get_all_promo_code_list()
@@ -252,6 +268,7 @@ async def command_all_promo_codes(message: types.Message):
 
 @dp.message_handler(commands=["backup_all_data"])
 async def command_backup_all_data(message: types.Message):
+    """Бэкап данных(пользователи и школы) и отправка админу в виде файлов JSON"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         backup_users()
@@ -266,6 +283,10 @@ async def command_backup_all_data(message: types.Message):
 
 @dp.message_handler(commands=["promo_code"], state='*')
 async def command_promo_code(message: types.Message):
+    """
+    Раздел с Промо-кодами. Тут можно активировать промокод и получить +3 дня к использованию бота и
+    скидку 50% на покупку годового доступа
+    """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
     language = user.language
@@ -300,7 +321,10 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["pay"])
 async def command_pay(message: types.Message):
-    """user.country поменял на KZ ибо доступен прием платежей только в тенге, сорян"""
+    """
+    Раздел Оплаты. Отдает ссылку на оплату доступа к боту.
+    user.country поменял на KZ ибо доступен прием платежей только в тенге, сорян
+    """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
     user_country = 'KZ'
@@ -322,6 +346,7 @@ async def command_pay(message: types.Message):
 
 @dp.message_handler(commands=["promotions"])
 async def command_promotions(message: types.Message):
+    """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     image_code = 'AgACAgIAAxkBAAIJiWDOFk77Oui8OwWojGP2EntQsQsaAAIQszEbXGVwSoOjlk90bMMFq3cUpC4AAwEAAwIAA3MAA0usAgABHwQ'
@@ -339,6 +364,7 @@ async def command_promotions(message: types.Message):
 
 @dp.message_handler(commands=["info"])
 async def command_help(message: types.Message):
+    """Раздел Инфо о боте"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(MESSAGE[f'info_{user_language}'])
@@ -346,6 +372,7 @@ async def command_help(message: types.Message):
 
 @dp.message_handler(commands=["up_time_limit_for_all_at_3day"])
 async def command_up_time_limit_for_all_at_3day(message: types.Message):
+    """Добавить +3 дня пользования ботом всем пользователям. Акции на праздники"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
         all_users_id = get_all_users_telegram_id()
@@ -354,8 +381,13 @@ async def command_up_time_limit_for_all_at_3day(message: types.Message):
         await message.answer('+3 дня использования всем пользователям АКТИВИРОВАНО!')
 
 
+# добавить автопроверку раз в сутки
 @dp.message_handler(commands=["send_message_from_losers"])
 async def command_send_message_from_losers(message: types.Message):
+    """
+    Проверяем сроки с даты регистрации, применяет скидки на 75% и 50% для не оплативших пользователей,
+    оповещает их о скидке
+    """
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         users_list_14 = get_loser_list_14days()
@@ -399,6 +431,7 @@ async def command_send_message_from_losers(message: types.Message):
 
 @dp.message_handler(commands=["send_hello_emails_to_new_schools"])
 async def command_send_hello_emails_to_new_schools(message: types.Message):
+    """Отправить приветственное email сообщение новым автошколам"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
         schools = get_not_notified_auto_schools()
@@ -415,6 +448,7 @@ async def command_send_hello_emails_to_new_schools(message: types.Message):
 
 @dp.poll_answer_handler()
 async def handle_poll_answer(quiz_answer: types.PollAnswer):
+    """Отправляем новый вопрос в ответ на отвеченный вопрос"""
     telegram_id = quiz_answer.user.id
     user_language = get_user_language(telegram_id)
     if not user_time_limit_is_over(telegram_id):
@@ -435,8 +469,10 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
     update_time_visit(telegram_id)
 
 
+# добавить парсер и валидацию от Pydantic
 @dp.message_handler(content_types=['document'])
 async def scan_message(message: types.Message):
+    """Принимает JSON файл, распарсивает его и добавляем информацию об автошколах в базу"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
         document = message.document.file_id
@@ -451,6 +487,7 @@ async def scan_message(message: types.Message):
 
 @dp.message_handler(content_types=['photo'])
 async def scan_photo(message: types.Message):
+    """Получить id фотографии, для админа"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
         photo_id = message.photo[0].file_id

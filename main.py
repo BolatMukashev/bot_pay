@@ -69,7 +69,7 @@ def about_us():
 
 @app.route('/accept_page', methods=['GET', 'POST'])
 def set_accept():
-    """telegram_id - int or str?
+    """telegram_id - int
     для проверки, сохраняем файл с id в папке backup сайта:
     file_name = os.path.join(os.getcwd(), 'backup', 'pay_data.json')
     create_new_json_file(file_name, telegram_id)
