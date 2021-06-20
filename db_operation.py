@@ -165,7 +165,6 @@ def translate_db_to_kz_language(db_name, json_file_name):
 # ВОПРОСЫ ------------------------------------------------------------------------------------------------------------
 
 
-# new_ru_question(question, correct_answer, all_answers, explanation=None, image_code=None)
 def new_ru_question(question, correct_answer, all_answers, explanation=None, image_code=None):
     database_initialization()
     new_question = QuestionsRU(question=question,
@@ -268,6 +267,7 @@ def get_all_questions_from_db(user_language):
 
 
 def new_user(telegram_id: int, full_name: str) -> None:
+    """Добавить нового пользователя в базу"""
     database_initialization()
     try:
         user = Users(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE)
@@ -279,6 +279,8 @@ def new_user(telegram_id: int, full_name: str) -> None:
 def set_user_on_db(telegram_id, full_name, country, language, registration_date, registration_is_over, time_limit,
                    last_visit, promo_code_used, price_in_rubles, made_payment, second_week_promotional_offer,
                    sixth_week_promotional_offer):
+    """Это когда добавляешь пользователя из JSON файла в базу (гавнокод), нужно будет переписать.
+    Спарсить всех пользователей из JSON файла модулем Pydantic и передавать сюда 1 параметр типа object"""
     registration_date = convert_str_to_datetime(registration_date)
     time_limit = convert_str_to_datetime(time_limit)
     last_visit = convert_str_to_datetime(last_visit)

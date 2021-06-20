@@ -4,6 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound
 from db_operation import *
+from keyboards.inline.callback_datas import referral_button_call
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty_RU import penalty_buttons_ru_1
 from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
@@ -39,10 +40,11 @@ async def cmd_set_commands(message: types.Message):
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         commands = [types.BotCommand(command="/question", description="Новый вопрос. Жаңа сұрақ"),
-                    types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
                     types.BotCommand(command="/penalty", description="Посмотреть штрафы. Айыппұлдарды қарау"),
-                    types.BotCommand(command="/promo_code", description="Использовать промокод. Промокодты қолдану"),
                     types.BotCommand(command="/pay", description="Оплатить. Төлеу"),
+                    types.BotCommand(command="/promo_code", description="Использовать промокод. Промокодты қолдану"),
+                    types.BotCommand(command="/promotions", description="Акции и скидки. Қор мен жеңілдіктер"),
+                    types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
                     types.BotCommand(command="/info", description="Подсказки. Кеңестер")]
         await bot.set_my_commands(commands)
         await message.answer("Команды установлены!")
@@ -318,6 +320,23 @@ async def command_pay(message: types.Message):
     await message.answer(pay_message_text, reply_markup=markup)
 
 
+@dp.message_handler(commands=["promotions"])
+async def command_promotions(message: types.Message):
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    image_code = 'AgACAgIAAxkBAAIJiWDOFk77Oui8OwWojGP2EntQsQsaAAIQszEbXGVwSoOjlk90bMMFq3cUpC4AAwEAAwIAA3MAA0usAgABHwQ'
+
+    markup = types.InlineKeyboardMarkup()
+    pay_button_text = BUTTONS[f'do_it_{user_language}']
+    ref_link = types.InlineKeyboardButton(text=pay_button_text,
+                                          callback_data=referral_button_call.new(referral='100friends',
+                                                                                 value=user_language))
+    markup.add(ref_link)
+
+    await bot.send_photo(telegram_id, image_code)
+    await message.answer(PROMOTIONS[f'100friends_{user_language}'], reply_markup=markup)
+
+
 @dp.message_handler(commands=["info"])
 async def command_help(message: types.Message):
     telegram_id = message.from_user.id
@@ -428,6 +447,14 @@ async def scan_message(message: types.Message):
             await message.answer('Информация об автошколах была добавлена в базу...')
         except KeyError:
             await message.answer('Не корректный набор данных!')
+
+
+@dp.message_handler(content_types=['photo'])
+async def scan_photo(message: types.Message):
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        photo_id = message.photo[0].file_id
+        await message.answer(photo_id)
 
 
 if __name__ == "__main__":
