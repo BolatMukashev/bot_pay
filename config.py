@@ -33,8 +33,13 @@ DB_HOST = os.getenv('DB_HOST')
 DB_PORT = int(os.getenv('DB_PORT'))
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
-KASSA_24_LOGIN = os.getenv('KASSA_24_LOGIN')
-KASSA_24_PASSWORD = os.getenv('KASSA_24_PASSWORD')
+pay_config = {
+    'KASSA_24_LOGIN_RU': os.getenv('KASSA_24_LOGIN_RU'),
+    'KASSA_24_PASSWORD_RU': os.getenv('KASSA_24_PASSWORD_RU'),
+    'KASSA_24_LOGIN_KZ': os.getenv('KASSA_24_LOGIN_KZ'),
+    'KASSA_24_PASSWORD_KZ': os.getenv('KASSA_24_PASSWORD_KZ')
+}
+
 
 db_config = {
     'db_name': DB_NAME,

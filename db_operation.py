@@ -585,19 +585,6 @@ def edit_promo_code(secret_key, new_promo_code):
     query.execute()
 
 
-def add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code):
-    database_initialization()
-    new_auto_school = AutoSchools(school_name=school_name,
-                                  country=country,
-                                  city=city,
-                                  phones=phones,
-                                  emails=emails,
-                                  secret_key=secret_key,
-                                  promo_code=promo_code
-                                  )
-    new_auto_school.save()
-
-
 # промокод меняет владелец автошколы, доступ к промкоду по secret_key
 def set_auto_schools_in_db(auto_schools):
     for auto_school in auto_schools:
@@ -609,6 +596,19 @@ def set_auto_schools_in_db(auto_schools):
         secret_key = get_unique_secret_key()
         promo_code = secret_key
         add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code)
+
+
+def add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code):
+    database_initialization()
+    new_auto_school = AutoSchools(school_name=school_name,
+                                  country=country,
+                                  city=city,
+                                  phones=phones,
+                                  emails=emails,
+                                  secret_key=secret_key,
+                                  promo_code=promo_code
+                                  )
+    new_auto_school.save()
 
 
 def add_auto_school_on_db(school_name, country, city, phones, emails, registration_date, secret_key, promo_code,
