@@ -336,8 +336,8 @@ async def command_pay(message: types.Message):
     monetary_unit = get_monetary_unit(user_country, user_language)
     price = get_finally_price_by(user.price_in_rubles, user_country)
     pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
-    pay_link = PayLink(login=config.pay_config[f'KASSA_24_LOGIN_{user_language}'],
-                       password=config.pay_config[f'KASSA_24_PASSWORD_{user_language}'],
+    pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_{user_language}'],
+                       password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
                        telegram_id=telegram_id, price_in_tenge=price)
     url = pay_link.get_pay_url()
 
@@ -398,8 +398,8 @@ async def command_send_message_from_losers(message: types.Message):
         users_list_14 = get_loser_list_14days()
         for telegram_id in users_list_14:
             user_language = get_user_language(telegram_id)
-            pay_link = PayLink(login=config.pay_config[f'KASSA_24_LOGIN_RU_{user_language}'],
-                               password=config.pay_config[f'KASSA_24_PASSWORD_{user_language}'],
+            pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_RU_{user_language}'],
+                               password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
                                telegram_id=telegram_id, price_in_tenge=config.PRICE_AFTER_14DAYS)
             url = pay_link.get_pay_url()
 
@@ -418,8 +418,8 @@ async def command_send_message_from_losers(message: types.Message):
         users_list_45 = get_loser_list_45days()
         for telegram_id in users_list_45:
             user_language = get_user_language(telegram_id)
-            pay_link = PayLink(login=config.pay_config[f'KASSA_24_LOGIN_RU_{user_language}'],
-                               password=config.pay_config[f'KASSA_24_PASSWORD_{user_language}'],
+            pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_RU_{user_language}'],
+                               password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
                                telegram_id=telegram_id, price_in_tenge=config.PRICE_AFTER_45DAYS)
             url = pay_link.get_pay_url()
 

@@ -314,20 +314,30 @@ def get_user_name_by(telegram_id):
 
 
 def get_user_language(telegram_id):
+    """Получить язык пользователя из кэша/базы"""
+    user_language = config.users_data_cache.get(telegram_id)
+    if user_language:
+        return user_language
     database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
+    config.users_data_cache[telegram_id] = user.language
     return user.language
 
 
-# user_language = 'RU' or 'KZ'
 # database_initialization - надо бы в декоратор завернуть
-def edit_user_language(telegram_id, user_language):
+def edit_user_language(telegram_id: int, new_user_language) -> None:
+    """
+    :param telegram_id: telegram_id
+    :param new_user_language: 'RU' or 'KZ'
+    """
     database_initialization()
-    query = Users.update(language=user_language).where(Users.telegram_id == telegram_id)
+    query = Users.update(language=new_user_language).where(Users.telegram_id == telegram_id)
     query.execute()
+    config.users_data_cache[telegram_id] = new_user_language
 
 
-def get_user_country(telegram_id):
+def get_user_country(telegram_id: int) -> str:
+    """Получить страну пользователя из базы"""
     database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user.country
@@ -1126,7 +1136,7 @@ def get_big_statistics():
 
 
 if __name__ == '__main__':
-    create_database(config.db_config["db_name"])
+    create_database(config.DB_CONFIGS["db_name"])
     create_new_tables(table_names)
     set_users_from_backup()
     set_auto_schools_from_backup()

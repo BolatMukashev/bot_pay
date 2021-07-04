@@ -1,20 +1,20 @@
 import pymysql
 from peewee import *
-from config import db_config
+from config import DB_CONFIGS
 from datetime import datetime, timedelta
 
 
-conn = pymysql.connect(host=db_config['host'],
-                       port=db_config['port'],
-                       user=db_config['user'],
-                       password=db_config['password'])
+conn = pymysql.connect(host=DB_CONFIGS['host'],
+                       port=DB_CONFIGS['port'],
+                       user=DB_CONFIGS['user'],
+                       password=DB_CONFIGS['password'])
 
 
-db = MySQLDatabase(db_config['db_name'],
-                   host=db_config['host'],
-                   port=db_config['port'],
-                   user=db_config['user'],
-                   password=db_config['password'])
+db = MySQLDatabase(DB_CONFIGS['db_name'],
+                   host=DB_CONFIGS['host'],
+                   port=DB_CONFIGS['port'],
+                   user=DB_CONFIGS['user'],
+                   password=DB_CONFIGS['password'])
 
 
 class BaseModel(Model):
