@@ -4,9 +4,9 @@ import base64
 
 class PayLink:
     kassa24_url = "https://ecommerce.pult24.kz/payment/create"
-    site_to_return = "https://pddgoodbot.ru"
+    site_to_return = "https://t.me/pdd_good_bot"
     site_to_send_callback = "https://pddgoodbot.ru/accept_page"
-    description = "Покупка годового доступа к образовательной платформе на базе мессенджера Telegram"
+    description = "Покупка годового доступа к образовательной платформе PDDgoodbot на базе мессенджера Telegram"
     email = "pdd.good.bot@gmail.com"
     phone = "7085292078"
 
@@ -38,10 +38,7 @@ class PayLink:
             "returnUrl": self.site_to_return,
             "callbackUrl": self.site_to_send_callback,
             "description": self.description,
-            "customerData": {
-                "email": self.email,
-                "phone": self.phone
-            },
+            "customerData": {},
             "metadata": {
                 "telegram_id": self.telegram_id
             }

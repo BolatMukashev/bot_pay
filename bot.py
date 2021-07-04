@@ -350,7 +350,7 @@ async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    image_code = 'AgACAgIAAxkBAAIJiWDOFk77Oui8OwWojGP2EntQsQsaAAIQszEbXGVwSoOjlk90bMMFq3cUpC4AAwEAAwIAA3MAA0usAgABHwQ'
+    image_code = IMAGES['100friends']
 
     markup = types.InlineKeyboardMarkup()
     pay_button_text = BUTTONS[f'do_it_{user_language}']

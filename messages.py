@@ -127,6 +127,10 @@ STICKERS = {
     'NO': 'CAACAgIAAxkBAAEB3HtgIV_xw819XJj4oKtFyPqCyh_pxwACawEAArnzlwslqyJF_izS0h4E'
 }
 
+IMAGES = {
+    '100friends': 'AgACAgIAAxkBAAI9mmDhhtWeuMCQ_jCRRgABOuH3RU2X_gACZ7QxGxJDEEv-BXPviTTuPwEAAwIAA3MAAyAE'
+}
+
 PROMO_CODE = {
     'registered': 'Данный промокод уже зарегистрирован',
     'error': 'Промокод введен не верно',
