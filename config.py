@@ -48,3 +48,8 @@ db_config = {
     'user': DB_USER_NAME,
     'password': DB_PASSWORD
 }
+
+CACHE = {
+    'number_of_questions_in_RU_db': None,
+    'number_of_questions_in_KZ_db': None
+}

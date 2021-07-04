@@ -187,9 +187,9 @@ def new_kz_question(question, correct_answer, all_answers, explanation=None, ima
     new_question.save()
 
 
-def get_table_length(db_name):
-    db_all = db_name.select()
-    count = len(db_all)
+def get_number_of_questions_in_db_and_set_in_cache(database, user_language):
+    count = len(database.select())
+    config.CACHE[f'number_of_questions_in_{user_language}_db'] = count
     return count
 
 
@@ -222,27 +222,11 @@ def choose_db_by_language(user_language):
 
 def get_random_question(user_language):
     database_initialization()
-    db_name = choose_db_by_language(user_language)
-    table_length = get_table_length(db_name)
-    random_id = random.randrange(1, table_length + 1)
-    question_block = db_name.get(db_name.id == random_id)
-
-    question_id = question_block.id
-    question = question_block.question
-    options = pickle.loads(question_block.all_answers)
-    random.shuffle(options)
-    correct_option_id = options.index(question_block.correct_answer)
-    explanation = question_block.explanation
-    image_code = question_block.image_code
-
-    question_dict = {'id': question_id,
-                     'question': question,
-                     'options': options,
-                     'correct_option_id': correct_option_id,
-                     'explanation': explanation,
-                     'image_code': image_code
-                     }
-    return question_dict
+    database = choose_db_by_language(user_language)
+    number_of_questions = config.CACHE.get(f'number_of_questions_in_{user_language}_db') or get_number_of_questions_in_db_and_set_in_cache(database, user_language)
+    random_id = random.randrange(1, number_of_questions + 1)
+    question = database.get(database.id == random_id)
+    return question
 
 
 def get_all_questions_from_db(user_language):

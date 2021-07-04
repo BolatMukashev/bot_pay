@@ -82,16 +82,19 @@ async def command_question(message: types.Message):
         await message.answer(MESSAGE['start_admin_text'])
     if not user_time_limit_is_over(telegram_id):
         question = get_random_question(user_language)
-        if config.DEBUG is False and question['image_code']:
-            await bot.send_photo(telegram_id, question['image_code'])
+        if config.DEBUG is False and question.image_code:
+            await bot.send_photo(telegram_id, question.image_code)
+        options = pickle.loads(question.all_answers)
+        random.shuffle(options)
+        correct_option_id = options.index(question.correct_answer)
         await bot.send_poll(telegram_id,
                             type='quiz',
                             is_anonymous=False,
                             is_closed=False,
-                            question=question['question'],
-                            options=question['options'],
-                            correct_option_id=question['correct_option_id'],
-                            explanation=question['explanation'])
+                            question=question.question,
+                            options=options,
+                            correct_option_id=correct_option_id,
+                            explanation=question.explanation)
     else:
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
         await bot.send_message(telegram_id, limit_error_message)
@@ -457,16 +460,19 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
     user_language = get_user_language(telegram_id)
     if not user_time_limit_is_over(telegram_id):
         question = get_random_question(user_language)
-        if config.DEBUG is False and question['image_code']:
-            await bot.send_photo(telegram_id, question['image_code'])
+        if config.DEBUG is False and question.image_code:
+            await bot.send_photo(telegram_id, question.image_code)
+        options = pickle.loads(question.all_answers)
+        random.shuffle(options)
+        correct_option_id = options.index(question.correct_answer)
         await quiz_answer.bot.send_poll(telegram_id,
                                         type='quiz',
                                         is_anonymous=False,
                                         is_closed=False,
-                                        question=question['question'],
-                                        options=question['options'],
-                                        correct_option_id=question['correct_option_id'],
-                                        explanation=question['explanation'])
+                                        question=question.question,
+                                        options=options,
+                                        correct_option_id=correct_option_id,
+                                        explanation=question.explanation)
     else:
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
         await bot.send_message(telegram_id, limit_error_message)

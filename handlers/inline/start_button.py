@@ -3,6 +3,8 @@ from bot import dp, bot
 from keyboards.inline.callback_datas import start_button_call
 from db_operation import get_random_question, update_registration_status, get_user_language
 import config
+import pickle
+import random
 
 
 @dp.callback_query_handler(start_button_call.filter(start='start'))
@@ -17,13 +19,16 @@ async def start_button_handler(call: CallbackQuery):
     update_registration_status(telegram_id)
 
     question = get_random_question(user_language)
-    if config.DEBUG is False and question['image_code']:
-        await bot.send_photo(telegram_id, question['image_code'])
+    if config.DEBUG is False and question.image_code:
+        await bot.send_photo(telegram_id, question.image_code)
+    options = pickle.loads(question.all_answers)
+    random.shuffle(options)
+    correct_option_id = options.index(question.correct_answer)
     await bot.send_poll(telegram_id,
                         type='quiz',
                         is_anonymous=False,
                         is_closed=False,
-                        question=question['question'],
-                        options=question['options'],
-                        correct_option_id=question['correct_option_id'],
-                        explanation=question['explanation'])
+                        question=question.question,
+                        options=options,
+                        correct_option_id=correct_option_id,
+                        explanation=question.explanation)
