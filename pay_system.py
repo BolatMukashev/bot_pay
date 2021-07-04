@@ -3,12 +3,12 @@ import base64
 
 
 class PayLink:
-    kassa24_url = "https://ecommerce.pult24.kz/payment/create"
+    kassa24_url = 'https://ecommerce.pult24.kz/payment/create'
     site_to_return = "https://t.me/pdd_good_bot"
     site_to_send_callback = "https://pddgoodbot.ru/accept_page"
     description = "Покупка годового доступа к образовательной платформе PDDgoodbot на базе мессенджера Telegram"
-    email = "pdd.good.bot@gmail.com"
-    phone = "7085292078"
+    # email = "pdd.good.bot@gmail.com"
+    # phone = "7085292078"
 
     def __init__(self, login: str, password: str, telegram_id, price_in_tenge: int):
         self.login = login
@@ -46,7 +46,7 @@ class PayLink:
         return json_data
 
     def get_pay_url(self) -> str:
-        """сгенерировать и получить платежную ссылку"""
+        """сделать POST запрос в сервис Kassa24 и получить персональную платежную ссылку с метаданными пользователя"""
         headers = self.get_headers()
         json_data = self.get_json_data()
         response = requests.post(self.kassa24_url, headers=headers, json=json_data)

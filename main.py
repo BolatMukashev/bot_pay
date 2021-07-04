@@ -67,6 +67,7 @@ def about_us():
     return render_template('about_us.html')
 
 
+# нужно добавить проверку на Платеж успешен или нет (0 или 1) и давать доступ только для успешных платежей
 @app.route('/accept_page', methods=['GET', 'POST'])
 def set_accept():
     """telegram_id - int

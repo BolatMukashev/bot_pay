@@ -50,6 +50,7 @@ async def cmd_set_commands(message: types.Message):
         await bot.set_my_commands(commands)
         await message.answer("Команды установлены!")
 
+
 # https://t.me/skillbox_speach_bot?start=test
 # Получить аргумент из команды /start:
 # start_args = message.get_args()
@@ -323,7 +324,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
 async def command_pay(message: types.Message):
     """
     Раздел Оплаты. Отдает ссылку на оплату доступа к боту.
-    user.country поменял на KZ ибо доступен прием платежей только в тенге, сорян
+    user.country поменял на KZ, ибо доступен прием платежей только в тенге, сорян...
     """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
@@ -382,7 +383,7 @@ async def command_up_time_limit_for_all_at_3day(message: types.Message):
         await message.answer('+3 дня использования всем пользователям АКТИВИРОВАНО!')
 
 
-# добавить автопроверку раз в сутки
+# добавить автопроверку раз в сутки. большое потребление оперативной памяти, стоит ли добавлять?
 @dp.message_handler(commands=["send_message_from_losers"])
 async def command_send_message_from_losers(message: types.Message):
     """
