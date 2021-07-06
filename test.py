@@ -3,6 +3,7 @@ from db_operation import *
 from auto_schools import auto_schools
 from pprint import pprint
 
+
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
 
 db_list = []
