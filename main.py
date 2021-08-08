@@ -71,6 +71,7 @@ def about_us():
 @app.route('/accept_page', methods=['GET', 'POST'])
 def set_accept():
     """
+    Платежная система kassa24
     status == 1 - оплата произведена успешно
     telegram_id - int
     для проверки, сохраняем файл с id в папке backup сайта:
@@ -84,6 +85,24 @@ def set_accept():
         update_user_made_payment_status(telegram_id)
     res = json.dumps({"accepted": True})
     return res
+
+
+@app.route('/accept', methods=['POST'])
+def accept():
+    """
+    Платежная система ioka
+    status == 'paid' - оплата произведена успешно, 'blocked' - средства заблокированы у пользователя
+    client_id - str
+    для проверки, сохраняем файл с id в папке backup сайта:
+    file_name = os.path.join(os.getcwd(), 'backup', 'pay_data.json')
+    create_new_json_file(file_name, telegram_id)
+    """
+    status = request.json['status']
+    if status == 'paid' or status == 'blocked':
+        telegram_id = int(request.json['client_id'])
+        up_user_time_limit_days(telegram_id, 365)
+        update_user_made_payment_status(telegram_id)
+    return 'all good'
 
 
 if __name__ == '__main__':

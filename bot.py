@@ -13,6 +13,7 @@ from messages import *
 from gmail import send_emails_to_schools
 import io
 from pay_system import PayLink
+from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
 
@@ -323,10 +324,36 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+# @dp.message_handler(commands=["pay"])
+# async def command_pay(message: types.Message):
+#     """
+#     Раздел Оплаты. Отдает ссылку на оплату доступа к образовательной системе.
+#     user.country поменял на KZ, ибо доступен прием платежей только в тенге, сорян...
+#     """
+#     telegram_id = message.from_user.id
+#     user = get_user_by(telegram_id)
+#     user_country = 'KZ'
+#     user_language = user.language
+#     monetary_unit = get_monetary_unit(user_country, user_language)
+#     price = get_finally_price_by(user.price_in_rubles, user_country)
+#     pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
+#     pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_{user_language}'],
+#                        password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
+#                        telegram_id=telegram_id, price_in_tenge=price)
+#     url = pay_link.get_pay_url()
+#
+#     markup = types.InlineKeyboardMarkup()
+#     pay_button = BUTTONS[f'pay_{user_language}']
+#     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
+#     markup.add(pay_link)
+#
+#     await message.answer(pay_message_text, reply_markup=markup)
+
+
 @dp.message_handler(commands=["pay"])
 async def command_pay(message: types.Message):
     """
-    Раздел Оплаты. Отдает ссылку на оплату доступа к боту.
+    Раздел Оплаты. Отдает ссылку на оплату доступа к образовательной системе.
     user.country поменял на KZ, ибо доступен прием платежей только в тенге, сорян...
     """
     telegram_id = message.from_user.id
@@ -336,9 +363,7 @@ async def command_pay(message: types.Message):
     monetary_unit = get_monetary_unit(user_country, user_language)
     price = get_finally_price_by(user.price_in_rubles, user_country)
     pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
-    pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_{user_language}'],
-                       password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
-                       telegram_id=telegram_id, price_in_tenge=price)
+    pay_link = PayLinkIoka(telegram_id=telegram_id, price_in_tenge=price)
     url = pay_link.get_pay_url()
 
     markup = types.InlineKeyboardMarkup()
