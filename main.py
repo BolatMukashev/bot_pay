@@ -87,14 +87,15 @@ def set_accept():
     return res
 
 
-@app.route('/accept', methods=['POST'])
+@app.route('/accept', methods=['GET', 'POST'])
 def accept():
     """
     Платежная система ioka
     status == 'paid' - оплата произведена успешно, 'blocked' - средства заблокированы у пользователя
     client_id - str
     для проверки, сохраняем файл с id в папке backup сайта:
-    file_name = os.path.join(os.getcwd(), 'backup', 'pay_data.json')
+    telegram_id = int(request.json['client_id'])
+    file_name = os.path.join(os.getcwd(), 'backup', 'pay_data_ioka.json')
     create_new_json_file(file_name, telegram_id)
     """
     status = request.json['status']

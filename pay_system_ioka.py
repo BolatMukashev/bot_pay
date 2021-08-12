@@ -6,7 +6,7 @@ class PayLinkIoka:
     secret_key = "DQPzyf2HK02U9rcID2vGCzFVVcmmMcvPcrw7ELe-zx_O9bQKJ_zZKw_uPLhGEMnFOxY-zhOggvg8NUv3ZAevNQ"
     url = "https://stage.ioka.kz/api/payments/register/"
     back_url = "https://t.me/pdd_good_bot/"
-    callback_url = "https://pddgoodbot.ru/accept/"
+    callback_url = "https://pddgoodbot.ru/accept"
 
     def __init__(self, telegram_id: int, price_in_tenge: int):
         self.telegram_id = telegram_id
