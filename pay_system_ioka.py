@@ -8,9 +8,10 @@ class PayLinkIoka:
     back_url = "https://t.me/pdd_good_bot/"
     callback_url = "https://pddgoodbot.ru/accept"
 
-    def __init__(self, telegram_id: int, price_in_tenge: int):
+    def __init__(self, telegram_id: int, price_in_tenge: int, currency: int):
         self.telegram_id = telegram_id
         self.price_in_tenge = price_in_tenge
+        self.currency = currency
 
     def get_headers(self) -> dict:
         """формируем заголовок запроса"""
@@ -20,11 +21,11 @@ class PayLinkIoka:
     def get_json_data(self, order_id) -> dict:
         """
         основное тело запроса
-        398 - код тенге, 643 - код рубля
+        (398 - код тенге, 643 - код рубля)
         """
         json_data = {
             "order_id": order_id,
-            "currency": 398,
+            "currency": self.currency,
             "amount": str(self.price_in_tenge),
             "client_id": str(self.telegram_id),
             "back_url": self.back_url,

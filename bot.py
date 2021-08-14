@@ -353,21 +353,20 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["pay"])
 async def command_pay(message: types.Message):
     """
-    Раздел Оплаты. Отдает ссылку на оплату доступа к образовательной системе.
-    user.country поменял на KZ, ибо доступен прием платежей только в тенге, сорян...
+    Раздел Оплаты.
+    Команда pay посылает запрос в платежную систему, получает в ответ платежную ссылку и передает эту ссылку на оплату
+    клиенту
     """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    user_country = 'KZ'
-    user_language = user.language
-    monetary_unit = get_monetary_unit(user_country, user_language)
-    price = get_finally_price_by(user.price_in_rubles, user_country)
-    pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
-    pay_link = PayLinkIoka(telegram_id=telegram_id, price_in_tenge=price)
+    monetary_unit = MonetaryUnit(user.country, user.language)
+    price = get_finally_price_by(user.price_in_rubles, user.country)
+    pay_message_text = MESSAGE[f'pay_message_{user.language}'] + f' {str(price)} {monetary_unit.name}!'
+    pay_link = PayLinkIoka(telegram_id=telegram_id, price_in_tenge=price, currency=monetary_unit.code)
     url = pay_link.get_pay_url()
 
     markup = types.InlineKeyboardMarkup()
-    pay_button = BUTTONS[f'pay_{user_language}']
+    pay_button = BUTTONS[f'pay_{user.language}']
     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
     markup.add(pay_link)
 

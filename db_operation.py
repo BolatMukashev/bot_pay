@@ -364,15 +364,34 @@ def get_monetary_unit_by_user_country(telegram_id):
         return 'рублей'
 
 
+# для платежки kassa24
 def get_monetary_unit(user_country, user_language):
     if user_country == 'KZ':
-        return 'тенге'
+         return 'тенге'
     elif user_country == 'RU' and user_language == 'RU':
         return 'рублей'
     elif user_country == 'RU' and user_language == 'KZ':
         return 'рубль'
     else:
         return 'рублей'
+
+
+class MonetaryUnit:
+    def __init__(self, user_country: str, user_language: str):
+        self.user_country = user_country
+        self.user_language = user_language
+
+        if self.user_country == 'KZ':
+            self.name = 'тенге'
+            self.code = 398
+
+        elif self.user_country == 'RU' and self.user_language == 'RU':
+            self.name = 'рублей'
+            self.code = 643
+
+        elif self.user_country == 'RU' and self.user_language == 'KZ':
+            self.name = 'рубль'
+            self.code = 643
 
 
 def get_user_time_limit(telegram_id):
