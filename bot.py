@@ -135,6 +135,7 @@ async def command_statistics(message: types.Message):
         await message.answer(result)
 
 
+# не работает...
 @dp.message_handler(commands=["message_for_all"], state='*')
 async def command_message_for_all(message: types.Message):
     """Отправить сообщение всем пользователям"""
@@ -144,18 +145,20 @@ async def command_message_for_all(message: types.Message):
         await AllStates.MessageForAll.set()
 
 
+# были проблемы с работой функции, нужно проверить
 @dp.message_handler(state=AllStates.MessageForAll, content_types=types.ContentTypes.TEXT)
 async def command_message_for_all_action(message: types.Message, state: FSMContext):
     my_message = message.text
     await state.update_data(my_message=my_message)
     users = get_all_users_telegram_id()
+    await state.finish()
     for user in users:
         try:
             await bot.send_sticker(user, STICKERS['message'])
             await bot.send_message(user, my_message)
         except ChatNotFound:
             pass
-    await state.finish()
+    await bot.send_message(config.ADMIN_ID, "Массовая рассылка сообщений завершена")
 
 
 @dp.message_handler(commands=["send_email_for_all_auto_schools"], state='*')
