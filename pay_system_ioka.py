@@ -1,10 +1,12 @@
 import requests
 import random
+from config import IOKA_PAY_CONFIGS
 
 
 class PayLinkIoka:
-    secret_key = "DQPzyf2HK02U9rcID2vGCzFVVcmmMcvPcrw7ELe-zx_O9bQKJ_zZKw_uPLhGEMnFOxY-zhOggvg8NUv3ZAevNQ"
-    url = "https://stage.ioka.kz/api/payments/register/"
+    secret_key = IOKA_PAY_CONFIGS.get('IOKA_SECRET_KEY')
+    test_server_url = "https://stage.ioka.kz/api/payments/register/"
+    url = "https://ioka.kz/api/payments/register/"
     back_url = "https://t.me/pdd_good_bot/"
     callback_url = "https://pddgoodbot.ru/accept"
 

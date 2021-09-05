@@ -40,6 +40,12 @@ PAY_CONFIGS = {
     'KASSA_24_PASSWORD_KZ': os.getenv('KASSA_24_PASSWORD_KZ')
 }
 
+IOKA_PAY_CONFIGS = {
+    'IOKA_TEST_KEY': os.getenv('IOKA_TEST_KEY'),
+    'IOKA_SECRET_KEY': os.getenv('IOKA_SECRET_KEY'),
+    'IOKA_PUBLIC_KEY': os.getenv('IOKA_PUBLIC_KEY')
+}
+
 
 DB_CONFIGS = {
     'db_name': DB_NAME,

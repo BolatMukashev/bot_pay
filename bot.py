@@ -373,6 +373,12 @@ async def command_pay(message: types.Message):
     await message.answer(pay_message_text, reply_markup=markup)
 
 
+async def pay_accepted_message(telegram_id: int, order_id: int) -> None:
+    await bot.send_message(telegram_id, text="Ваш платеж принят!\n"
+                                             "Вы можете продолжать пользоваться нашим сервисом\n"
+                                             f"ID платежа {order_id}")
+
+
 @dp.message_handler(commands=["promotions"])
 async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""

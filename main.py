@@ -3,6 +3,7 @@ from werkzeug.utils import redirect
 from db_operation import *
 from gmail import send_emails_to_schools
 from static.html_messages.you_promo_code_registered import you_promo_code_registered_message
+from bot import pay_accepted_message
 
 app = Flask(__name__)
 
@@ -99,14 +100,18 @@ def accept():
     client_id - str
     для проверки, сохраняем файл с id в папке backup сайта:
     telegram_id = int(request.json['client_id'])
+    order_id = int(request.json["order_id"])
+    new_data = [telegram_id, order_id]
     file_name = os.path.join(os.getcwd(), 'backup', 'pay_data_ioka.json')
-    create_new_json_file(file_name, telegram_id)
+    create_new_json_file(file_name, new_data)
     """
     status = request.json['status']
     if status == 'paid' or status == 'blocked':
         telegram_id = int(request.json['client_id'])
+        order_id = int(request.json["order_id"])
         up_user_time_limit_days(telegram_id, 365)
         update_user_made_payment_status(telegram_id)
+        pay_accepted_message(telegram_id, order_id)
     return 'all good'
 
 
