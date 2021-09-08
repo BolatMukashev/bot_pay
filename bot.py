@@ -16,6 +16,7 @@ from pay_system import PayLink
 from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
+from tqdm import tqdm as loading_bar
 
 
 if config.DEBUG:
@@ -29,7 +30,6 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 class AllStates(StatesGroup):
     MessageForAll: State = State()
-    MessageForAllRepair: State = State()
     SendPromotionalPost: State = State()
     UsePromoCode: State = State()
     DeleteAutoSchool: State = State()
@@ -136,25 +136,33 @@ async def command_statistics(message: types.Message):
 
 
 # не работает...
-@dp.message_handler(commands=["message_for_all"], state='*')
-async def command_message_for_all(message: types.Message):
+@dp.message_handler(commands=["message_for_all", "message_for_all_about_repair"], state='*')
+async def command_message_for_all(message: types.Message, state: FSMContext):
     """Отправить сообщение всем пользователям"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         await message.answer('Пиши своё сообщение, но помни что оно уйдет всем пользователям!!!')
         await AllStates.MessageForAll.set()
+        await state.update_data(command_used=message.text)
 
 
 # были проблемы с работой функции, нужно проверить
 @dp.message_handler(state=AllStates.MessageForAll, content_types=types.ContentTypes.TEXT)
 async def command_message_for_all_action(message: types.Message, state: FSMContext):
     my_message = message.text
-    await state.update_data(my_message=my_message)
-    users = get_all_users_telegram_id()
+
+    sticker_id = ""
+    data = await state.get_data()
+    if data['command_used'] == "/message_for_all":
+        sticker_id: str = STICKERS['message']
+    elif data['command_used'] == "/message_for_all_about_repair":
+        sticker_id: str = STICKERS['repair']
     await state.finish()
-    for user in users:
+
+    users = get_all_users_telegram_id()
+    for user in loading_bar(users, desc='Отправка сообщений пользователям', colour="blue", ncols=120):
         try:
-            await bot.send_sticker(user, STICKERS['message'])
+            await bot.send_sticker(user, sticker_id)
             await bot.send_message(user, my_message)
         except ChatNotFound:
             pass
@@ -178,7 +186,7 @@ async def command_send_email_for_all_auto_schools_action(message: types.Message,
     message_subtitle = 'Произошли изменения'
     html = new_func_and_offers_message(my_message)
     send_emails_to_schools(emails, message_subtitle, html)
-    await message.answer('Сообщения о изменениях были отправлены автошколам!')
+    await message.answer('Сообщения о изменениях были отправлены автошколам! ✅')
     await state.finish()
 
 
@@ -201,29 +209,6 @@ async def command_send_photo_action(message: types.Message, state: FSMContext):
     for user_id in all_users:
         try:
             await bot.send_photo(user_id, photo_id, caption=my_message)
-        except ChatNotFound:
-            pass
-    await state.finish()
-
-
-@dp.message_handler(commands=["message_for_all_about_repair"], state='*')
-async def command_message_for_all_repair(message: types.Message):
-    """Отправить сообщение о ремонте всем пользователем + стикер с ремонтными работами"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        await message.answer('Пиши своё сообщение о РЕМОНТНЫХ РАБОТАХ, но помни что оно уйдет всем пользователям!!!')
-        await AllStates.MessageForAllRepair.set()
-
-
-@dp.message_handler(state=AllStates.MessageForAllRepair, content_types=types.ContentTypes.TEXT)
-async def command_message_for_all_repair_action(message: types.Message, state: FSMContext):
-    my_message = message.text
-    await state.update_data(my_message=my_message)
-    users = get_all_users_telegram_id()
-    for user in users:
-        try:
-            await bot.send_sticker(user, STICKERS['repair'])
-            await bot.send_message(user, my_message)
         except ChatNotFound:
             pass
     await state.finish()
@@ -325,32 +310,6 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
         await message.answer_sticker(STICKERS['NO'])
         await message.answer(PROMO_CODE[f'promo_code_error_{language}'])
     await state.finish()
-
-
-# @dp.message_handler(commands=["pay"])
-# async def command_pay(message: types.Message):
-#     """
-#     Раздел Оплаты. Отдает ссылку на оплату доступа к образовательной системе.
-#     user.country поменял на KZ, ибо доступен прием платежей только в тенге, сорян...
-#     """
-#     telegram_id = message.from_user.id
-#     user = get_user_by(telegram_id)
-#     user_country = 'KZ'
-#     user_language = user.language
-#     monetary_unit = get_monetary_unit(user_country, user_language)
-#     price = get_finally_price_by(user.price_in_rubles, user_country)
-#     pay_message_text = MESSAGE[f'pay_message_{user_language}'] + f' {str(price)} {monetary_unit}!'
-#     pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_{user_language}'],
-#                        password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
-#                        telegram_id=telegram_id, price_in_tenge=price)
-#     url = pay_link.get_pay_url()
-#
-#     markup = types.InlineKeyboardMarkup()
-#     pay_button = BUTTONS[f'pay_{user_language}']
-#     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
-#     markup.add(pay_link)
-#
-#     await message.answer(pay_message_text, reply_markup=markup)
 
 
 @dp.message_handler(commands=["pay"])

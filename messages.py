@@ -1,33 +1,35 @@
 MESSAGE = dict(start_admin_text="""
-    Показать статистику:
-    /statistics
-    Отправить сообщение для неоплативших:
-    /send_message_from_losers
-    Отправить рекламу всем:
-    /send_promotional_post
-    Сообщения всем:
-    /message_for_all
-    Сообщения всем о ремонте:
-    /message_for_all_about_repair
-    Список всех пользователей:
-    /all_users
-    Список всех промо-кодов:
-    /all_promo_codes
-    +3 минуты админу:
-    /up_admin_time_limit
-    +3 дня использования всем!
-    /up_time_limit_for_all_at_3day
-    Отправить приветственное сообщениe:
-    /send_hello_emails_to_new_schools
-    Отправить email всем Автошколам:
-    /send_email_for_all_auto_schools
-    Удалить Автошколу из базы:
-    /delete_auto_school
-    Бэкап данных:
-    /backup_all_data
-    Установить команды:
-    /set_commands
-    """,
+Показать статистику:
+/statistics
+
+MESSAGES
+Отправить рекламу всем:
+/send_promotional_post
+Сообщения всем:
+/message_for_all
+Сообщения всем о ремонте:
+/message_for_all_about_repair
+Cообщение для неоплативших:
+/send_message_from_losers
+
+EMAIL
+Отправить приветственное сообщениe:
+/send_hello_emails_to_new_schools
+Отправить email всем Автошколам:
+/send_email_for_all_auto_schools
+
+ACTIONS
++3 минуты админу:
+/up_admin_time_limit
++3 дня использования всем!
+/up_time_limit_for_all_at_3day
+Удалить Автошколу из базы:
+/delete_auto_school
+Бэкап данных:
+/backup_all_data
+Установить команды:
+/set_commands
+""",
                start_user_text='Добро пожаловать\n'
                                'У вас есть 24 часа чтобы ознакомится с нашей Образовательной платформой',
                language_choice='Выберите язык\n'
