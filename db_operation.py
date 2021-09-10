@@ -367,7 +367,7 @@ def get_monetary_unit_by_user_country(telegram_id):
 # для платежки kassa24
 def get_monetary_unit(user_country, user_language):
     if user_country == 'KZ':
-         return 'тенге'
+        return 'тенге'
     elif user_country == 'RU' and user_language == 'RU':
         return 'рублей'
     elif user_country == 'RU' and user_language == 'KZ':
@@ -768,7 +768,7 @@ def up_number_of_references(promo_code):
 
 def correct_letters_filter(promo_code):
     promo_code = promo_code.upper()
-    correct_promo_code = [c for c in promo_code if c in 'QWERTYUIOPASDFGHJKLZXCVBNM.-_, 1234567890+#№$!%&?*']
+    correct_promo_code = [c for c in promo_code if c in string.ascii_uppercase + string.digits + '.-_, +#№$!%&?*']
     return ''.join(correct_promo_code)
 
 
