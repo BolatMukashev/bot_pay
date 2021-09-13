@@ -5,6 +5,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound
 from db_operation import *
 from keyboards.inline.callback_datas import referral_button_call
+from keyboards.inline.country import country_buttons
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty_RU import penalty_buttons_ru_1
 from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
@@ -12,7 +13,7 @@ from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from messages import *
 from gmail import send_emails_to_schools
 import io
-from pay_system import PayLink
+from pay_system_kassa24 import PayLink
 from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
@@ -46,7 +47,10 @@ async def cmd_set_commands(message: types.Message):
                     types.BotCommand(command="/pay", description="Оплатить. Төлеу"),
                     types.BotCommand(command="/promo_code", description="Использовать промокод. Промокодты қолдану"),
                     types.BotCommand(command="/promotions", description="Акции и скидки. Қор мен жеңілдіктер"),
+                    types.BotCommand(command="/chat", description="Обсудить вопросы. Сұрақтарды талқылау"),
+                    types.BotCommand(command="/error", description="Сообщить об ошибке. Қате туралы хабарлау"),
                     types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
+                    types.BotCommand(command="/country", description="Изменить страну. Ел өзгерту"),
                     types.BotCommand(command="/info", description="Подсказки. Кеңестер")]
         await bot.set_my_commands(commands)
         await message.answer("Команды установлены!")
@@ -106,6 +110,30 @@ async def command_question(message: types.Message):
 async def command_language(message: types.Message):
     """Вызвать меню смены языка"""
     await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
+
+
+@dp.message_handler(commands=["country"])
+async def command_country(message: types.Message):
+    """Вызвать меню смены страны"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    await message.answer(MESSAGE[f'country_choice_{user_language}'], reply_markup=country_buttons)
+
+
+@dp.message_handler(commands=["chat"])
+async def command_chat(message: types.Message):
+    """Ссылка на чат"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    await message.answer(MESSAGE[f'link_to_chat_{user_language}'])
+
+
+@dp.message_handler(commands=["error"])
+async def command_error(message: types.Message):
+    """Ссылка на обсуждение ошибок"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    await message.answer(MESSAGE[f'link_error_chat_{user_language}'])
 
 
 @dp.message_handler(commands=["penalty"])
@@ -191,7 +219,7 @@ async def command_send_email_for_all_auto_schools_action(message: types.Message,
 
 
 # переделать, отдельная команда для Ру пользователей, отдельная для КЗ
-@dp.message_handler(commands=["send_promotional_post"], state='*')
+@dp.message_handler(commands=["send_post"], state='*')
 async def command_send_photo(message: types.Message):
     """Отправить рекламное сообщение всем пользователям - фото+подпись"""
     telegram_id = message.from_user.id
@@ -239,24 +267,6 @@ async def command_up_admin_q_a(message: types.Message):
     if user_id == config.ADMIN_ID:
         up_admin_time_limit_3minute()
         await message.answer('+3 минуты добавлено')
-
-
-@dp.message_handler(commands=["all_users"])
-async def command_all_users(message: types.Message):
-    """Получить список всех зарегистрированных пользователь в базе данных"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        result = get_all_users_list()
-        await message.answer(result)
-
-
-@dp.message_handler(commands=["all_promo_codes"])
-async def command_all_promo_codes(message: types.Message):
-    """Получить список всех зарегистрированных промо-кодов из базы данных"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        result = get_all_promo_code_list()
-        await message.answer(result)
 
 
 @dp.message_handler(commands=["backup_all_data"])
@@ -375,6 +385,17 @@ async def command_up_time_limit_for_all_at_3day(message: types.Message):
         for user_id in all_users_id:
             up_user_time_limit_days(user_id, 3)
         await message.answer('+3 дня использования всем пользователям АКТИВИРОВАНО!')
+
+
+@dp.message_handler(commands=["up_time_limit_for_all_at_30days"])
+async def command_up_time_limit_for_all_at_30day(message: types.Message):
+    """Добавить +30 дней пользования ботом всем пользователям. Акция за ремонт"""
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        all_users_id = get_all_users_telegram_id()
+        for user_id in all_users_id:
+            up_user_time_limit_days(user_id, 30)
+        await message.answer('+30 дней использования всем пользователям АКТИВИРОВАНО!')
 
 
 # добавить автопроверку раз в сутки. большое потребление оперативной памяти, стоит ли добавлять?

@@ -4,6 +4,7 @@ from keyboards.inline.callback_datas import set_country
 from keyboards.inline.start_button import START_button
 from db_operation import edit_user_country, get_user_language
 from messages import MESSAGE
+from db_operation import get_user_registration_status
 
 
 @dp.callback_query_handler(set_country.filter(country='country'))
@@ -19,5 +20,5 @@ async def update_country(call: CallbackQuery, callback_data: dict):
     await call.message.edit_reply_markup()
     await bot.edit_message_text(chat_id=chat_id, message_id=message_id,
                                 text=MESSAGE[f'country_edited_ok_{user_language}'])
-
-    await bot.send_message(chat_id, text=MESSAGE[f'registration_ok_{user_language}'], reply_markup=START_button)
+    if not get_user_registration_status(telegram_id):
+        await bot.send_message(chat_id, text=MESSAGE[f'registration_ok_{user_language}'], reply_markup=START_button)
