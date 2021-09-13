@@ -321,10 +321,9 @@ async def command_pay(message: types.Message):
     """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    monetary_unit = MonetaryUnit(user.country, user.language)
-    price = get_finally_price_by(user.price_in_rubles, user.country)
-    pay_message_text = MESSAGE[f'pay_message_{user.language}'] + f' {str(price)} {monetary_unit.name}!'
-    pay_link = PayLinkIoka(telegram_id=telegram_id, price=price, currency=monetary_unit.code, name=user.full_name)
+    pay_data = PayData(user.country, user.language, user.price_in_rubles)
+    pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
+                           name=user.full_name)
     url = pay_link.get_pay_url()
 
     markup = types.InlineKeyboardMarkup()
@@ -332,7 +331,7 @@ async def command_pay(message: types.Message):
     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
     markup.add(pay_link)
 
-    await message.answer(pay_message_text, reply_markup=markup)
+    await message.answer(pay_data.pay_message_text, reply_markup=markup)
 
 
 def pay_accepted_message(telegram_id: int, order_id: int) -> None:

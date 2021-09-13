@@ -23,8 +23,7 @@ class PayLinkIoka:
 
     def get_json_data(self, order_id) -> dict:
         """
-        основное тело запроса
-        (398 - код тенге, 643 - код рубля)
+        основное тело запроса на сервер IOKA
         """
         json_data = {
             "order_id": order_id,
@@ -33,7 +32,7 @@ class PayLinkIoka:
             "client_id": str(self.telegram_id),
             "back_url": self.back_url,
             "callback_url": self.callback_url,
-            "additional_params": self.name,
+            "additional_params": {"name": self.name},
             "template": "3D"
         }
         return json_data
@@ -49,7 +48,3 @@ class PayLinkIoka:
             if response.ok:
                 url = response.json()["url"]
                 return url
-
-
-# new_payment = PayLinkIoka(111222555, 500)
-# print(new_payment.get_pay_url())

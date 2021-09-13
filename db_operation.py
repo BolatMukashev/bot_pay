@@ -10,8 +10,9 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 
-# ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
+# ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
+from messages import MESSAGE
 
 table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools]
 
@@ -376,22 +377,30 @@ def get_monetary_unit(user_country, user_language):
         return 'рублей'
 
 
-class MonetaryUnit:
-    def __init__(self, user_country: str, user_language: str):
+class PayData:
+    def __init__(self, user_country: str, user_language: str, price_in_rubles: int):
+        """
+        Прием оплаты в рублях не работает (платежная система IOKA)
+        (398 - код тенге, 643 - код рубля)
+        :param user_country: Страна пользователя
+        :param user_language: Язык пользователя
+        """
         self.user_country = user_country
         self.user_language = user_language
+        self.price_ruble = price_in_rubles
+        self.price_tenge = int(self.price_ruble * config.RUBLES_EXCHANGE_RATE)
+        self.code = 398
 
         if self.user_country == 'KZ':
-            self.name = 'тенге'
-            self.code = 398
+            self.pay_message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_tenge} тенге!'
 
         elif self.user_country == 'RU' and self.user_language == 'RU':
-            self.name = 'рублей'
-            self.code = 643
+            self.pay_message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рублей!' \
+                                                                                   f' ({self.price_tenge} тенге)'
 
         elif self.user_country == 'RU' and self.user_language == 'KZ':
-            self.name = 'рубль'
-            self.code = 643
+            self.pay_message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рубль!' \
+                                                                                   f' ({self.price_tenge} тенге)'
 
 
 def get_user_time_limit(telegram_id):
@@ -437,13 +446,13 @@ def get_time_visit(telegram_id):
 def get_price_in_rubles_on_user(telegram_id):
     database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
-    return user.price_in_rubles
+    return user.price_ruble
 
 
 def get_finally_price(telegram_id):
     database_initialization()
     user = get_user_by(telegram_id)
-    price_in_rubles = user.price_in_rubles
+    price_in_rubles = user.price_ruble
     user_country = user.country
     if user_country == 'KZ':
         return round(price_in_rubles * 5)
@@ -451,9 +460,15 @@ def get_finally_price(telegram_id):
         return price_in_rubles
 
 
-def get_finally_price_by(price_in_rubles, user_country):
+def get_finally_price_by(price_in_rubles: int, user_country: str) -> int:
+    """
+    Преобразует цену в рублях в цену в тенге, если пользователь из Казахстана
+    :param price_in_rubles: Цена из базы, у пользователя, в рублях
+    :param user_country: Страна проживания пользователя
+    :return:
+    """
     if user_country == 'KZ':
-        return round(price_in_rubles * 5)
+        return int(price_in_rubles * config.RUBLES_EXCHANGE_RATE)
     else:
         return price_in_rubles
 
@@ -564,7 +579,7 @@ def get_all_users_on_dict_format():
                        'time_limit': user.time_limit,
                        'last_visit': user.last_visit,
                        'promo_code_used': user.promo_code_used,
-                       'price_in_rubles': user.price_in_rubles,
+                       'price_in_rubles': user.price_ruble,
                        'made_payment': user.made_payment,
                        'second_week_promotional_offer': user.second_week_promotional_offer,
                        'sixth_week_promotional_offer': user.sixth_week_promotional_offer}

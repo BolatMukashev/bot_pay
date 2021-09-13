@@ -1,10 +1,9 @@
 import os
-import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG = json.loads(os.getenv('DEBUG').lower())
+DEBUG = True
 
 TEST_BOT_TOKEN = os.getenv('TEST_BOT_TOKEN')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -32,6 +31,8 @@ DB_USER_NAME = os.getenv('DB_USER_NAME')
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = int(os.getenv('DB_PORT'))
 DB_PASSWORD = os.getenv('DB_PASSWORD')
+
+RUBLES_EXCHANGE_RATE = 5.87
 
 PAY_CONFIGS = {
     'KASSA_24_LOGIN_RU': os.getenv('KASSA_24_LOGIN_RU'),
