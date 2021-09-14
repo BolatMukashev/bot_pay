@@ -163,38 +163,28 @@ async def command_statistics(message: types.Message):
         await message.answer(result)
 
 
-# не работает...
-@dp.message_handler(commands=["message_for_all", "message_for_all_about_repair"], state='*')
-async def command_message_for_all(message: types.Message, state: FSMContext):
-    """Отправить сообщение всем пользователям"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        await message.answer('Пиши своё сообщение, но помни что оно уйдет всем пользователям!!!')
-        await AllStates.MessageForAll.set()
-        await state.update_data(command_used=message.text)
+# переделать, отдельная команда для Ру пользователей, отдельная для КЗ
+@dp.message_handler(commands=["send_post_ru", "send_post_kz"], state='*')
+async def command_send_post(message: types.Message):
+    """Отправить рекламное сообщение всем пользователям - фото+подпись"""
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        await message.answer('Отправь рекламное фото и сообщение, оно будет перенаправлено всем пользователям!')
+        await AllStates.SendPromotionalPost.set()
 
 
-# были проблемы с работой функции, нужно проверить
-@dp.message_handler(state=AllStates.MessageForAll, content_types=types.ContentTypes.TEXT)
-async def command_message_for_all_action(message: types.Message, state: FSMContext):
-    my_message = message.text
-
-    sticker_id = ""
-    data = await state.get_data()
-    if data['command_used'] == "/message_for_all":
-        sticker_id: str = STICKERS['message']
-    elif data['command_used'] == "/message_for_all_about_repair":
-        sticker_id: str = STICKERS['repair']
-    await state.finish()
-
-    users = get_all_users_telegram_id()
-    for user in loading_bar(users, desc='Отправка сообщений пользователям', colour="blue", ncols=120):
+@dp.message_handler(state=AllStates.SendPromotionalPost, content_types=['text', 'photo'])
+async def command_send_post_action(message: types.Message, state: FSMContext):
+    photo_id = message.photo[0].file_id
+    my_message = message.caption
+    await state.update_data(photo_id=photo_id)
+    all_users = get_all_users_telegram_id()
+    for user_id in loading_bar(all_users):
         try:
-            await bot.send_sticker(user, sticker_id)
-            await bot.send_message(user, my_message)
+            await bot.send_photo(user_id, photo_id, caption=my_message)
         except ChatNotFound:
             pass
-    await bot.send_message(config.ADMIN_ID, "Массовая рассылка сообщений завершена")
+    await state.finish()
 
 
 @dp.message_handler(commands=["send_email_for_all_auto_schools"], state='*')
@@ -218,30 +208,6 @@ async def command_send_email_for_all_auto_schools_action(message: types.Message,
     await state.finish()
 
 
-# переделать, отдельная команда для Ру пользователей, отдельная для КЗ
-@dp.message_handler(commands=["send_post"], state='*')
-async def command_send_photo(message: types.Message):
-    """Отправить рекламное сообщение всем пользователям - фото+подпись"""
-    telegram_id = message.from_user.id
-    if telegram_id == config.ADMIN_ID:
-        await message.answer('Отправь рекламное фото и сообщение, оно будет перенаправлено всем пользователям!')
-        await AllStates.SendPromotionalPost.set()
-
-
-@dp.message_handler(state=AllStates.SendPromotionalPost, content_types=['text', 'photo'])
-async def command_send_photo_action(message: types.Message, state: FSMContext):
-    photo_id = message.photo[0].file_id
-    my_message = message.caption
-    await state.update_data(photo_id=photo_id)
-    all_users = get_all_users_telegram_id()
-    for user_id in all_users:
-        try:
-            await bot.send_photo(user_id, photo_id, caption=my_message)
-        except ChatNotFound:
-            pass
-    await state.finish()
-
-
 @dp.message_handler(commands=["delete_auto_school"], state='*')
 async def command_delete_auto_school(message: types.Message):
     """Удалить Автошколу по запросу"""
@@ -258,30 +224,6 @@ async def command_delete_auto_school_action(message: types.Message, state: FSMCo
     delete_auto_schools_by(secret_key)
     await message.answer('Автошкола успешно удалена из базы!')
     await state.finish()
-
-
-@dp.message_handler(commands=["up_admin_time_limit"])
-async def command_up_admin_q_a(message: types.Message):
-    """Добавить 3 минуты к времени использования админу, для тестов"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        up_admin_time_limit_3minute()
-        await message.answer('+3 минуты добавлено')
-
-
-@dp.message_handler(commands=["backup_all_data"])
-async def command_backup_all_data(message: types.Message):
-    """Бэкап данных(пользователи и школы) и отправка админу в виде файлов JSON"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        backup_users()
-        backup_auto_schools()
-        path_1 = path_to_users_backup()
-        path_2 = path_to_auto_schools_backup()
-        with open(path_1, 'rb') as users_json_file:
-            await message.answer_document(users_json_file)
-        with open(path_2, 'rb') as auto_schools_json_file:
-            await message.answer_document(auto_schools_json_file)
 
 
 @dp.message_handler(commands=["promo_code"], state='*')
@@ -331,8 +273,8 @@ async def command_pay(message: types.Message):
     """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    pay_data = PayData(user.country, user.language, user.price_in_rubles)
-    pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
+    pay_order = PayOrder(user.country, user.language, user.price_in_rubles)
+    pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_order.price_tenge, currency=pay_order.code,
                            name=user.full_name)
     url = pay_link.get_pay_url()
 
@@ -341,7 +283,7 @@ async def command_pay(message: types.Message):
     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
     markup.add(pay_link)
 
-    await message.answer(pay_data.pay_message_text, reply_markup=markup)
+    await message.answer(pay_order.message_text, reply_markup=markup)
 
 
 def pay_accepted_message(telegram_id: int, order_id: int) -> None:
@@ -364,7 +306,8 @@ async def command_promotions(message: types.Message):
                                                                                  value=user_language))
     markup.add(ref_link)
 
-    await bot.send_photo(telegram_id, image_code)
+    if not config.DEBUG:
+        await bot.send_photo(telegram_id, image_code)
     await message.answer(PROMOTIONS[f'100friends_{user_language}'], reply_markup=markup)
 
 
@@ -374,6 +317,15 @@ async def command_help(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(MESSAGE[f'info_{user_language}'])
+
+
+@dp.message_handler(commands=["up_admin_time_limit"])
+async def command_up_admin_q_a(message: types.Message):
+    """Добавить 3 минуты к времени использования админу, для тестов"""
+    user_id = message.from_user.id
+    if user_id == config.ADMIN_ID:
+        up_admin_time_limit_3minute()
+        await message.answer('+3 минуты добавлено')
 
 
 @dp.message_handler(commands=["up_time_limit_for_all_at_3day"])
@@ -514,6 +466,21 @@ async def scan_photo(message: types.Message):
     if telegram_id == config.ADMIN_ID:
         photo_id = message.photo[0].file_id
         await message.answer(photo_id)
+
+
+@dp.message_handler(commands=["backup_all_data"])
+async def command_backup_all_data(message: types.Message):
+    """Бэкап данных(пользователи и школы) и отправка админу в виде файлов JSON"""
+    user_id = message.from_user.id
+    if user_id == config.ADMIN_ID:
+        backup_users()
+        backup_auto_schools()
+        path_1 = path_to_users_backup()
+        path_2 = path_to_auto_schools_backup()
+        with open(path_1, 'rb') as users_json_file:
+            await message.answer_document(users_json_file)
+        with open(path_2, 'rb') as auto_schools_json_file:
+            await message.answer_document(auto_schools_json_file)
 
 
 if __name__ == "__main__":

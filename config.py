@@ -8,8 +8,8 @@ DEBUG = True
 TEST_BOT_TOKEN = os.getenv('TEST_BOT_TOKEN')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
-BOT_ADDRESS = os.getenv('BOT_ADDRESS')
 BOT_NAME = os.getenv('BOT_NAME')
+BOT_ADDRESS = os.getenv('BOT_ADDRESS')
 ADMIN_ID = int(os.getenv('ADMIN_ID'))
 
 BASE_PRICE = int(os.getenv('BASE_PRICE'))

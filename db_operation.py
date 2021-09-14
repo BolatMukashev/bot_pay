@@ -377,7 +377,7 @@ def get_monetary_unit(user_country, user_language):
         return 'рублей'
 
 
-class PayData:
+class PayOrder:
     def __init__(self, user_country: str, user_language: str, price_in_rubles: int):
         """
         Прием оплаты в рублях не работает (платежная система IOKA)
@@ -392,14 +392,14 @@ class PayData:
         self.code = 398
 
         if self.user_country == 'KZ':
-            self.pay_message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_tenge} тенге!'
+            self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_tenge} тенге!'
 
         elif self.user_country == 'RU' and self.user_language == 'RU':
-            self.pay_message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рублей!' \
+            self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рублей!' \
                                                                                    f' ({self.price_tenge} тенге)'
 
         elif self.user_country == 'RU' and self.user_language == 'KZ':
-            self.pay_message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рубль!' \
+            self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рубль!' \
                                                                                    f' ({self.price_tenge} тенге)'
 
 
