@@ -527,15 +527,19 @@ def update_time_visit(telegram_id):
     query.execute()
 
 
-def get_all_users_telegram_id() -> list:
-    """Получить telegram_id всех пользователей"""
-    all_telegram_id = []
+def get_all_users_telegram_id(language: str = '') -> list:
+    """
+    Получить telegram_id пользователей (фильтр по языку)
+    :param language: Язык пользователей
+    :return: список id пользователей
+    """
     database_initialization()
-    all_users = Users.select()
-    for user in all_users:
-        telegram_id = user.telegram_id
-        all_telegram_id.append(telegram_id)
-    return all_telegram_id
+    if language:
+        users = Users.select(Users.telegram_id).where(Users.language == language)
+    else:
+        users = Users.select(Users.telegram_id)
+    telegram_ids = [user.telegram_id for user in users]
+    return telegram_ids
 
 
 def get_loser_list_14days():
@@ -910,13 +914,11 @@ def get_users_online_now():
     return users_online
 
 
+# не работает
 def get_users_online_today():
-    today = datetime.now()
-    count = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.last_visit.year == today.year and user.last_visit.month == today.month and user.last_visit.day == today.day:
-            count += 1
+    users = Users.select(Users.telegram_id).where(Users.last_visit.formats[2] == datetime.now().strftime('%Y-%m-%d'))
+    users = [user.telegram_id for user in users]
+    count = len(users)
     return count
 
 
