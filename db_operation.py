@@ -9,10 +9,10 @@ import config
 import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
-
+from messages import MESSAGE
 
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
-from messages import MESSAGE
+
 
 table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools]
 
@@ -224,7 +224,9 @@ def choose_db_by_language(user_language):
 def get_random_question(user_language):
     database_initialization()
     database = choose_db_by_language(user_language)
-    number_of_questions = config.CACHE.get(f'number_of_questions_in_{user_language}_db') or get_number_of_questions_in_db_and_set_in_cache(database, user_language)
+    number_of_questions = config.CACHE.get(
+        f'number_of_questions_in_{user_language}_db') or get_number_of_questions_in_db_and_set_in_cache(database,
+                                                                                                        user_language)
     random_id = random.randrange(1, number_of_questions + 1)
     question = database.get(database.id == random_id)
     return question
@@ -306,6 +308,16 @@ def get_user_by(telegram_id):
     database_initialization()
     user = Users.get(Users.telegram_id == telegram_id)
     return user
+
+
+def get_all_users_in_db() -> object:
+    """
+    Получить всех пользователей из базы данных (для статистики)
+    :return: Данные о всех пользователях из базы
+    """
+    database_initialization()
+    users = Users.select()
+    return users
 
 
 def get_user_name_by(telegram_id):
@@ -396,11 +408,11 @@ class PayOrder:
 
         elif self.user_country == 'RU' and self.user_language == 'RU':
             self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рублей!' \
-                                                                                   f' ({self.price_tenge} тенге)'
+                                                                               f' ({self.price_tenge} тенге)'
 
         elif self.user_country == 'RU' and self.user_language == 'KZ':
             self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рубль!' \
-                                                                                   f' ({self.price_tenge} тенге)'
+                                                                               f' ({self.price_tenge} тенге)'
 
 
 def get_user_time_limit(telegram_id):
@@ -862,310 +874,246 @@ def set_auto_schools_from_backup():
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
 
 
-def get_number_of_users():
-    database_initialization()
-    all_users = Users.select()
-    number_of_users = len(all_users)
-    return number_of_users
+def get_number_of_users(users) -> int:
+    users = [user.id for user in users]
+    return len(users)
 
 
-def get_number_of_users_on_day():
+def get_number_of_registrations_today(users):
     today = datetime.now().date()
-    all_users = Users.select().where(Users.registration_date == today)
-    number_of_users = len(all_users)
-    return number_of_users
+    users = [user.id for user in users if user.registration_date.date() == today]
+    return len(users)
 
 
-def get_number_of_users_on_week():
-    old_day = datetime.now().date() - timedelta(days=7)
-    all_users = Users.select().where(Users.registration_date > old_day)
-    number_of_users = len(all_users)
-    return number_of_users
+def get_number_of_registrations_on_week(users):
+    seven_day_ago = datetime.now().date() - timedelta(days=7)
+    users = [user.id for user in users if user.registration_date.date() > seven_day_ago]
+    return len(users)
 
 
-def get_number_of_users_on_month():
+def get_number_of_registrations_on_month(users):
+    this_year = datetime.now().year
     this_month = datetime.now().month
+    users = [user.id for user in users if
+             user.registration_date.year == this_year and user.registration_date.month == this_month]
+    return len(users)
+
+
+def get_number_of_registrations_on_year(users):
     this_year = datetime.now().year
-    users_count = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.registration_date.year == this_year and user.registration_date.month == this_month:
-            users_count += 1
-    return users_count
+    users = [user.id for user in users if user.registration_date.year == this_year]
+    return len(users)
 
 
-def get_number_of_users_on_year():
-    this_year = datetime.now().year
-    users_count = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.registration_date.year == this_year:
-            users_count += 1
-    return users_count
-
-
-def get_users_online_now():
-    today = datetime.now()
-    users_online = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.last_visit.year == today.year and user.last_visit.month == today.month and user.last_visit.hour == today.hour:
-            users_online += 1
-    return users_online
-
-
-# не работает
-def get_users_online_today():
-    users = Users.select(Users.telegram_id).where(Users.last_visit.formats[2] == datetime.now().strftime('%Y-%m-%d'))
-    users = [user.telegram_id for user in users]
-    count = len(users)
-    return count
-
-
-def get_users_online_on_this_week():
-    old_day = datetime.now() - timedelta(days=7)
-    count = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.last_visit.date() > old_day.date():
-            count += 1
-    return count
-
-
-def get_users_online_on_this_month():
-    today = datetime.now()
-    count = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.last_visit.year == today.year and user.last_visit.month == today.month:
-            count += 1
-    return count
-
-
-def get_users_online_on_this_year():
-    today = datetime.now()
-    count = 0
-    all_users = Users.select()
-    for user in all_users:
-        if user.last_visit.year == today.year:
-            count += 1
-    return count
-
-
-def get_all_users_list():
-    result = []
-    all_users = Users.select()
-    result.append('id -> имя')
-    for user in all_users:
-        result.append(f"{user.telegram_id} -> {user.full_name}")
-    return '\n'.join(result)
-
-
-def get_number_of_promo_codes():
-    promo_codes = AutoSchools.select()
-    number_of_promo_codes = len(promo_codes)
-    return number_of_promo_codes
-
-
-def get_number_of_promo_codes_on_day():
+def get_users_online_today(users):
     today = datetime.now().date()
-    promo_codes = AutoSchools.select().where(AutoSchools.registration_date == today)
-    number_of_promo_codes = len(promo_codes)
-    return number_of_promo_codes
+    users = [user.id for user in users if user.last_visit.date() == today]
+    return len(users)
 
 
-def get_number_of_promo_codes_on_week():
+def get_users_online_on_this_week(users):
     old_day = datetime.now().date() - timedelta(days=7)
-    promo_codes = AutoSchools.select().where(AutoSchools.registration_date > old_day)
-    number_of_promo_codes = len(promo_codes)
-    return number_of_promo_codes
+    users = [user.id for user in users if user.last_visit.date() > old_day]
+    return len(users)
 
 
-def get_number_of_promo_codes_on_month():
+def get_users_online_on_this_month(users):
+    this_year = datetime.now().year
     this_month = datetime.now().month
+    users = [user.id for user in users if user.last_visit.year == this_year and user.last_visit.month == this_month]
+    return len(users)
+
+
+def get_users_online_on_this_year(users):
     this_year = datetime.now().year
-    promo_codes_count = 0
-    promo_codes = AutoSchools.select()
-    for promo_code in promo_codes:
-        if promo_code.registration_date.year == this_year and promo_code.registration_date.month == this_month:
-            promo_codes_count += 1
-    return promo_codes_count
+    users = [user.id for user in users if user.last_visit.year == this_year]
+    return len(users)
 
 
-def get_number_of_promo_codes_on_year():
+def get_number_of_promo_codes(auto_schools):
+    promo_codes = [auto_school.id for auto_school in auto_schools]
+    return len(promo_codes)
+
+
+def get_number_of_activated_promo_codes(auto_schools):
+    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.secret_key != auto_school.promo_code]
+    return len(promo_codes)
+
+
+def get_number_of_promo_codes_registrations_today(auto_schools):
+    today = datetime.now().date()
+    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.registration_date.date() == today]
+    return len(promo_codes)
+
+
+def get_number_of_promo_codes_registrations_on_week(auto_schools):
+    seven_day_ago = datetime.now().date() - timedelta(days=7)
+    promo_codes = [auto_school.id for auto_school in auto_schools if
+                   auto_school.registration_date.date() > seven_day_ago]
+    return len(promo_codes)
+
+
+def get_number_of_promo_codes_registrations_on_month(auto_schools):
     this_year = datetime.now().year
-    promo_codes_count = 0
-    promo_codes = AutoSchools.select()
-    for promo_code in promo_codes:
-        if promo_code.registration_date.year == this_year:
-            promo_codes_count += 1
-    return promo_codes_count
+    this_month = datetime.now().month
+    promo_codes = [auto_school.id for auto_school in auto_schools if
+                   auto_school.registration_date.year == this_year and
+                   auto_school.registration_date.month == this_month]
+    return len(promo_codes)
 
 
-def get_all_promo_code_list():
-    result = []
-    promo_codes = AutoSchools.select().order_by(AutoSchools.number_of_references.desc())
-    result.append('школа > промо-код > упоминаний')
-    for promo_code in promo_codes:
-        result.append(f"{promo_code.school_name} {promo_code.promo_code} {promo_code.number_of_references}")
-    return '\n'.join(result)
+def get_number_of_promo_codes_registrations_on_year(auto_schools):
+    this_year = datetime.now().year
+    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.registration_date.year == this_year]
+    return len(promo_codes)
 
 
-def get_number_of_promo_code_used_users():
-    promo_code_used_users = Users.select().where(Users.promo_code_used == 1)
-    promo_code_used = len(promo_code_used_users)
-    return promo_code_used
+def get_number_of_promo_code_used_users(users):
+    promo_code_used_users = [user.id for user in users if user.promo_code_used == 1]
+    return len(promo_code_used_users)
 
 
-def get_number_of_payed_users():
-    payed_users = Users.select().where(Users.made_payment == 1)
-    payed_users_count = len(payed_users)
-    return payed_users_count
+def get_number_of_payed_users(users):
+    payed_users = [user for user in users if user.made_payment == 1]
+    return len(payed_users)
 
 
-def get_promo_code_conversion():
-    users = get_number_of_users()
-    promo_code_used_users = get_number_of_promo_code_used_users()
+def get_promo_code_conversion(users):
+    all_users_len = get_number_of_users(users)
+    promo_code_used_users = get_number_of_promo_code_used_users(users)
     try:
-        conversion = round(promo_code_used_users * 100 / users, 2)
+        conversion = round(promo_code_used_users * 100 / all_users_len, 2)
     except ZeroDivisionError:
         conversion = 0
     return conversion
 
 
-def get_pay_conversion():
-    users = get_number_of_users()
-    payed_users = get_number_of_payed_users()
+def get_pay_conversion(users):
+    all_users_len = get_number_of_users(users)
+    payed_users = get_number_of_payed_users(users)
     try:
-        conversion = round(payed_users * 100 / users, 2)
+        conversion = round(payed_users * 100 / all_users_len, 2)
     except ZeroDivisionError:
         conversion = 0
     return conversion
 
 
-def get_ru_language_users_count():
-    ru_users = Users.select().where(Users.language == 'RU')
-    ru_users_count = len(ru_users)
-    return ru_users_count
+def get_ru_language_users_count(users):
+    ru_users = [user.id for user in users if user.language == 'RU']
+    return len(ru_users)
 
 
-def get_kz_language_users_count():
-    kz_users = Users.select().where(Users.language == 'KZ')
-    kz_users_count = len(kz_users)
-    return kz_users_count
+def get_kz_language_users_count(users):
+    kz_users = [user.id for user in users if user.language == 'KZ']
+    return len(kz_users)
 
 
-def get_percent_of_language_choice():
-    users = get_number_of_users()
-    ru_users = get_ru_language_users_count()
-    kz_users = get_kz_language_users_count()
-    result_ru = round(ru_users * 100 / users, 2)
-    result_kz = round(kz_users * 100 / users, 2)
+def get_percent_of_language_choice(users):
+    all_users_len = get_number_of_users(users)
+    ru_users = get_ru_language_users_count(users)
+    kz_users = get_kz_language_users_count(users)
+    result_ru = round(ru_users * 100 / all_users_len, 2)
+    result_kz = round(kz_users * 100 / all_users_len, 2)
     return result_ru, result_kz
 
 
-def get_russian_users_count():
-    ru_users = Users.select().where(Users.country == 'RU')
-    ru_users_count = len(ru_users)
-    return ru_users_count
+def get_number_of_users_from_russia(users):
+    ru_users = [user.id for user in users if user.country == 'RU']
+    return len(ru_users)
 
 
-def get_kazakhstan_users_count():
-    kz_users = Users.select().where(Users.country == 'KZ')
-    kz_users_count = len(kz_users)
-    return kz_users_count
+def get_number_of_users_from_kazakhstan(users):
+    kz_users = [user.id for user in users if user.country == 'KZ']
+    return len(kz_users)
 
 
-def get_percent_of_country_choice():
-    users = get_number_of_users()
-    ru_users = get_russian_users_count()
-    kz_users = get_kazakhstan_users_count()
-    result_ru = round(ru_users * 100 / users, 2)
-    result_kz = round(kz_users * 100 / users, 2)
+def get_percent_of_country_choice(users):
+    all_users_len = get_number_of_users(users)
+    ru_users = get_number_of_users_from_russia(users)
+    kz_users = get_number_of_users_from_kazakhstan(users)
+    result_ru = round(ru_users * 100 / all_users_len, 2)
+    result_kz = round(kz_users * 100 / all_users_len, 2)
     return result_ru, result_kz
 
 
-def get_active_auto_schools():
-    auto_schools = AutoSchools.select().where(AutoSchools.secret_key != AutoSchools.promo_code)
+def get_number_of_auto_schools(auto_schools):
+    auto_schools = get_number_of_promo_codes(auto_schools)
     return auto_schools
 
 
-def get_length_active_auto_schools():
-    auto_schools = get_active_auto_schools()
-    return len(auto_schools)
+def get_number_of_active_auto_schools(auto_schools):
+    auto_schools = get_number_of_activated_promo_codes(auto_schools)
+    return auto_schools
 
 
-def get_all_auto_schools_length():
-    all_auto_schools = len(get_all_auto_schools_on_db())
-    return all_auto_schools
-
-
-def get_active_auto_schools_conversion():
-    all_auto_schools = len(get_all_auto_schools_on_db())
-    active_auto_schools = get_length_active_auto_schools()
-    conversion = round(active_auto_schools * 100 / all_auto_schools, 2)
+def get_active_auto_schools_conversion(auto_schools):
+    auto_schools_len = get_number_of_auto_schools(auto_schools)
+    active_auto_schools = get_number_of_active_auto_schools(auto_schools)
+    conversion = round(active_auto_schools * 100 / auto_schools_len, 2)
     return conversion
 
 
 def get_big_statistics():
-    users = get_number_of_users()
-    users_today = get_number_of_users_on_day()
-    users_on_week = get_number_of_users_on_week()
-    users_on_month = get_number_of_users_on_month()
-    users_on_year = get_number_of_users_on_year()
+    users = get_all_users_in_db()
+    auto_schools = get_all_auto_schools_on_db()
+    users_len = get_number_of_users(users)
+    users_today = get_number_of_registrations_today(users)
+    users_on_week = get_number_of_registrations_on_week(users)
+    users_on_month = get_number_of_registrations_on_month(users)
+    users_on_year = get_number_of_registrations_on_year(users)
 
-    users_online = get_users_online_now()
-    users_online_today = get_users_online_today()
-    users_online_on_this_week = get_users_online_on_this_week()
-    users_online_on_this_month = get_users_online_on_this_month()
-    users_online_on_this_year = get_users_online_on_this_year()
+    users_online_today = get_users_online_today(users)
+    users_online_on_this_week = get_users_online_on_this_week(users)
+    users_online_on_this_month = get_users_online_on_this_month(users)
+    users_online_on_this_year = get_users_online_on_this_year(users)
 
-    promo_codes = get_number_of_promo_codes()
-    promo_codes_today = get_number_of_promo_codes_on_day()
-    promo_codes_on_week = get_number_of_promo_codes_on_week()
-    promo_codes_on_month = get_number_of_promo_codes_on_month()
-    promo_codes_on_year = get_number_of_promo_codes_on_year()
+    promo_codes = get_number_of_promo_codes(auto_schools)
+    promo_codes_today = get_number_of_promo_codes_registrations_today(auto_schools)
+    promo_codes_on_week = get_number_of_promo_codes_registrations_on_week(auto_schools)
+    promo_codes_on_month = get_number_of_promo_codes_registrations_on_month(auto_schools)
+    promo_codes_on_year = get_number_of_promo_codes_registrations_on_year(auto_schools)
+    promo_code_conversion = get_promo_code_conversion(users)
 
-    promo_code_conversion = get_promo_code_conversion()
-    pay_conversion = get_pay_conversion()
-    ru_language_users, kz_language_users = get_percent_of_language_choice()
-    users_from_russia, users_from_kazakhstan = get_percent_of_country_choice()
+    payed_users = get_number_of_payed_users(users)
+    pay_conversion = get_pay_conversion(users)
+    ru_language_users, kz_language_users = get_percent_of_language_choice(users)
+    users_from_russia, users_from_kazakhstan = get_percent_of_country_choice(users)
 
-    all_auto_schools = get_all_auto_schools_length()
-    active_auto_schools = get_length_active_auto_schools()
-    active_auto_schools_conversion = get_active_auto_schools_conversion()
+    all_auto_schools = get_number_of_auto_schools(auto_schools)
+    active_auto_schools = get_number_of_active_auto_schools(auto_schools)
+    active_auto_schools_conversion = get_active_auto_schools_conversion(auto_schools)
 
     text = [
-        f'Зарегистрированных пользователей: {users}',
+        f'Зарегистрированных пользователей: {users_len}',
         f'Зарегистрировались сегодня: {users_today}',
         f'Зарегистрировались на этой неделе: {users_on_week}',
         f'Зарегистрировались в этом месяце: {users_on_month}',
         f'Зарегистрировались за год: {users_on_year}',
-        '\n',
-        f'Cейчас онлайн: {users_online}',
+        ' ',
         f'Сегодня были в онлайн: {users_online_today}',
         f'Онлайн за неделю: {users_online_on_this_week}',
         f'Онлайн за месяц: {users_online_on_this_month}',
         f'Онлайн за год: {users_online_on_this_year}',
-        '\n'
+        f' ',
         f'Зарегистрировано промо-кодов: {promo_codes}',
         f'Зарегистрировано промо-кодов сегодня: {promo_codes_today}',
         f'Зарегистрировано промо-кодов на этой неделе: {promo_codes_on_week}',
         f'Зарегистрировано промо-кодов в этом месяце: {promo_codes_on_month}',
         f'Зарегистрировано промо-кодов за год: {promo_codes_on_year}',
-        f'Воспользовались промо-кодами: {promo_code_conversion}% пользователей',
-        f'\n',
+        f'Воспользовались промо-кодами: {promo_code_conversion} % пользователей',
+        f' ',
         f'Всего зарегистрировано автошкол: {all_auto_schools}',
         f'Количество активных автошкол: {active_auto_schools}',
-        f'Конверсия автошкол: {active_auto_schools_conversion}%',
-        f'\n',
-        f'Оплатили сервис: {pay_conversion}% пользователей',
-        f'\n',
-        f'Пользователей в России: {users_from_russia}%',
-        f'Пользователей в Казахстане: {users_from_kazakhstan}%',
-        f'Из них:',
-        f'Русскоязычных пользователей: {ru_language_users}%',
-        f'Казахоязычных пользователей: {kz_language_users}%'
+        f'Конверсия автошкол: {active_auto_schools_conversion} %',
+        f' ',
+        f'Оплатили сервис: {payed_users} человек',
+        f'Оплатили сервис: {pay_conversion} % пользователей',
+        f' ',
+        f'Пользователей в России: {users_from_russia} %',
+        f'Пользователей в Казахстане: {users_from_kazakhstan} %',
+        f' ',
+        f'Русскоязычных пользователей: {ru_language_users} %',
+        f'Казахоязычных пользователей: {kz_language_users} %'
     ]
 
     return '\n'.join(text)
