@@ -539,19 +539,36 @@ def update_time_visit(telegram_id):
     query.execute()
 
 
-def get_all_users_telegram_id(language: str = '') -> list:
+def get_all_users_telegram_id(language: str = '', country: str = '') -> list:
     """
     Получить telegram_id пользователей (фильтр по языку)
     :param language: Язык пользователей
+    :param country: Страна пользователей
     :return: список id пользователей
     """
     database_initialization()
     if language:
         users = Users.select(Users.telegram_id).where(Users.language == language)
+    elif country:
+        users = Users.select(Users.telegram_id).where(Users.country == country)
     else:
         users = Users.select(Users.telegram_id)
     telegram_ids = [user.telegram_id for user in users]
     return telegram_ids
+
+
+def filter_telegram_id(command: str):
+    language = ''
+    country = ''
+    if command == '/send_post_ru':
+        language = 'RU'
+    elif command == '/send_post_kz':
+        language = 'KZ'
+    elif command == '/send_post_russia':
+        country = 'RU'
+    elif command == '/send_post_kazakhstan':
+        country = 'KZ'
+    return language, country
 
 
 def get_loser_list_14days():
@@ -1084,36 +1101,41 @@ def get_big_statistics():
     active_auto_schools_conversion = get_active_auto_schools_conversion(auto_schools)
 
     text = [
-        f'Зарегистрированных пользователей: {users_len}',
-        f'Зарегистрировались сегодня: {users_today}',
-        f'Зарегистрировались на этой неделе: {users_on_week}',
-        f'Зарегистрировались в этом месяце: {users_on_month}',
-        f'Зарегистрировались за год: {users_on_year}',
+        f'Зарегистрированных пользователей',
+        f'Всего: {users_len}',
+        f'Сегодня: {users_today}',
+        f'За неделю: {users_on_week}',
+        f'За месяц: {users_on_month}',
+        f'За год: {users_on_year}',
         ' ',
-        f'Сегодня были в онлайн: {users_online_today}',
-        f'Онлайн за неделю: {users_online_on_this_week}',
-        f'Онлайн за месяц: {users_online_on_this_month}',
-        f'Онлайн за год: {users_online_on_this_year}',
+        f'Онлайн',
+        f'Сегодня: {users_online_today}',
+        f'За неделю: {users_online_on_this_week}',
+        f'За месяц: {users_online_on_this_month}',
+        f'За год: {users_online_on_this_year}',
         f' ',
-        f'Зарегистрировано промо-кодов: {promo_codes}',
-        f'Зарегистрировано промо-кодов сегодня: {promo_codes_today}',
-        f'Зарегистрировано промо-кодов на этой неделе: {promo_codes_on_week}',
-        f'Зарегистрировано промо-кодов в этом месяце: {promo_codes_on_month}',
-        f'Зарегистрировано промо-кодов за год: {promo_codes_on_year}',
-        f'Воспользовались промо-кодами: {promo_code_conversion} % пользователей',
+        f'Зарегистрировано промо-кодов',
+        f'Всего: {promo_codes}',
+        f'Сегодня: {promo_codes_today}',
+        f'За неделю: {promo_codes_on_week}',
+        f'За месяц: {promo_codes_on_month}',
+        f'За год: {promo_codes_on_year}',
+        f'Воспользовались {promo_code_conversion} % пользователей',
         f' ',
-        f'Всего зарегистрировано автошкол: {all_auto_schools}',
-        f'Количество активных автошкол: {active_auto_schools}',
-        f'Конверсия автошкол: {active_auto_schools_conversion} %',
+        f'Зарегистрировано автошкол',
+        f'Всего: {all_auto_schools}',
+        f'Активных: {active_auto_schools}',
+        f'Конверсия: {active_auto_schools_conversion} %',
         f' ',
-        f'Оплатили сервис: {payed_users} человек',
-        f'Оплатили сервис: {pay_conversion} % пользователей',
+        f'Оплатили сервис',
+        f'{payed_users} человек',
+        f'{pay_conversion} % пользователей',
         f' ',
-        f'Пользователей в России: {users_from_russia} %',
-        f'Пользователей в Казахстане: {users_from_kazakhstan} %',
+        f'Из России: {users_from_russia} %',
+        f'Из Казахстана: {users_from_kazakhstan} %',
         f' ',
-        f'Русскоязычных пользователей: {ru_language_users} %',
-        f'Казахоязычных пользователей: {kz_language_users} %'
+        f'Русскоязычных: {ru_language_users} %',
+        f'Казахоязычных: {kz_language_users} %'
     ]
 
     return '\n'.join(text)

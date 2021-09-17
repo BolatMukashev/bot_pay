@@ -164,7 +164,7 @@ async def command_statistics(message: types.Message):
 
 
 # переделать, отдельная команда для Ру пользователей, отдельная для КЗ
-@dp.message_handler(commands=["send_post_ru", "send_post_kz"], state='*')
+@dp.message_handler(commands=["send_post_ru", "send_post_kz", "send_post_russia", "send_post_kazakhstan"], state='*')
 async def command_send_post(message: types.Message, state: FSMContext):
     """Отправить рекламное сообщение всем пользователям - фото+подпись"""
     telegram_id = message.from_user.id
@@ -177,23 +177,19 @@ async def command_send_post(message: types.Message, state: FSMContext):
 @dp.message_handler(state=AllStates.SendPromotionalPost, content_types=['text', 'photo'])
 async def command_send_post_action(message: types.Message, state: FSMContext):
     photo_id = message.photo[0].file_id
-    my_message = message.caption
+    caption = message.caption
     await state.update_data(photo_id=photo_id)
     data = await state.get_data()
     comm = data['location']
     await state.finish()
-    users_language = ''
-    if comm == '/send_post_ru':
-        users_language = 'RU'
-    elif comm == '/send_post_kz':
-        users_language = 'KZ'
-    print(users_language)
-    users = get_all_users_telegram_id(language=users_language)
+    users_language, user_country = filter_telegram_id(comm)
+    users = get_all_users_telegram_id(language=users_language, country=user_country)
     for user_id in loading_bar(users):
         try:
-            await bot.send_photo(user_id, photo_id, caption=my_message)
+            await bot.send_photo(user_id, photo_id, caption=caption)
         except ChatNotFound:
             pass
+    await bot.send_message(config.ADMIN_ID, 'Сообщение доставлено всем пользователям ✌🏻')
 
 
 @dp.message_handler(commands=["send_email_for_all_auto_schools"], state='*')

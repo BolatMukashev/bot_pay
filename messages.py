@@ -7,6 +7,10 @@ MESSAGES
 /send_post_ru
 Отправить картинку + подпись (каз):
 /send_post_kz
+Отправить картинку + подпись (ru):
+/send_post_russia
+Отправить картинку + подпись (kz):
+/send_post_kazakhstan
 Cообщение для неоплативших:
 /send_message_from_losers
 
