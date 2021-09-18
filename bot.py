@@ -333,26 +333,17 @@ async def command_up_admin_q_a(message: types.Message):
         await message.answer('+3 минуты добавлено')
 
 
-@dp.message_handler(commands=["up_time_limit_for_all_at_3day"])
-async def command_up_time_limit_for_all_at_3day(message: types.Message):
-    """Добавить +3 дня пользования ботом всем пользователям. Акции на праздники"""
+@dp.message_handler(commands=["up_time_limit_for_all_at_days_03", "up_time_limit_for_all_at_days_30"])
+async def command_up_time_limit_for_all_at_n_day(message: types.Message):
+    """
+    Добавить +n дня пользования ботом всем пользователям.
+    Акция на праздник или компенсация за ремонт
+    """
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
-        all_users_id = get_all_users_telegram_id()
-        for user_id in all_users_id:
-            up_user_time_limit_days(user_id, 3)
-        await message.answer('+3 дня использования всем пользователям АКТИВИРОВАНО!')
-
-
-@dp.message_handler(commands=["up_time_limit_for_all_at_30days"])
-async def command_up_time_limit_for_all_at_30day(message: types.Message):
-    """Добавить +30 дней пользования ботом всем пользователям. Акция за ремонт"""
-    telegram_id = message.from_user.id
-    if telegram_id == config.ADMIN_ID:
-        all_users_id = get_all_users_telegram_id()
-        for user_id in all_users_id:
-            up_user_time_limit_days(user_id, 30)
-        await message.answer('+30 дней использования всем пользователям АКТИВИРОВАНО!')
+        days = int(message.text[-2:])
+        up_all_user_time_limit(days=days)
+        await message.answer(f'+{days} дней использования всем пользователям АКТИВИРОВАНО!')
 
 
 # добавить автопроверку раз в сутки. большое потребление оперативной памяти, стоит ли добавлять?

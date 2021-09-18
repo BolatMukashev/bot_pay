@@ -10,6 +10,9 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 from messages import MESSAGE
+from typing import Union
+from tqdm import tqdm as loading_bar
+
 
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
@@ -432,8 +435,12 @@ def user_time_limit_is_over(telegram_id):
         return False
 
 
-def up_user_time_limit_days(telegram_id, days: int) -> None:
-    """Продлить доступ к боту на n дней"""
+def up_user_time_limit_days(telegram_id: Union[int, str], days: int) -> None:
+    """
+    Продлить доступ к боту 1 пользователю на n дней
+    :param telegram_id: Telegram id пользователя
+    :param days: Количество дней, на которое нужно увеличить доступ
+    """
     time_limit_is_over = user_time_limit_is_over(telegram_id)
     if time_limit_is_over:
         query = Users.update(time_limit=datetime.now() + timedelta(days=days)).where(Users.telegram_id == telegram_id)
@@ -441,6 +448,19 @@ def up_user_time_limit_days(telegram_id, days: int) -> None:
         time_limit_date = get_user_time_limit(telegram_id)
         query = Users.update(time_limit=time_limit_date + timedelta(days=days)).where(Users.telegram_id == telegram_id)
     query.execute()
+
+
+def up_all_user_time_limit(days: int) -> None:
+    """
+    Продлить доступ к боту ВСЕМ пользователям на n дней
+    :param days: Количество дней, на которое нужно увеличить доступ
+    """
+    database_initialization()
+    today = datetime.now()
+    res = Users.select(Users.id, Users.time_limit).where(Users.time_limit >= today)
+    for user in loading_bar(res):
+        Users.update(time_limit=user.time_limit + timedelta(days=days)).where(Users.id == user.id).execute()
+    Users.update(time_limit=today + timedelta(days=days)).where(Users.time_limit < today).execute()
 
 
 def up_admin_time_limit_3minute():

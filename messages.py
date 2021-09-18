@@ -24,9 +24,9 @@ ACTIONS
 +3 минуты админу:
 /up_admin_time_limit
 +3 дня использования всем!
-/up_time_limit_for_all_at_3day
+/up_time_limit_for_all_at_days_03
 +30 дней использования всем!
-/up_time_limit_for_all_at_30days
+/up_time_limit_for_all_at_days_30
 Удалить Автошколу из базы:
 /delete_auto_school
 Бэкап данных:
