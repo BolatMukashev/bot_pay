@@ -296,13 +296,12 @@ async def command_pay(message: types.Message):
     await message.answer(pay_order.message_text, reply_markup=markup)
 
 
-def pay_accepted_message(telegram_id: int, order_id: int) -> None:
+async def pay_accepted_message(telegram_id: int, order_id: int) -> None:
     text = f"Ваш платеж принят!\n" \
            f"ID платежа: {order_id}\n" \
            f"Вы можете продолжать пользоваться нашим сервисом\n" \
            f"Нажмите 👉🏻 /question"
-    url = f'https://api.telegram.org/bot{config.BOT_TOKEN}/sendMessage?chat_id={telegram_id}&text={text}'
-    requests.get(url)
+    await bot.send_message(telegram_id, text)
 
 
 @dp.message_handler(commands=["promotions"])
