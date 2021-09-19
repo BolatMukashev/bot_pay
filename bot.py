@@ -190,6 +190,8 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
             await bot.send_photo(user_id, photo_id, caption=caption)
         except (ChatNotFound, UserDeactivated, BotBlocked):
             no_active_users += 1
+        except Exception as err:
+            await bot.send_message(config.ADMIN_ID, err)
     await bot.send_message(config.ADMIN_ID, 'Сообщение доставлено всем пользователям ✌🏻\n'
                                             f'Не доставлено до {no_active_users} из {len(users)}')
 
