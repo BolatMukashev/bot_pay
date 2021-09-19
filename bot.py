@@ -187,8 +187,8 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
     for user_id in loading_bar(users):
         try:
             await bot.send_photo(user_id, photo_id, caption=caption)
-        except ChatNotFound:
-            pass
+        except Exception as err:
+            await bot.send_message(config.ADMIN_ID, err)
     await bot.send_message(config.ADMIN_ID, 'Сообщение доставлено всем пользователям ✌🏻')
 
 
