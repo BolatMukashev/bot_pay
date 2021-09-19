@@ -54,6 +54,8 @@ class PayLink:
             url = response.json()['url']
             return url
 
+
+# отправить ссылку на платежную форму
 # @dp.message_handler(commands=["pay"])
 # async def command_pay(message: types.Message):
 #     """
@@ -78,3 +80,24 @@ class PayLink:
 #     markup.add(pay_link)
 #
 #     await message.answer(pay_message_text, reply_markup=markup)
+
+
+# обработка платежа на сайте
+# нужно добавить проверку на Платеж успешен или нет (0 или 1) и давать доступ только для успешных платежей
+# @app.route('/accept_page', methods=['GET', 'POST'])
+# def set_accept():
+#     """
+#     Платежная система kassa24
+#     status == 1 - оплата произведена успешно
+#     telegram_id - int
+#     для проверки, сохраняем файл с id в папке backup сайта:
+#     file_name = os.path.join(os.getcwd(), 'backup', 'pay_data.json')
+#     create_new_json_file(file_name, telegram_id)
+#     """
+#     status = request.json['status']
+#     if status == 1:
+#         telegram_id = request.json['metadata']['telegram_id']
+#         up_user_time_limit_days(telegram_id, 365)
+#         update_user_made_payment_status(telegram_id)
+#     res = json.dumps({"accepted": True})
+#     return res

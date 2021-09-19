@@ -18,6 +18,7 @@ from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
 from tqdm import tqdm as loading_bar
+import requests
 
 
 if config.DEBUG:
@@ -296,9 +297,12 @@ async def command_pay(message: types.Message):
 
 
 def pay_accepted_message(telegram_id: int, order_id: int) -> None:
-    bot.send_message(telegram_id, text="Ваш платеж принят!\n"
-                                       "Вы можете продолжать пользоваться нашим сервисом\n"
-                                       f"ID платежа: {order_id}")
+    text = f"Ваш платеж принят!\n" \
+           f"ID платежа: {order_id}\n" \
+           f"Вы можете продолжать пользоваться нашим сервисом\n" \
+           f"Нажмите 👉🏻 /question"
+    url = f'https://api.telegram.org/bot{config.BOT_TOKEN}/sendMessage?chat_id={telegram_id}&text={text}'
+    requests.get(url)
 
 
 @dp.message_handler(commands=["promotions"])

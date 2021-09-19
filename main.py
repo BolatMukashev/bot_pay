@@ -4,6 +4,7 @@ from db_operation import *
 from gmail import send_emails_to_schools
 from static.html_messages.you_promo_code_registered import you_promo_code_registered_message
 from bot import pay_accepted_message
+import requests
 
 app = Flask(__name__)
 
@@ -66,26 +67,6 @@ def promo_code_registered(new_promo_code):
 @app.route('/about_us')
 def about_us():
     return render_template('about_us.html')
-
-
-# нужно добавить проверку на Платеж успешен или нет (0 или 1) и давать доступ только для успешных платежей
-@app.route('/accept_page', methods=['GET', 'POST'])
-def set_accept():
-    """
-    Платежная система kassa24
-    status == 1 - оплата произведена успешно
-    telegram_id - int
-    для проверки, сохраняем файл с id в папке backup сайта:
-    file_name = os.path.join(os.getcwd(), 'backup', 'pay_data.json')
-    create_new_json_file(file_name, telegram_id)
-    """
-    status = request.json['status']
-    if status == 1:
-        telegram_id = request.json['metadata']['telegram_id']
-        up_user_time_limit_days(telegram_id, 365)
-        update_user_made_payment_status(telegram_id)
-    res = json.dumps({"accepted": True})
-    return res
 
 
 @app.route('/accept', methods=['GET', 'POST'])
