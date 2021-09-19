@@ -2,7 +2,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.utils.exceptions import ChatNotFound
+from aiogram.utils.exceptions import ChatNotFound, UserDeactivated, BotBlocked
 from db_operation import *
 from keyboards.inline.callback_datas import referral_button_call
 from keyboards.inline.country import country_buttons
@@ -184,12 +184,14 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
     await state.finish()
     users_language, user_country = filter_telegram_id(comm)
     users = get_all_users_telegram_id(language=users_language, country=user_country)
+    no_active_users = 0
     for user_id in loading_bar(users):
         try:
             await bot.send_photo(user_id, photo_id, caption=caption)
-        except Exception as err:
-            await bot.send_message(config.ADMIN_ID, err)
-    await bot.send_message(config.ADMIN_ID, 'Сообщение доставлено всем пользователям ✌🏻')
+        except (ChatNotFound, UserDeactivated, BotBlocked):
+            no_active_users += 1
+    await bot.send_message(config.ADMIN_ID, 'Сообщение доставлено всем пользователям ✌🏻\n'
+                                            f'Не доставлено до {no_active_users} из {len(users)}')
 
 
 @dp.message_handler(commands=["send_email_for_all_auto_schools"], state='*')
