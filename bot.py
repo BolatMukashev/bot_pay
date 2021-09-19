@@ -18,7 +18,6 @@ from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
 from tqdm import tqdm as loading_bar
-import requests
 
 
 if config.DEBUG:
@@ -296,6 +295,7 @@ async def command_pay(message: types.Message):
     await message.answer(pay_order.message_text, reply_markup=markup)
 
 
+# не работает в main.py
 async def pay_accepted_message(telegram_id: int, order_id: int) -> None:
     text = f"Ваш платеж принят!\n" \
            f"ID платежа: {order_id}\n" \
