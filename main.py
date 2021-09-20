@@ -3,9 +3,6 @@ from werkzeug.utils import redirect
 from db_operation import *
 from gmail import send_emails_to_schools
 from static.html_messages.you_promo_code_registered import you_promo_code_registered_message
-from bot import pay_accepted_message
-from bot import bot
-
 
 app = Flask(__name__)
 
@@ -90,9 +87,10 @@ def accept():
     status = request.json['status']
     if status == 'paid' or status == 'blocked':
         telegram_id = int(request.json['client_id'])
-        order_id = int(request.json["order_id"])
+        # order_id = int(request.json["order_id"])
         up_user_time_limit_days(telegram_id, 365)
         update_user_made_payment_status(telegram_id)
+        # pay_accepted_message(telegram_id, order_id)
     return 'all good'
 
 

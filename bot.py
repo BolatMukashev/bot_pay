@@ -261,7 +261,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     await state.update_data(user_promo_code=user_promo_code)
     promo_codes = all_promo_codes()
     if user_promo_code in promo_codes:
-        up_user_time_limit_days(telegram_id, 3)
+        up_user_time_limit_days(telegram_id, 5)
         up_number_of_references(user_promo_code)
         update_user_promo_code_used_status(telegram_id)
         change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_14DAYS)
