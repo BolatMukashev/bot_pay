@@ -127,7 +127,8 @@ def hello_auto_school_message(secret_key):
     <body>
         <div class="main__block">
             <h1>Новая образовательная платорма</h1>
-            <h2>на базе мессенджера Telegram (<a href="https://t.me/pdd_good_bot" target="_blank">@pdd_good_bot</a>)</h2>
+            <h2>на базе мессенджера Telegram (<a href="https://t.me/pdd_good_bot" target="_blank">@pdd_good_bot</a>)
+            </h2>
             <p>Мы хотим дать студентам Автошкол новые возможности в обучении.</p>
             <p>Используя современные технологии, мы создали продукт,<br>
             который обеспечивает привычный пользовательский опыт.<br>
