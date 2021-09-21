@@ -13,7 +13,6 @@ from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from messages import *
 from gmail import send_emails_to_schools
 import io
-from pay_system_kassa24 import PayLink
 from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
@@ -190,8 +189,8 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
             await bot.send_photo(user_id, photo_id, caption=caption)
         except (ChatNotFound, UserDeactivated, BotBlocked):
             no_active_users += 1
-        except Exception as err:
-            await bot.send_message(config.ADMIN_ID, err)
+        except Exception as ex:
+            await bot.send_message(config.ADMIN_ID, ex)
     await bot.send_message(config.ADMIN_ID, 'Сообщение доставлено всем пользователям ✌🏻\n'
                                             f'Не доставлено до {no_active_users} из {len(users)}')
 
@@ -264,7 +263,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
         up_user_time_limit_days(telegram_id, 5)
         up_number_of_references(user_promo_code)
         update_user_promo_code_used_status(telegram_id)
-        change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_14DAYS)
+        change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_20DAYS)
         await message.answer_sticker(STICKERS['all_good'])
         await message.answer(PROMO_CODE[f'promo_code_activated_{language}'])
     else:
@@ -353,54 +352,25 @@ async def command_up_time_limit_for_all_at_n_day(message: types.Message):
         await message.answer(f'+{days} дней использования всем пользователям АКТИВИРОВАНО!')
 
 
-# добавить автопроверку раз в сутки. большое потребление оперативной памяти, стоит ли добавлять?
-@dp.message_handler(commands=["send_message_from_losers"])
-async def command_send_message_from_losers(message: types.Message):
-    """
-    Проверяем сроки с даты регистрации, применяет скидки на 75% и 50% для не оплативших пользователей,
-    оповещает их о скидке
-    """
+@dp.message_handler(commands=["set_50_percent_price_for_losers"])
+async def command_set_50_percent_price_for_losers(message: types.Message):
+    """Сделать 50% скидку на покупку годового доступа для лузеров"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
-        users_list_14 = get_loser_list_14days()
-        for telegram_id in users_list_14:
-            user_language = get_user_language(telegram_id)
-            pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_RU_{user_language}'],
-                               password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
-                               telegram_id=telegram_id, price_in_tenge=config.PRICE_AFTER_14DAYS)
-            url = pay_link.get_pay_url()
-
-            markup = types.InlineKeyboardMarkup()
-            pay_button_text = BUTTONS[f'pay_{user_language}']
-            pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
-            markup.add(pay_link)
-
-            await bot.send_sticker(telegram_id, STICKERS['come_back'])
-            await bot.send_message(telegram_id, OFFERS[f'second_week_promotional_offer_{user_language}'],
-                                   reply_markup=markup)
-
-            change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_14DAYS)
-            update_second_week_promotional_offer_status(telegram_id)
-
-        users_list_45 = get_loser_list_45days()
-        for telegram_id in users_list_45:
-            user_language = get_user_language(telegram_id)
-            pay_link = PayLink(login=config.PAY_CONFIGS[f'KASSA_24_LOGIN_RU_{user_language}'],
-                               password=config.PAY_CONFIGS[f'KASSA_24_PASSWORD_{user_language}'],
-                               telegram_id=telegram_id, price_in_tenge=config.PRICE_AFTER_45DAYS)
-            url = pay_link.get_pay_url()
-
-            markup = types.InlineKeyboardMarkup()
-            pay_button_text = BUTTONS[f'pay_{user_language}']
-            pay_link = types.InlineKeyboardButton(text=pay_button_text, url=url)
-            markup.add(pay_link)
-
-            await bot.send_sticker(telegram_id, STICKERS['come_back'])
-            await bot.send_message(telegram_id, OFFERS[f'sixth_week_promotional_offer_{user_language}'],
-                                   reply_markup=markup)
-
-            change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_45DAYS)
-            update_sixth_week_promotional_offer_status(telegram_id)
+        losers = get_losers()
+        set_50_percent_price_for_losers()
+        no_active_users = 0
+        for user in loading_bar(losers):
+            try:
+                await bot.send_photo(user['telegram_id'],
+                                     IMAGES['50percent'],
+                                     caption=OFFERS[f'second_week_promotional_offer_{user["language"]}'])
+            except (ChatNotFound, UserDeactivated, BotBlocked):
+                no_active_users += 1
+            except Exception as ex:
+                await bot.send_message(config.ADMIN_ID, ex)
+        await bot.send_message(config.ADMIN_ID, '50% скидка установлена ✌🏻\n'
+                                                f'Оповещены {len(losers) - no_active_users} из {len(losers)}')
 
 
 @dp.message_handler(commands=["send_hello_emails_to_new_schools"])

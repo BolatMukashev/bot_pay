@@ -13,8 +13,7 @@ BOT_ADDRESS = os.getenv('BOT_ADDRESS')
 ADMIN_ID = int(os.getenv('ADMIN_ID'))
 
 BASE_PRICE = int(os.getenv('BASE_PRICE'))
-PRICE_AFTER_14DAYS = int(os.getenv('PRICE_AFTER_14DAYS'))
-PRICE_AFTER_45DAYS = int(os.getenv('PRICE_AFTER_45DAYS'))
+PRICE_AFTER_20DAYS = int(os.getenv('PRICE_AFTER_20DAYS'))
 
 APP_USER_NAME = os.getenv('APP_USER_NAME')
 APP_PASSWORD = os.getenv('APP_PASSWORD')

@@ -591,30 +591,34 @@ def filter_telegram_id(command: str):
     return language, country
 
 
-def get_loser_list_14days():
-    loser_list = []
+def get_losers():
+    """
+    Получить пользователей из бд, у которых лемит закончился 2 недели назад, а цена 100%
+    :return: Итерируемы объект со списком telegram id пользователей
+    """
     database_initialization()
-    all_users = Users.select().where(Users.second_week_promotional_offer == 0)
-    for user in all_users:
-        telegram_id = user.telegram_id
-        time_limit = get_user_time_limit(telegram_id)
-        two_week_ago = time_limit + timedelta(days=14)
-        if datetime.now() > two_week_ago:
-            loser_list.append(telegram_id)
-    return loser_list
+    twenty_days_ago = datetime.now() - timedelta(days=20)
+    losers = Users.select(Users.telegram_id, Users.language).where(
+        (Users.time_limit < twenty_days_ago) &
+        (Users.price_in_rubles != config.PRICE_AFTER_20DAYS) &
+        (Users.made_payment == 0)
+    )
+    losers = [{'telegram_id': user.telegram_id, 'language': user.language} for user in losers]
+    return losers
 
 
-def get_loser_list_45days():
-    loser_list = []
+def set_50_percent_price_for_losers():
+    """
+    Установить цену в 50% для пользователей, у которых лемит закончился 2 недели назад, а цена 100%
+    """
     database_initialization()
-    all_users = Users.select().where(Users.sixth_week_promotional_offer == 0)
-    for user in all_users:
-        telegram_id = user.telegram_id
-        time_limit = get_user_time_limit(telegram_id)
-        two_week_ago = time_limit + timedelta(days=45)
-        if datetime.now() > two_week_ago:
-            loser_list.append(telegram_id)
-    return loser_list
+    twenty_days_ago = datetime.now() - timedelta(days=20)
+    Users.update(price_in_rubles=config.PRICE_AFTER_20DAYS,
+                 second_week_promotional_offer=1).where(
+        (Users.time_limit < twenty_days_ago) &
+        (Users.price_in_rubles != config.PRICE_AFTER_20DAYS) &
+        (Users.made_payment == 0)
+    ).execute()
 
 
 def get_all_users_on_dict_format():

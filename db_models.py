@@ -22,6 +22,7 @@ class BaseModel(Model):
         database = db  # соединение с базой, из шаблона выше
 
 
+# удалить second_week_promotional_offer, sixth_week_promotional_offer
 class Users(BaseModel):
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)

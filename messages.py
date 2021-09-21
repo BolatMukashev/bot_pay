@@ -11,8 +11,6 @@ MESSAGES
 /send_post_russia
 Отправить картинку + подпись (kz):
 /send_post_kazakhstan
-Cообщение для неоплативших:
-/send_message_from_losers
 
 EMAIL
 Отправить приветственное сообщениe:
@@ -27,6 +25,8 @@ ACTIONS
 /up_time_limit_for_all_at_days_03
 +30 дней использования всем!
 /up_time_limit_for_all_at_days_30
+50% скидка лузерам
+/set_50_percent_price_for_losers
 Удалить Автошколу из базы:
 /delete_auto_school
 Бэкап данных:
@@ -143,7 +143,9 @@ STICKERS = {
 }
 
 IMAGES = {
-    '100friends': 'AgACAgIAAxkBAAI9mmDhhtWeuMCQ_jCRRgABOuH3RU2X_gACZ7QxGxJDEEv-BXPviTTuPwEAAwIAA3MAAyAE'
+    '100friends': 'AgACAgIAAxkBAAI9mmDhhtWeuMCQ_jCRRgABOuH3RU2X_gACZ7QxGxJDEEv-BXPviTTuPwEAAwIAA3MAAyAE',
+    '50percent': 'AgACAgIAAxkBAAJJ_mFKJUPa3raFEIrcXN52xQMdQwrhAALvtjEbECJQSrt4_xDHMSCrAQADAgADcwADIQQ',
+    'test_img': 'AgACAgIAAxkBAAIVFWFKKS30e59wdOZts8xDlTnYxVBQAALItDEbc-dZSszgkrm9TU6sAQADAgADcwADIQQ'
 }
 
 PROMO_CODE = {
