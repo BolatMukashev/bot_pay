@@ -117,7 +117,7 @@ def new_func_and_offers_message(message):
             <body>
                 <div class="main__block">
                     {message}
-                    <div><a href="http://pddgoodbot.ru"><button class="button">Открыть сайт</button></a></div>
+                    <div><a href="https://pddgoodbot.ru"><button class="button">Открыть сайт</button></a></div>
                 </div>
             </body>
             """]

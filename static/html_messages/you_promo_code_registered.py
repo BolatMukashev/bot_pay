@@ -131,7 +131,7 @@ def you_promo_code_registered_message(promo_code):
                     <p><i>Если в дальнейшем Вы захотите изменить этот промкод на другой,<br>
                     воспользуйтесь тем же СЕКРЕТНЫМ КЛЮЧОМ, которым регистрировали этот промкод.<br>
                     Старый промкод при этом будет удален.</i></p>
-                    <div><a href="http://pddgoodbot.ru"><button class="button">Открыть сайт</button></a></div>
+                    <div><a href="https://pddgoodbot.ru"><button class="button">Открыть сайт</button></a></div>
                 </div>
             </body>
             """]
