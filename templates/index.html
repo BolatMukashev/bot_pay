@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="description" content="Telegram бот поможет подготовится к экзамену на знание ПДД, закрепить
     полученные в автошколе знания, узнать размеры штрафов за нарушения">
-    <meta name="keywords" content="telegram бот, пдд, правила дорожного движения, автошколы, экзамен, тест, вопросы">
+    <meta name="keywords" content="telegram бот, пдд, правила дорожного движения, автошкола, экзамен, тест, вопросы,
+    рф, рк, казахстан, россия, сұрақтар, жол ережелер, вождение, көлік жүргізу">
     <meta name="Author" content="Болат Мукашев">
     <meta name="Copyright" content="Болат Мукашев">
 
@@ -30,7 +31,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" type=text/css href="../static/styles/index.css">
+    <link rel="stylesheet" type=text/css href="{{ url_for('static', filename='styles/index.css') }}">
     <!-- "{{ url_for('static', filename='styles/index.css') }}" -->
     <!-- "../static/styles/index.css" -->
     <title>ПДД тесты</title>

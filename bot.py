@@ -354,7 +354,7 @@ async def command_up_time_limit_for_all_at_n_day(message: types.Message):
 
 @dp.message_handler(commands=["set_50_percent_price_for_losers"])
 async def command_set_50_percent_price_for_losers(message: types.Message):
-    """Сделать 50% скидку на покупку годового доступа для лузеров"""
+    """Сделать 50% скидку на покупку годового доступа для лузеров и отправить соответствующий пост"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         losers = get_losers()
