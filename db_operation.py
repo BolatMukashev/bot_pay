@@ -1094,7 +1094,15 @@ def get_active_auto_schools_conversion(auto_schools):
     return conversion
 
 
-def get_big_statistics():
+def get_big_statistics() -> str:
+    """
+    Получить всю статистику
+    Установка времени на Linux Server:
+    date
+    timedatectl
+    sudo timedatectl set-timezone Asia/Atyrau
+    :return: Статистику в строков представлении
+    """
     users = get_all_users_in_db()
     auto_schools = get_all_auto_schools_on_db()
     users_len = get_number_of_users(users)

@@ -82,8 +82,6 @@ async def command_question(message: types.Message):
     """Получить новый вопрос из базы"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    if telegram_id == config.ADMIN_ID:
-        await message.answer(MESSAGE['start_admin_text'])
     if not user_time_limit_is_over(telegram_id):
         question = get_random_question(user_language)
         if config.DEBUG is False and question.image_code:
@@ -328,6 +326,8 @@ async def command_help(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(MESSAGE[f'info_{user_language}'])
+    if telegram_id == config.ADMIN_ID:
+        await message.answer(MESSAGE['start_admin_text'])
 
 
 @dp.message_handler(commands=["up_admin_time_limit"])
