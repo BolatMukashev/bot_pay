@@ -9,7 +9,7 @@ import config
 import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
-from messages import MESSAGE
+from messages import MESSAGE, COMMANDS_DESCRIPTIONS
 from typing import Union
 from tqdm import tqdm as loading_bar
 
@@ -1171,6 +1171,22 @@ def get_big_statistics() -> str:
     ]
 
     return '\n'.join(text)
+
+
+def get_commands_descriptions_and_language_code(command: str) -> dict:
+    """
+    Получить локализованное описание комманд и код языка
+    :param command: комманда
+    :return: описание комманд и код языка
+    """
+    descriptions = ''
+    if command == 'set_commands':
+        descriptions = COMMANDS_DESCRIPTIONS['ALL']
+    elif command == 'set_commands_ru':
+        descriptions = COMMANDS_DESCRIPTIONS['RU']
+    elif command == 'set_commands_kz':
+        descriptions = COMMANDS_DESCRIPTIONS['KZ']
+    return descriptions
 
 
 if __name__ == '__main__':

@@ -30,6 +30,12 @@ class Users(BaseModel):
     country = CharField(null=False, default='RU')
     language = CharField(null=False, default='RU')
     registration_date = DateTimeField(default=datetime.now())
+    # import datetime
+    # import pytz
+    # print(datetime.datetime.now())
+    # then = datetime.datetime.now(pytz.utc)
+    # print(then)
+    # print(then.astimezone(pytz.timezone('Asia/Atyrau')))
     registration_is_over = BooleanField(null=False, default=False)
     time_limit = DateTimeField(default=datetime.now() + timedelta(days=1))
     last_visit = DateTimeField(default=datetime.now())

@@ -36,60 +36,25 @@ class AllStates(StatesGroup):
     SendEmailToAllAutoSchools: State = State()
 
 
-@dp.message_handler(commands="set_commands", state="*")
+@dp.message_handler(commands=["set_commands"], state="*")
 async def command_set_commands(message: types.Message):
-    """Установить команды в боковой панели для всех"""
+    """Установить команды в боковом меню, в зависимости от языка"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
-        commands = [types.BotCommand(command="/question", description="Новый вопрос. Жаңа сұрақ"),
-                    types.BotCommand(command="/penalty", description="Посмотреть штрафы. Айыппұлдарды қарау"),
-                    types.BotCommand(command="/pay", description="Оплатить. Төлеу"),
-                    types.BotCommand(command="/promo_code", description="Использовать промокод. Промокодты қолдану"),
-                    types.BotCommand(command="/promotions", description="Акции и скидки. Қор мен жеңілдіктер"),
-                    types.BotCommand(command="/chat", description="Обсудить вопросы. Сұрақтарды талқылау"),
-                    types.BotCommand(command="/error", description="Сообщить об ошибке. Қате туралы хабарлау"),
-                    types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
-                    types.BotCommand(command="/country", description="Изменить страну. Ел өзгерту"),
-                    types.BotCommand(command="/info", description="Подсказки. Кеңестер")]
-        await bot.set_my_commands(commands=commands, language_code='')
-        await message.answer("Команды установлены!")
-
-
-@dp.message_handler(commands="set_commands_ru", state="*")
-async def command_set_commands_ru(message: types.Message):
-    """Установить команды в боковой панели для русскоязычных"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        commands = [types.BotCommand(command="/question", description="Новый вопрос"),
-                    types.BotCommand(command="/penalty", description="Посмотреть штрафы"),
-                    types.BotCommand(command="/pay", description="Оплатить"),
-                    types.BotCommand(command="/promo_code", description="Использовать промокод"),
-                    types.BotCommand(command="/promotions", description="Акции и скидки"),
-                    types.BotCommand(command="/chat", description="Обсудить вопросы"),
-                    types.BotCommand(command="/error", description="Сообщить об ошибке"),
-                    types.BotCommand(command="/language", description="Изменить язык"),
-                    types.BotCommand(command="/country", description="Изменить страну"),
-                    types.BotCommand(command="/info", description="Подсказки")]
-        await bot.set_my_commands(commands=commands, language_code='ru')
-        await message.answer("Команды установлены!")
-
-
-@dp.message_handler(commands="set_commands_kz", state="*")
-async def command_set_commands_kz(message: types.Message):
-    """Установить команды в боковой панели для всех"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        commands = [types.BotCommand(command="/question", description="Новый вопрос. Жаңа сұрақ"),
-                    types.BotCommand(command="/penalty", description="Посмотреть штрафы. Айыппұлдарды қарау"),
-                    types.BotCommand(command="/pay", description="Оплатить. Төлеу"),
-                    types.BotCommand(command="/promo_code", description="Использовать промокод. Промокодты қолдану"),
-                    types.BotCommand(command="/promotions", description="Акции и скидки. Қор мен жеңілдіктер"),
-                    types.BotCommand(command="/chat", description="Обсудить вопросы. Сұрақтарды талқылау"),
-                    types.BotCommand(command="/error", description="Сообщить об ошибке. Қате туралы хабарлау"),
-                    types.BotCommand(command="/language", description="Изменить язык. Тілді өзгерту"),
-                    types.BotCommand(command="/country", description="Изменить страну. Ел өзгерту"),
-                    types.BotCommand(command="/info", description="Подсказки. Кеңестер")]
-        await bot.set_my_commands(commands=commands, language_code='kk')
+        commands_list = ["set_commands", "set_commands_ru", "set_commands_kz"]
+        for command in commands_list:
+            descriptions = get_commands_descriptions_and_language_code(command)
+            commands = [types.BotCommand(command="/question", description=descriptions['question']),
+                        types.BotCommand(command="/penalty", description=descriptions['penalty']),
+                        types.BotCommand(command="/pay", description=descriptions['pay']),
+                        types.BotCommand(command="/promo_code", description=descriptions['promo_code']),
+                        types.BotCommand(command="/promotions", description=descriptions['promotions']),
+                        types.BotCommand(command="/chat", description=descriptions['chat']),
+                        types.BotCommand(command="/error", description=descriptions['error']),
+                        types.BotCommand(command="/language", description=descriptions['language']),
+                        types.BotCommand(command="/country", description=descriptions['country']),
+                        types.BotCommand(command="/info", description=descriptions['info'])]
+            await bot.set_my_commands(commands=commands, language_code=descriptions['language_code'])
         await message.answer("Команды установлены!")
 
 
