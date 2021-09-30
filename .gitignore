@@ -1,4 +1,5 @@
 venv
+.venv
 ent_bot.txt
 img_id.txt
 to_server.txt
@@ -11,3 +12,4 @@ static/images/Kazakhstan_gory_2.jpg
 /static/images/Thumbs.db
 LinuxServer5.pem
 my_docs
+backup
