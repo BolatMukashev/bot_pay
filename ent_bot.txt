@@ -8,3 +8,7 @@ if res:
 
 # добавляем +1 к упоминанию пользователя по user_id
 # когда упоминаний > 3 или ОПЛАЧЕНО=True доступ открыт
+
+
+git fetch && git reset --hard origin/master
+git pull

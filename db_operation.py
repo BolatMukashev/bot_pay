@@ -359,10 +359,18 @@ def get_user_country(telegram_id: int) -> str:
     return user.country
 
 
-def edit_user_country(telegram_id, user_country):
+def edit_user_country(telegram_id, user_country) -> None:
+    """Изменить страну пользователя"""
     database_initialization()
     query = Users.update(country=user_country).where(Users.telegram_id == telegram_id)
     query.execute()
+
+
+def get_user_pay_status(telegram_id: int) -> str:
+    """Получить статус оплаты"""
+    database_initialization()
+    user = Users.get(Users.telegram_id == telegram_id)
+    return user.made_payment
 
 
 def get_monetary_unit_by_user_country(telegram_id):

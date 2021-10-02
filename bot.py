@@ -13,6 +13,7 @@ from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from messages import *
 from gmail import send_emails_to_schools
 import io
+import asyncio
 from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
@@ -293,6 +294,39 @@ async def command_pay(message: types.Message):
     markup.add(pay_link)
 
     await message.answer(pay_order.message_text, reply_markup=markup)
+
+    await send_pay_access_message(telegram_id, user.language, 30)
+
+
+async def send_pay_access_message(telegram_id: int, user_language: str, time_limit: int) -> None:
+    """
+    Отправить сообщение, если платеж произведен успешно
+    Проверка осуществляется каждую минуту в течении ограниченного количества времени (time_limit)
+    :param user_language: язык пользователя
+    :param time_limit: количество минут, в течении которых ссылка активна для оплаты
+    :param telegram_id: id плательщика
+    """
+    time_stop = datetime.now() + timedelta(minutes=time_limit)
+    while True:
+        time_now = datetime.now()
+        await asyncio.sleep(60)
+        status = await check_pay_status(telegram_id, user_language)
+        if status or time_now > time_stop:
+            break
+
+
+async def check_pay_status(telegram_id: int, user_language: str) -> bool:
+    """
+    Проверить статус платежа
+    :param user_language: язык пользователя
+    :param telegram_id: id плательщика
+    :return: True если статус 1
+    """
+    status = get_user_pay_status(telegram_id)
+    if status:
+        text = MESSAGE.get(f'pay_registered_message_{user_language}')
+        await bot.send_message(telegram_id, text)
+        return True
 
 
 # не работает в main.py
