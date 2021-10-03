@@ -295,7 +295,7 @@ async def command_pay(message: types.Message):
 
     await message.answer(pay_order.message_text, reply_markup=markup)
 
-    await send_pay_access_message(telegram_id, user.language, 30)
+    await send_pay_access_message(telegram_id, user.language, 20)
 
 
 async def send_pay_access_message(telegram_id: int, user_language: str, time_limit: int) -> None:
