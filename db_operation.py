@@ -13,7 +13,6 @@ from messages import MESSAGE, COMMANDS_DESCRIPTIONS
 from typing import Union
 from tqdm import tqdm as loading_bar
 
-
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
 
@@ -415,15 +414,19 @@ class PayOrder:
         self.code = 398
 
         if self.user_country == 'KZ':
-            self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_tenge} тенге!'
+            self.message_text = "{0} {1} тенге!\n{2}".format(MESSAGE[f'pay_message_{self.user_language}'],
+                                                             self.price_tenge,
+                                                             MESSAGE[f'link_limit_{self.user_language}'])
 
         elif self.user_country == 'RU' and self.user_language == 'RU':
-            self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рублей!' \
-                                                                               f' ({self.price_tenge} тенге)'
+            self.message_text = "{0} {1} рублей! ({2} тенге)\n{3}".format(MESSAGE[f'pay_message_{self.user_language}'],
+                                                                          self.price_ruble, self.price_tenge,
+                                                                          MESSAGE[f'link_limit_{self.user_language}'])
 
         elif self.user_country == 'RU' and self.user_language == 'KZ':
-            self.message_text = MESSAGE[f'pay_message_{self.user_language}'] + f' {self.price_ruble} рубль!' \
-                                                                               f' ({self.price_tenge} тенге)'
+            self.message_text = "{0} {1} рубль! ({2} тенге)\n{3}".format(MESSAGE[f'pay_message_{self.user_language}'],
+                                                                         self.price_ruble, self.price_tenge,
+                                                                         MESSAGE[f'link_limit_{self.user_language}'])
 
 
 def get_user_time_limit(telegram_id):
