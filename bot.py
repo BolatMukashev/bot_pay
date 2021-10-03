@@ -75,7 +75,7 @@ async def command_start(message: types.Message):
     full_name = message.from_user.full_name
     new_user(telegram_id, full_name)
     await bot.send_sticker(telegram_id, STICKERS['hello'])
-    await message.answer(MESSAGE['start_user_text'])
+    await message.answer(MESSAGE['start_user_text'].format(full_name), parse_mode='HTML')
     if not get_user_registration_status(telegram_id):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
@@ -329,15 +329,6 @@ async def check_pay_status(telegram_id: int, user_language: str) -> bool:
         return True
 
 
-# не работает в main.py
-async def pay_accepted_message(telegram_id: int, order_id: int) -> None:
-    text = f"Ваш платеж принят!\n" \
-           f"ID платежа: {order_id}\n" \
-           f"Вы можете продолжать пользоваться нашим сервисом\n" \
-           f"Нажмите 👉🏻 /question"
-    await bot.send_message(telegram_id, text)
-
-
 @dp.message_handler(commands=["promotions"])
 async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
@@ -362,7 +353,7 @@ async def command_help(message: types.Message):
     """Раздел Инфо о боте"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    await message.answer(MESSAGE[f'info_{user_language}'])
+    await message.answer(MESSAGE[f'info_{user_language}'], parse_mode='HTML')
     if telegram_id == config.ADMIN_ID:
         await message.answer(MESSAGE['start_admin_text'])
 
