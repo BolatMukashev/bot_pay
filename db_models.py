@@ -22,13 +22,14 @@ class BaseModel(Model):
         database = db  # соединение с базой, из шаблона выше
 
 
-# удалить second_week_promotional_offer, sixth_week_promotional_offer
+# удалить second_week_promotional_offer, sixth_week_promotional_offer, made_payment
 # import datetime
 # import pytz
 # print(datetime.datetime.now())
 # then = datetime.datetime.now(pytz.utc)
 # print(then)
 # print(then.astimezone(pytz.timezone('Asia/Atyrau')))
+
 class Users(BaseModel):
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)
@@ -47,6 +48,17 @@ class Users(BaseModel):
 
     class Meta:
         db_table = "users"
+
+
+class PayOrders(BaseModel):
+    id = PrimaryKeyField(null=False)
+    telegram_id = ForeignKeyField(Users, related_name='telegram_id')
+    date = DateTimeField(default=datetime.now())
+    order_number = IntegerField(null=False)
+    price = IntegerField(null=False)
+
+    class Meta:
+        db_table = "pay_orders"
 
 
 class AutoSchools(BaseModel):

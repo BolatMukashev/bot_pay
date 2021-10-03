@@ -16,16 +16,19 @@ from tqdm import tqdm as loading_bar
 # ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
 
 
-table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools]
+table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools, PayOrders]
 
 
 def create_new_tables(db_models):
     try:
         db.connect()
-        db.create_tables(db_models)
-        print('Таблицы созданы...')
     except peewee.InternalError as err:
         print(str(err))
+    else:
+        db.create_tables(db_models)
+        print('Таблицы созданы...')
+    finally:
+        db.close()
 
 
 def create_database(db_name):
@@ -643,7 +646,7 @@ def get_all_users_on_dict_format():
                        'time_limit': user.time_limit,
                        'last_visit': user.last_visit,
                        'promo_code_used': user.promo_code_used,
-                       'price_in_rubles': user.price_ruble,
+                       'price_in_rubles': user.price_in_rubles,
                        'made_payment': user.made_payment,
                        'second_week_promotional_offer': user.second_week_promotional_offer,
                        'sixth_week_promotional_offer': user.sixth_week_promotional_offer}
@@ -857,6 +860,36 @@ def promo_code_check_to_correct(promo_code):
         return True
     else:
         return False
+
+
+# ПЛАТЕЖИ ------------------------------------------------------------------------------------------------------------
+
+
+def new_pay_order(telegram_id: int, order_number: int, price: int) -> None:
+    """
+    Добавить информацию о новом платеже в базу
+    :param telegram_id: id плательщика
+    :param order_number: номер платежа
+    :param price: цена во время оплаты (в тенге)
+    """
+    database_initialization()
+    try:
+        pay_order = PayOrders(telegram_id=telegram_id, order_number=order_number, price=price)
+        pay_order.save()
+    except peewee.IntegrityError:
+        pass
+
+
+def check_pay_order(telegram_id: int) -> str:
+    """Получить номер платежа, тем самым подтвердить что платеж был"""
+    database_initialization()
+    try:
+        pay_order = PayOrders.get(PayOrders.telegram_id == telegram_id)
+        if pay_order:
+            print('Платеж есть')
+            return pay_order.order_number
+    except Exception as exx:
+        print(exx)
 
 
 # БЭКАП ДАННЫХ -------------------------------------------------------------------------------------------------------
@@ -1197,9 +1230,9 @@ def get_commands_descriptions_and_language_code(command: str) -> dict:
 
 
 if __name__ == '__main__':
-    create_database(config.DB_CONFIGS["db_name"])
+    # create_database(config.DB_CONFIGS["db_name"])
     create_new_tables(table_names)
-    set_users_from_backup()
-    set_auto_schools_from_backup()
-    write_all_questions_in_db('backup/all_questions_ru.json', 'RU')
-    write_all_questions_in_db('backup/all_questions_kz.json', 'KZ')
+    # set_users_from_backup()
+    # set_auto_schools_from_backup()
+    # write_all_questions_in_db('backup/all_questions_ru.json', 'RU')
+    # write_all_questions_in_db('backup/all_questions_kz.json', 'KZ')

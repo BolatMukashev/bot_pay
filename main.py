@@ -78,19 +78,19 @@ def accept():
 
     client_id - str
     для проверки, сохраняем файл с id в папке backup сайта:
-    telegram_id = int(request.json['client_id'])
-    order_id = int(request.json["order_id"])
-    new_data = [telegram_id, order_id]
-    file_name = os.path.join(os.getcwd(), 'backup', 'pay_data_ioka.json')
-    create_new_json_file(file_name, new_data)
+        telegram_id = int(request.json['client_id'])
+        order_id = int(request.json["order_id"])
+        new_data = [telegram_id, order_id]
+        file_name = os.path.join(os.getcwd(), 'backup', 'pay_data_ioka.json')
+        create_new_json_file(file_name, new_data)
     """
     status = request.json['status']
     if status == 'paid' or status == 'blocked':
         telegram_id = int(request.json['client_id'])
-        # order_id = int(request.json["order_id"])
+        order_id = int(request.json["order_id"])
+        price = int(request.json["amount"])
+        new_pay_order(telegram_id, order_id, price)
         up_user_time_limit_days(telegram_id, 365)
-        update_user_made_payment_status(telegram_id)
-        # pay_accepted_message(telegram_id, order_id)
     return 'all good'
 
 

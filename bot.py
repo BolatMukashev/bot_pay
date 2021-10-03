@@ -320,11 +320,11 @@ async def check_pay_status(telegram_id: int, user_language: str) -> bool:
     Проверить статус платежа
     :param user_language: язык пользователя
     :param telegram_id: id плательщика
-    :return: True если статус 1
+    :return: True если есть номер платежа
     """
-    status = get_user_pay_status(telegram_id)
-    if status:
-        text = MESSAGE.get(f'pay_registered_message_{user_language}')
+    pay_order_number = check_pay_order(telegram_id)
+    if pay_order_number:
+        text = MESSAGE.get(f'pay_registered_message_{user_language}').format(pay_order_number)
         await bot.send_message(telegram_id, text)
         return True
 
