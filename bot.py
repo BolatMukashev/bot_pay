@@ -3,7 +3,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound, UserDeactivated, BotBlocked
-from db_operation import *
+from db_operations import *
 from keyboards.inline.callback_datas import referral_button_call
 from keyboards.inline.country import country_buttons
 from keyboards.inline.language import language_buttons
@@ -102,6 +102,7 @@ async def command_question(message: types.Message):
                             correct_option_id=correct_option_id,
                             explanation=question.explanation)
     else:
+        await bot.send_sticker(telegram_id, STICKERS['flower'])
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
         await bot.send_message(telegram_id, limit_error_message)
     update_time_visit(telegram_id)
@@ -191,8 +192,8 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
             await bot.send_photo(user_id, photo_id, caption=caption)
         except (ChatNotFound, UserDeactivated, BotBlocked):
             no_active_users += 1
-        except Exception as ex:
-            await bot.send_message(config.ADMIN_ID, ex)
+        except Exception as exx:
+            await bot.send_message(config.ADMIN_ID, str(exx))
     await bot.send_message(config.ADMIN_ID, 'Сообщение доставлено всем пользователям ✌🏻\n'
                                             f'Не доставлено до {no_active_users} из {len(users)}')
 
@@ -202,7 +203,8 @@ async def command_send_email_for_all_auto_schools(message: types.Message):
     """Отправить email сообщение всем автошколам об изменениях в работе бота или политики"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
-        await message.answer('Отправь сообщение в виде HTML кода, но помни что оно уйдет всем Автошколам!!!')
+        await message.answer('Пиши текст.\n'
+                             'Сообщение будет встроенно в HTML код и будет отправлено всем Автошколам!')
         await AllStates.SendEmailToAllAutoSchools.set()
 
 
@@ -283,8 +285,8 @@ async def command_pay(message: types.Message):
     """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    pay_order = PayOrder(user.country, user.language, user.price_in_rubles)
-    pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_order.price_tenge, currency=pay_order.code,
+    pay_data = PayData(user.country, user.language, user.price_in_rubles)
+    pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
                            name=user.full_name)
     url = pay_link.get_pay_url()
 
@@ -293,7 +295,7 @@ async def command_pay(message: types.Message):
     pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
     markup.add(pay_link)
 
-    await message.answer(pay_order.message_text, reply_markup=markup)
+    await message.answer(pay_data.message_text, reply_markup=markup)
 
     await send_pay_access_message(telegram_id, user.language, 20)
 
@@ -308,8 +310,8 @@ async def send_pay_access_message(telegram_id: int, user_language: str, time_lim
     """
     time_stop = datetime.now() + timedelta(minutes=time_limit)
     while True:
-        time_now = datetime.now()
         await asyncio.sleep(60)
+        time_now = datetime.now()
         status = await check_pay_status(telegram_id, user_language)
         if status or time_now > time_stop:
             break
@@ -353,6 +355,7 @@ async def command_help(message: types.Message):
     """Раздел Инфо о боте"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
+    await message.answer_sticker(STICKERS['message'])
     await message.answer(MESSAGE[f'info_{user_language}'], parse_mode='HTML')
     if telegram_id == config.ADMIN_ID:
         await message.answer(MESSAGE['start_admin_text'])
@@ -395,8 +398,8 @@ async def command_set_50_percent_price_for_losers(message: types.Message):
                                      caption=OFFERS[f'second_week_promotional_offer_{user["language"]}'])
             except (ChatNotFound, UserDeactivated, BotBlocked):
                 no_active_users += 1
-            except Exception as ex:
-                await bot.send_message(config.ADMIN_ID, ex)
+            except Exception as exx:
+                await bot.send_message(config.ADMIN_ID, str(exx))
         await bot.send_message(config.ADMIN_ID, '50% скидка установлена ✌🏻\n'
                                                 f'Оповещены {len(losers) - no_active_users} из {len(losers)}')
 
@@ -439,6 +442,7 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
                                         correct_option_id=correct_option_id,
                                         explanation=question.explanation)
     else:
+        await bot.send_sticker(telegram_id, STICKERS['flower'])
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
         await bot.send_message(telegram_id, limit_error_message)
     update_time_visit(telegram_id)

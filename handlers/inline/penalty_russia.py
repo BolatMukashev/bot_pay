@@ -3,7 +3,7 @@ from bot import dp
 from keyboards.inline.callback_datas import russia_pen_titles, russia_pen_buttons, next_penalty, go_back_penalty
 from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from messages import BUTTONS
-from db_operation import get_data_from_json_file
+from db_operations import get_data_from_json_file
 
 
 data = get_data_from_json_file('backup/penalty_russia.json')

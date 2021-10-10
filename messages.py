@@ -67,9 +67,11 @@ ACTIONS
                               '/promo_code - промокодты қолданыңыз\n\n'
                               '/promotions - жеңілдіктер мен акциялар\n\n',
                pay_message_RU='Получите ГОД безлемитного доступа к нашей образовательной платформе.\n'
-                              'Для Вас это будет стоить всего {} {}! {}\nСсылка на оплату будет активна 20 минут',
+                              'Для Вас это будет стоить всего {} {}! {}\n'
+                              '<i>Ссылка на оплату будет активна 20 минут</i>',
                pay_message_KZ='Біздің білім беру платформасына БIР ЖЫЛ шектеусіз қол жеткізіңіз.\n'
-                              'Сіз үшін бұл бар болғаны {} {}! {}\nТөлем сілтемесі 20 минут бойы белсенді болады',
+                              'Сіз үшін бұл бар болғаны {} {}! {}\n'
+                              '<i>Төлем сілтемесі 20 минут бойы белсенді болады</i>',
                pay_registered_message_RU='Ваш платёж принят\n'
                                          'Номер платежа: {}\n'
                                          'Чтобы продолжить обучение нажмите /question',
@@ -201,6 +203,7 @@ STICKERS = {
     'message': 'CAACAgIAAxkBAAEB1rpgGo2RcuS-bNqr3URmqOIh9Nv3SAACPAEAArnzlwvMnvUK9IcNFR4E',
     'come_back': 'CAACAgIAAxkBAAEB1sRgGpJtzbzRtNodSiGctvngZ9AccQACHwEAArnzlwu5r6hVbS11sB4E',
     'all_good': 'CAACAgIAAxkBAAEB1sJgGpJkbNi5ocJafzCeo8OUd7b_VQACJgEAArnzlwt4WnW4BxSuMB4E',
+    'flower': 'CAACAgIAAxkBAAEDBDZhWy9yYcsn6eTkTp1-Yvm79of3zwACZAEAArnzlwvMmCtHVcQbbiEE',
     'NO': 'CAACAgIAAxkBAAEB3HtgIV_xw819XJj4oKtFyPqCyh_pxwACawEAArnzlwslqyJF_izS0h4E'
 }
 

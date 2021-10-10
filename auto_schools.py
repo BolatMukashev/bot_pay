@@ -1,4 +1,4 @@
-from db_operation import create_new_json_file
+from db_operations import create_new_json_file
 
 auto_schools = [
     {'school_name': 'Болат', 'country': 'Казахстан', 'city': 'Уральск', 'phones': [87775552233, 85552223311],

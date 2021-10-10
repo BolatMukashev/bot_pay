@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery
 from bot import dp, bot
 from keyboards.inline.callback_datas import start_button_call
-from db_operation import get_random_question, update_registration_status, get_user_language
+from db_operations import get_random_question, update_registration_status, get_user_language
 import config
 import pickle
 import random

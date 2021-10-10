@@ -1,7 +1,8 @@
 import json
-from db_operation import *
+from db_operations import *
 from auto_schools import auto_schools
 from pprint import pprint
+from db_operations import new_pay_order
 
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
@@ -80,6 +81,21 @@ def all_db_testing(questions_list):
         print()
 
 
-# all_db_testing(db_list)
+all_db_testing(db_list)
 
 # pprint(data, depth=3, width=300)
+
+
+def test_pay_order():
+    telegram_id = 55447789
+    order_number = 555555445
+    price = 100
+    try:
+        new_pay_order(telegram_id, order_number, price)
+    except Exception as err:
+        print(err)
+
+
+if __name__ == '__main__':
+    test_pay_order()
+    print(get_number_of_payed_users())

@@ -2,9 +2,9 @@ from aiogram.types import CallbackQuery
 from bot import dp, bot
 from keyboards.inline.callback_datas import set_country
 from keyboards.inline.start_button import START_button
-from db_operation import edit_user_country, get_user_language
+from db_operations import edit_user_country, get_user_language
 from messages import MESSAGE
-from db_operation import get_user_registration_status
+from db_operations import get_user_registration_status
 
 
 @dp.callback_query_handler(set_country.filter(country='country'))

@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery
 from bot import dp, bot
 from keyboards.inline.callback_datas import set_language
-from db_operation import edit_user_language, get_user_registration_status
+from db_operations import edit_user_language, get_user_registration_status
 from keyboards.inline.country import country_buttons
 from messages import MESSAGE
 

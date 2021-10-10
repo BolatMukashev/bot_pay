@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery
 from bot import dp
 from keyboards.inline.callback_datas import referral_button_call
-from db_operation import get_user_language
+from db_operations import get_user_language
 from messages import PROMOTIONS
 import config
 

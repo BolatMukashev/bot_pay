@@ -1,6 +1,5 @@
 import os
 import json
-import peewee
 import random
 import string
 from db_models import *
@@ -12,36 +11,6 @@ from google_trans_new.google_trans_new import google_new_transError
 from messages import MESSAGE, COMMANDS_DESCRIPTIONS
 from typing import Union
 from tqdm import tqdm as loading_bar
-
-# ТАБЛИЦЫ ------------------------------------------------------------------------------------------------------------
-
-
-table_names = [Users, QuestionsRU, QuestionsKZ, AutoSchools, PayOrders]
-
-
-def create_new_tables(db_models):
-    try:
-        db.connect()
-    except peewee.InternalError as err:
-        print(str(err))
-    else:
-        db.create_tables(db_models)
-        print('Таблицы созданы...')
-    finally:
-        db.close()
-
-
-def create_database(db_name):
-    try:
-        conn.cursor().execute(f'create database {db_name}')
-        print('База данных успешно создана...')
-    except pymysql.err.ProgrammingError:
-        print('База данных уже была создана ранее...')
-
-
-def database_initialization():
-    if not db.is_closed():
-        db.close()
 
 
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
@@ -61,8 +30,8 @@ def add_image_code_to(db_name, image_code_list):
 
 
 def edit_image_code(old_code, new_code):
-    QuestionsRU.update(image_code=new_code).where(QuestionsRU.image_code == old_code).execute()
-    QuestionsKZ.update(image_code=new_code).where(QuestionsKZ.image_code == old_code).execute()
+    QuestionRU.update(image_code=new_code).where(QuestionRU.image_code == old_code).execute()
+    QuestionKZ.update(image_code=new_code).where(QuestionKZ.image_code == old_code).execute()
 
 
 # ПЕРЕВОД ------------------------------------------------------------------------------------------------------------
@@ -173,23 +142,23 @@ def translate_db_to_kz_language(db_name, json_file_name):
 
 def new_ru_question(question, correct_answer, all_answers, explanation=None, image_code=None):
     database_initialization()
-    new_question = QuestionsRU(question=question,
-                               correct_answer=correct_answer,
-                               all_answers=all_answers,
-                               explanation=explanation,
-                               image_code=image_code
-                               )
+    new_question = QuestionRU(question=question,
+                              correct_answer=correct_answer,
+                              all_answers=all_answers,
+                              explanation=explanation,
+                              image_code=image_code
+                              )
     new_question.save()
 
 
 def new_kz_question(question, correct_answer, all_answers, explanation=None, image_code=None):
     database_initialization()
-    new_question = QuestionsKZ(question=question,
-                               correct_answer=correct_answer,
-                               all_answers=all_answers,
-                               explanation=explanation,
-                               image_code=image_code
-                               )
+    new_question = QuestionKZ(question=question,
+                              correct_answer=correct_answer,
+                              all_answers=all_answers,
+                              explanation=explanation,
+                              image_code=image_code
+                              )
     new_question.save()
 
 
@@ -221,9 +190,9 @@ def write_all_questions_in_db(json_file_name, language):
 
 def choose_db_by_language(user_language):
     if user_language == 'RU':
-        return QuestionsRU
+        return QuestionRU
     elif user_language == 'KZ':
-        return QuestionsKZ
+        return QuestionKZ
 
 
 def get_random_question(user_language):
@@ -262,10 +231,11 @@ def new_user(telegram_id: int, full_name: str) -> None:
     """Добавить нового пользователя в базу"""
     database_initialization()
     try:
-        user = Users(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE)
+        user = User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE)
         user.save()
-    except peewee.IntegrityError:
-        pass
+    except IntegrityError as err:
+        print(err)
+        assert err
 
 
 def set_user_on_db(telegram_id, full_name, country, language, registration_date, registration_is_over, time_limit,
@@ -278,21 +248,21 @@ def set_user_on_db(telegram_id, full_name, country, language, registration_date,
     last_visit = convert_str_to_datetime(last_visit)
     try:
         database_initialization()
-        user = Users(telegram_id=telegram_id,
-                     full_name=full_name,
-                     country=country,
-                     language=language,
-                     registration_date=registration_date,
-                     registration_is_over=registration_is_over,
-                     time_limit=time_limit,
-                     last_visit=last_visit,
-                     promo_code_used=promo_code_used,
-                     price_in_rubles=price_in_rubles,
-                     made_payment=made_payment,
-                     second_week_promotional_offer=second_week_promotional_offer,
-                     sixth_week_promotional_offer=sixth_week_promotional_offer)
+        user = User(telegram_id=telegram_id,
+                    full_name=full_name,
+                    country=country,
+                    language=language,
+                    registration_date=registration_date,
+                    registration_is_over=registration_is_over,
+                    time_limit=time_limit,
+                    last_visit=last_visit,
+                    promo_code_used=promo_code_used,
+                    price_in_rubles=price_in_rubles,
+                    made_payment=made_payment,
+                    second_week_promotional_offer=second_week_promotional_offer,
+                    sixth_week_promotional_offer=sixth_week_promotional_offer)
         user.save()
-    except peewee.IntegrityError:
+    except IntegrityError:
         pass
 
 
@@ -311,7 +281,7 @@ def valid_id(telegram_id):
 
 def get_user_by(telegram_id):
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user
 
 
@@ -321,13 +291,13 @@ def get_all_users_in_db() -> object:
     :return: Данные о всех пользователях из базы
     """
     database_initialization()
-    users = Users.select()
+    users = User.select()
     return users
 
 
 def get_user_name_by(telegram_id):
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user.full_name
 
 
@@ -337,7 +307,7 @@ def get_user_language(telegram_id):
     if user_language:
         return user_language
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     config.users_data_cache[telegram_id] = user.language
     return user.language
 
@@ -349,7 +319,7 @@ def edit_user_language(telegram_id: int, new_user_language) -> None:
     :param new_user_language: 'RU' or 'KZ'
     """
     database_initialization()
-    query = Users.update(language=new_user_language).where(Users.telegram_id == telegram_id)
+    query = User.update(language=new_user_language).where(User.telegram_id == telegram_id)
     query.execute()
     config.users_data_cache[telegram_id] = new_user_language
 
@@ -357,21 +327,21 @@ def edit_user_language(telegram_id: int, new_user_language) -> None:
 def get_user_country(telegram_id: int) -> str:
     """Получить страну пользователя из базы"""
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user.country
 
 
 def edit_user_country(telegram_id, user_country) -> None:
     """Изменить страну пользователя"""
     database_initialization()
-    query = Users.update(country=user_country).where(Users.telegram_id == telegram_id)
+    query = User.update(country=user_country).where(User.telegram_id == telegram_id)
     query.execute()
 
 
 def get_user_pay_status(telegram_id: int) -> str:
     """Получить статус оплаты"""
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user.made_payment
 
 
@@ -402,7 +372,7 @@ def get_monetary_unit(user_country, user_language):
         return 'рублей'
 
 
-class PayOrder:
+class PayData:
     def __init__(self, user_country: str, user_language: str, price_in_rubles: int):
         """
         Прием оплаты в рублях не работает (платежная система IOKA)
@@ -430,7 +400,7 @@ class PayOrder:
 
 def get_user_time_limit(telegram_id):
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     date_time = user.time_limit
     return date_time
 
@@ -453,10 +423,10 @@ def up_user_time_limit_days(telegram_id: Union[int, str], days: int) -> None:
     """
     time_limit_is_over = user_time_limit_is_over(telegram_id)
     if time_limit_is_over:
-        query = Users.update(time_limit=datetime.now() + timedelta(days=days)).where(Users.telegram_id == telegram_id)
+        query = User.update(time_limit=datetime.now() + timedelta(days=days)).where(User.telegram_id == telegram_id)
     else:
         time_limit_date = get_user_time_limit(telegram_id)
-        query = Users.update(time_limit=time_limit_date + timedelta(days=days)).where(Users.telegram_id == telegram_id)
+        query = User.update(time_limit=time_limit_date + timedelta(days=days)).where(User.telegram_id == telegram_id)
     query.execute()
 
 
@@ -467,27 +437,27 @@ def up_all_user_time_limit(days: int) -> None:
     """
     database_initialization()
     today = datetime.now()
-    res = Users.select(Users.id, Users.time_limit).where(Users.time_limit >= today)
+    res = User.select(User.id, User.time_limit).where(User.time_limit >= today)
     for user in loading_bar(res):
-        Users.update(time_limit=user.time_limit + timedelta(days=days)).where(Users.id == user.id).execute()
-    Users.update(time_limit=today + timedelta(days=days)).where(Users.time_limit < today).execute()
+        User.update(time_limit=user.time_limit + timedelta(days=days)).where(User.id == user.id).execute()
+    User.update(time_limit=today + timedelta(days=days)).where(User.time_limit < today).execute()
 
 
 def up_admin_time_limit_3minute():
     database_initialization()
-    query = Users.update(time_limit=datetime.now() + timedelta(minutes=3)).where(Users.telegram_id == config.ADMIN_ID)
+    query = User.update(time_limit=datetime.now() + timedelta(minutes=3)).where(User.telegram_id == config.ADMIN_ID)
     query.execute()
 
 
 def get_time_visit(telegram_id):
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user.last_visit
 
 
 def get_price_in_rubles_on_user(telegram_id):
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user.price_ruble
 
 
@@ -517,55 +487,55 @@ def get_finally_price_by(price_in_rubles: int, user_country: str) -> int:
 
 def change_price_in_rubles_on_user(telegram_id, new_price):
     database_initialization()
-    query = Users.update(price_in_rubles=new_price).where(Users.telegram_id == telegram_id)
+    query = User.update(price_in_rubles=new_price).where(User.telegram_id == telegram_id)
     query.execute()
 
 
 def get_user_registration_status(telegram_id):
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user.registration_is_over
 
 
 def update_registration_status(telegram_id):
     database_initialization()
-    query = Users.update(registration_is_over=True).where(Users.telegram_id == telegram_id)
+    query = User.update(registration_is_over=True).where(User.telegram_id == telegram_id)
     query.execute()
 
 
 def update_second_week_promotional_offer_status(telegram_id):
     database_initialization()
-    query = Users.update(second_week_promotional_offer=True).where(Users.telegram_id == telegram_id)
+    query = User.update(second_week_promotional_offer=True).where(User.telegram_id == telegram_id)
     query.execute()
 
 
 def update_sixth_week_promotional_offer_status(telegram_id):
     database_initialization()
-    query = Users.update(sixth_week_promotional_offer=True).where(Users.telegram_id == telegram_id)
+    query = User.update(sixth_week_promotional_offer=True).where(User.telegram_id == telegram_id)
     query.execute()
 
 
 def get_user_promo_code_used_status(telegram_id):
     database_initialization()
-    user = Users.get(Users.telegram_id == telegram_id)
+    user = User.get(User.telegram_id == telegram_id)
     return user.promo_code_used
 
 
 def update_user_promo_code_used_status(telegram_id):
     database_initialization()
-    query = Users.update(promo_code_used=True).where(Users.telegram_id == telegram_id)
+    query = User.update(promo_code_used=True).where(User.telegram_id == telegram_id)
     query.execute()
 
 
 def update_user_made_payment_status(telegram_id):
     database_initialization()
-    query = Users.update(made_payment=True).where(Users.telegram_id == telegram_id)
+    query = User.update(made_payment=True).where(User.telegram_id == telegram_id)
     query.execute()
 
 
 def update_time_visit(telegram_id):
     database_initialization()
-    query = Users.update(last_visit=datetime.now()).where(Users.telegram_id == telegram_id)
+    query = User.update(last_visit=datetime.now()).where(User.telegram_id == telegram_id)
     query.execute()
 
 
@@ -578,11 +548,11 @@ def get_all_users_telegram_id(language: str = '', country: str = '') -> list:
     """
     database_initialization()
     if language:
-        users = Users.select(Users.telegram_id).where(Users.language == language)
+        users = User.select(User.telegram_id).where(User.language == language)
     elif country:
-        users = Users.select(Users.telegram_id).where(Users.country == country)
+        users = User.select(User.telegram_id).where(User.country == country)
     else:
-        users = Users.select(Users.telegram_id)
+        users = User.select(User.telegram_id)
     telegram_ids = [user.telegram_id for user in users]
     return telegram_ids
 
@@ -608,10 +578,9 @@ def get_losers():
     """
     database_initialization()
     twenty_days_ago = datetime.now() - timedelta(days=20)
-    losers = Users.select(Users.telegram_id, Users.language).where(
-        (Users.time_limit < twenty_days_ago) &
-        (Users.price_in_rubles != config.PRICE_AFTER_20DAYS) &
-        (Users.made_payment == 0)
+    losers = User.select(User.telegram_id, User.language).where(
+        (User.time_limit < twenty_days_ago) &
+        (User.price_in_rubles != config.PRICE_AFTER_20DAYS)
     )
     losers = [{'telegram_id': user.telegram_id, 'language': user.language} for user in losers]
     return losers
@@ -623,18 +592,17 @@ def set_50_percent_price_for_losers():
     """
     database_initialization()
     twenty_days_ago = datetime.now() - timedelta(days=20)
-    Users.update(price_in_rubles=config.PRICE_AFTER_20DAYS,
-                 second_week_promotional_offer=1).where(
-        (Users.time_limit < twenty_days_ago) &
-        (Users.price_in_rubles != config.PRICE_AFTER_20DAYS) &
-        (Users.made_payment == 0)
+    User.update(price_in_rubles=config.PRICE_AFTER_20DAYS,
+                second_week_promotional_offer=1).where(
+        (User.time_limit < twenty_days_ago) &
+        (User.price_in_rubles != config.PRICE_AFTER_20DAYS)
     ).execute()
 
 
 def get_all_users_on_dict_format():
     all_users_list = []
     database_initialization()
-    all_users = Users.select()
+    all_users = User.select()
     for user in all_users:
         simple_user = {'id': user.id,
                        'telegram_id': user.telegram_id,
@@ -660,7 +628,7 @@ def get_all_users_on_dict_format():
 def all_promo_codes():
     promo_codes_list = []
     database_initialization()
-    promo_codes = AutoSchools.select()
+    promo_codes = AutoSchool.select()
     for promo_code in promo_codes:
         promo_codes_list.append(promo_code.promo_code)
     return promo_codes_list
@@ -676,7 +644,7 @@ def check_promo_code(promo_code):
 
 def edit_promo_code(secret_key, new_promo_code):
     database_initialization()
-    query = AutoSchools.update(promo_code=new_promo_code).where(AutoSchools.secret_key == secret_key)
+    query = AutoSchool.update(promo_code=new_promo_code).where(AutoSchool.secret_key == secret_key)
     query.execute()
 
 
@@ -695,52 +663,52 @@ def set_auto_schools_in_db(auto_schools):
 
 def add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code):
     database_initialization()
-    new_auto_school = AutoSchools(school_name=school_name,
-                                  country=country,
-                                  city=city,
-                                  phones=phones,
-                                  emails=emails,
-                                  secret_key=secret_key,
-                                  promo_code=promo_code
-                                  )
+    new_auto_school = AutoSchool(school_name=school_name,
+                                 country=country,
+                                 city=city,
+                                 phones=phones,
+                                 emails=emails,
+                                 secret_key=secret_key,
+                                 promo_code=promo_code
+                                 )
     new_auto_school.save()
 
 
 def add_auto_school_on_db(school_name, country, city, phones, emails, registration_date, secret_key, promo_code,
                           number_of_references, notified):
     database_initialization()
-    auto_school = AutoSchools(school_name=school_name,
-                              country=country,
-                              city=city,
-                              phones=pickle.dumps(phones, pickle.HIGHEST_PROTOCOL),
-                              emails=pickle.dumps(emails, pickle.HIGHEST_PROTOCOL),
-                              registration_date=convert_str_to_date(registration_date),
-                              secret_key=secret_key,
-                              promo_code=promo_code,
-                              number_of_references=number_of_references,
-                              notified=notified
-                              )
+    auto_school = AutoSchool(school_name=school_name,
+                             country=country,
+                             city=city,
+                             phones=pickle.dumps(phones, pickle.HIGHEST_PROTOCOL),
+                             emails=pickle.dumps(emails, pickle.HIGHEST_PROTOCOL),
+                             registration_date=convert_str_to_date(registration_date),
+                             secret_key=secret_key,
+                             promo_code=promo_code,
+                             number_of_references=number_of_references,
+                             notified=notified
+                             )
     try:
         auto_school.save()
-    except peewee.IntegrityError:
+    except IntegrityError:
         pass
 
 
 def get_all_auto_schools_on_db():
     database_initialization()
-    all_auto_schools = AutoSchools.select()
+    all_auto_schools = AutoSchool.select()
     return all_auto_schools
 
 
 def get_auto_school_by(secret_key):
     database_initialization()
-    school = AutoSchools.get(AutoSchools.secret_key == secret_key)
+    school = AutoSchool.get(AutoSchool.secret_key == secret_key)
     return school
 
 
 def get_auto_school_emails_by(secret_key):
     database_initialization()
-    school = AutoSchools.get(AutoSchools.secret_key == secret_key)
+    school = AutoSchool.get(AutoSchool.secret_key == secret_key)
     emails = pickle.loads(school.emails)
     return emails
 
@@ -748,7 +716,7 @@ def get_auto_school_emails_by(secret_key):
 def get_all_auto_schools_emails():
     emails = []
     database_initialization()
-    schools = AutoSchools.select()
+    schools = AutoSchool.select()
     for school in schools:
         email = pickle.loads(school.emails)
         emails.extend(email)
@@ -757,13 +725,13 @@ def get_all_auto_schools_emails():
 
 def delete_auto_schools_by(secret_key):
     database_initialization()
-    query = AutoSchools.delete().where(AutoSchools.secret_key == secret_key)
+    query = AutoSchool.delete().where(AutoSchool.secret_key == secret_key)
     query.execute()
 
 
 def get_not_notified_auto_schools():
     database_initialization()
-    auto_schools = AutoSchools.select().where(AutoSchools.notified == 0)
+    auto_schools = AutoSchool.select().where(AutoSchool.notified == 0)
     return auto_schools
 
 
@@ -798,14 +766,14 @@ def get_not_notified_auto_schools_emails():
 
 def edit_notified_status(school_id):
     database_initialization()
-    query = AutoSchools.update(notified=1).where(AutoSchools.id == school_id)
+    query = AutoSchool.update(notified=1).where(AutoSchool.id == school_id)
     query.execute()
 
 
 def all_secret_keys():
     secret_keys_list = []
     database_initialization()
-    promo_codes = AutoSchools.select()
+    promo_codes = AutoSchool.select()
     for promo_code in promo_codes:
         secret_keys_list.append(promo_code.secret_key)
     return secret_keys_list
@@ -836,15 +804,15 @@ def get_unique_secret_key():
 
 def get_number_of_references(promo_code):
     database_initialization()
-    promo_code = AutoSchools.get(AutoSchools.promo_code == promo_code)
+    promo_code = AutoSchool.get(AutoSchool.promo_code == promo_code)
     number_of_references = promo_code.number_of_references
     return number_of_references
 
 
 def up_number_of_references(promo_code):
     database_initialization()
-    query = AutoSchools.update(number_of_references=AutoSchools.number_of_references + 1).where(
-        AutoSchools.promo_code == promo_code)
+    query = AutoSchool.update(number_of_references=AutoSchool.number_of_references + 1).where(
+        AutoSchool.promo_code == promo_code)
     query.execute()
 
 
@@ -874,19 +842,20 @@ def new_pay_order(telegram_id: int, order_number: int, price: int) -> None:
     """
     database_initialization()
     try:
-        pay_order = PayOrders(telegram_id=telegram_id, order_number=order_number, price=price)
+        pay_order = PayOrder(telegram_id=telegram_id, order_number=order_number, price=price)
         pay_order.save()
-    except peewee.IntegrityError:
+    except IntegrityError:
         pass
+    except Exception as exx:
+        print(exx)
 
 
 def check_pay_order(telegram_id: int) -> str:
     """Получить номер платежа, тем самым подтвердить что платеж был"""
     database_initialization()
     try:
-        pay_order = PayOrders.get(PayOrders.telegram_id == telegram_id)
+        pay_order = PayOrder.get(PayOrder.telegram_id == telegram_id)
         if pay_order:
-            print('Платеж есть')
             return pay_order.order_number
     except Exception as exx:
         print(exx)
@@ -1054,8 +1023,10 @@ def get_number_of_promo_code_used_users(users):
     return len(promo_code_used_users)
 
 
-def get_number_of_payed_users(users):
-    payed_users = [user for user in users if user.made_payment == 1]
+def get_number_of_payed_users():
+    database_initialization()
+    orders = PayOrder.select()
+    payed_users = set(user.telegram_id for user in orders)
     return len(payed_users)
 
 
@@ -1071,7 +1042,7 @@ def get_promo_code_conversion(users):
 
 def get_pay_conversion(users):
     all_users_len = get_number_of_users(users)
-    payed_users = get_number_of_payed_users(users)
+    payed_users = get_number_of_payed_users()
     try:
         conversion = round(payed_users * 100 / all_users_len, 2)
     except ZeroDivisionError:
@@ -1163,7 +1134,7 @@ def get_big_statistics() -> str:
     promo_codes_on_year = get_number_of_promo_codes_registrations_on_year(auto_schools)
     promo_code_conversion = get_promo_code_conversion(users)
 
-    payed_users = get_number_of_payed_users(users)
+    payed_users = get_number_of_payed_users()
     pay_conversion = get_pay_conversion(users)
     ru_language_users, kz_language_users = get_percent_of_language_choice(users)
     users_from_russia, users_from_kazakhstan = get_percent_of_country_choice(users)

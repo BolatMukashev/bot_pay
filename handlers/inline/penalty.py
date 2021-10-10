@@ -5,7 +5,7 @@ from keyboards.inline.penalty_RU import penalty_buttons_ru_1, penalty_buttons_ru
     penalty_buttons_ru_4, penalty_buttons_ru_5
 from keyboards.inline.penalty_KZ import penalty_buttons_kz_1, penalty_buttons_kz_2, penalty_buttons_kz_3, \
     penalty_buttons_kz_4, penalty_buttons_kz_5
-from db_operation import get_user_language, get_data_from_json_file
+from db_operations import get_user_language, get_data_from_json_file
 
 
 @dp.callback_query_handler(get_penalty.filter(type='penalty'))

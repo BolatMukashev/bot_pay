@@ -1,6 +1,6 @@
 from flask import Flask, url_for, request, render_template, send_from_directory
 from werkzeug.utils import redirect
-from db_operation import *
+from db_operations import *
 from gmail import send_emails_to_schools
 from static.html_messages.you_promo_code_registered import you_promo_code_registered_message
 

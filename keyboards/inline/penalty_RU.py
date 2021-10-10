@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from keyboards.inline.callback_datas import get_penalty, next_penalty
 from messages import BUTTONS
-from db_operation import get_data_from_json_file
+from db_operations import get_data_from_json_file
 
 language = 'RU'
 button_type = 'lty'
