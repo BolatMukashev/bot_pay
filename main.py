@@ -88,7 +88,7 @@ def accept():
     if status == 'paid' or status == 'blocked':
         telegram_id = int(request.json['client_id'])
         order_id = int(request.json["order_id"])
-        price = int(request.json["amount"])
+        price = int(float(request.json["amount"]))
         new_pay_order(telegram_id, order_id, price)
         up_user_time_limit_days(telegram_id, 365)
     return 'all good'
