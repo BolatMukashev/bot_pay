@@ -24,5 +24,4 @@ async def update_country(call: CallbackQuery, callback_data: dict):
     if not get_user_registration_status(telegram_id):
         await bot.send_message(chat_id,
                                text=MESSAGE[f'registration_ok_{user_language}'],
-                               reply_markup=START_button,
-                               parse_mode='HTML')
+                               reply_markup=START_button)

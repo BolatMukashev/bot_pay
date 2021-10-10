@@ -21,11 +21,11 @@ from tqdm import tqdm as loading_bar
 
 
 if config.DEBUG:
-    bot = Bot(token=config.TEST_BOT_TOKEN)
+    token = config.TEST_BOT_TOKEN
 else:
-    bot = Bot(token=config.BOT_TOKEN)
+    token = config.BOT_TOKEN
 
-
+bot = Bot(token=token, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
@@ -69,7 +69,7 @@ async def command_start(message: types.Message):
     full_name = message.from_user.full_name
     new_user(telegram_id, full_name)
     await bot.send_sticker(telegram_id, STICKERS['hello'])
-    await message.answer(MESSAGE['start_user_text'].format(full_name), parse_mode='HTML')
+    await message.answer(MESSAGE['start_user_text'].format(full_name))
     if not get_user_registration_status(telegram_id):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
@@ -349,7 +349,7 @@ async def command_help(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer_sticker(STICKERS['message'])
-    await message.answer(MESSAGE[f'info_{user_language}'], parse_mode='HTML')
+    await message.answer(MESSAGE[f'info_{user_language}'])
     if telegram_id == config.ADMIN_ID:
         await message.answer(MESSAGE['start_admin_text'])
 
