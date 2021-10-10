@@ -3,7 +3,7 @@ from db_operations import *
 from auto_schools import auto_schools
 from pprint import pprint
 from db_operations import new_pay_order
-
+from peewee import IntegrityError
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
 
@@ -96,6 +96,28 @@ def test_pay_order():
         print(err)
 
 
+def test_auto_schools():
+    school_name = 'TestSchool'
+    country = 'Казахстан'
+    city = 'Уральск'
+    phones = ''
+    emails = ''
+    instagram = ''
+    secret_key = 'test26'
+    promo_code = 'testpr55omo'
+    try:
+        AutoSchool(school_name=school_name,
+                   country=country,
+                   city=city,
+                   secret_key=secret_key,
+                   promo_code=promo_code).save()
+    except IntegrityError as err:
+        print(err.args[1])
+
+
 if __name__ == '__main__':
-    test_pay_order()
-    print(get_number_of_payed_users())
+    a = get_all_auto_schools_on_db()
+    print(get_auto_schools_emails(a))
+    print(get_auto_schools_phones(a))
+    print(get_auto_schools_instagrams(a))
+

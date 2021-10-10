@@ -93,14 +93,16 @@ class PayOrder(BaseModel):
         db_table = "pay_orders"
 
 
+# phones, emails, instagram -> default None
 class AutoSchool(BaseModel):
     id = PrimaryKeyField(null=False)
     school_name = CharField(null=False, max_length=100)
     country = CharField(null=False, max_length=100)
     city = CharField(null=False, max_length=100)
-    phones = BlobField(null=False)
-    emails = BlobField(null=False)
-    registration_date = DateTimeField(default=get_date)
+    phones = BlobField(null=True, default=None)
+    emails = BlobField(null=True, default=None)
+    instagram = CharField(null=True, max_length=100, default=None)
+    registration_date = DateField(default=get_date)
     secret_key = CharField(null=False, max_length=100, unique=True)
     promo_code = CharField(null=False, max_length=100, unique=True)
     number_of_references = IntegerField(null=False, default=0)

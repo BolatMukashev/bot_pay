@@ -622,24 +622,21 @@ def get_all_users_on_dict_format():
     return all_users_list
 
 
-# ПРОМО КОДЫ ---------------------------------------------------------------------------------------------------------
+# ПРОМО КОДЫ и АВТОШКОЛЫ ----------------------------------------------------------------------------------------------
 
 
-def all_promo_codes():
-    promo_codes_list = []
+def get_all_promo_codes_and_secret_keys():
     database_initialization()
     promo_codes = AutoSchool.select()
-    for promo_code in promo_codes:
-        promo_codes_list.append(promo_code.promo_code)
-    return promo_codes_list
+    promo_codes_list = [promo_code.promo_code for promo_code in promo_codes]
+    all_secret_keys = [promo_code.secret_key for promo_code in promo_codes]
+    return promo_codes_list, all_secret_keys
 
 
 def check_promo_code(promo_code):
-    promo_codes = all_promo_codes()
+    promo_codes, _ = get_all_promo_codes_and_secret_keys()
     if promo_code in promo_codes:
         return True
-    else:
-        return False
 
 
 def edit_promo_code(secret_key, new_promo_code):
@@ -648,50 +645,48 @@ def edit_promo_code(secret_key, new_promo_code):
     query.execute()
 
 
-# промокод меняет владелец автошколы, доступ к промкоду по secret_key
-def set_auto_schools_in_db(auto_schools):
+# pydantic json file parse
+def add_new_auto_schools(auto_schools):
     for auto_school in auto_schools:
-        school_name = auto_school['school_name']
-        country = auto_school['country']
-        city = auto_school['city']
-        phones = pickle.dumps(auto_school['phones'], pickle.HIGHEST_PROTOCOL)
-        emails = pickle.dumps(auto_school['emails'], pickle.HIGHEST_PROTOCOL)
-        secret_key = get_unique_secret_key()
-        promo_code = secret_key
-        add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code)
-
-
-def add_new_auto_school(school_name, country, city, phones, emails, secret_key, promo_code):
-    database_initialization()
-    new_auto_school = AutoSchool(school_name=school_name,
-                                 country=country,
-                                 city=city,
-                                 phones=phones,
-                                 emails=emails,
-                                 secret_key=secret_key,
-                                 promo_code=promo_code
-                                 )
-    new_auto_school.save()
-
-
-def add_auto_school_on_db(school_name, country, city, phones, emails, registration_date, secret_key, promo_code,
-                          number_of_references, notified):
-    database_initialization()
-    auto_school = AutoSchool(school_name=school_name,
-                             country=country,
-                             city=city,
-                             phones=pickle.dumps(phones, pickle.HIGHEST_PROTOCOL),
-                             emails=pickle.dumps(emails, pickle.HIGHEST_PROTOCOL),
-                             registration_date=convert_str_to_date(registration_date),
-                             secret_key=secret_key,
-                             promo_code=promo_code,
-                             number_of_references=number_of_references,
-                             notified=notified
-                             )
-    try:
-        auto_school.save()
-    except IntegrityError:
         pass
+
+
+def add_new_auto_school(school_name: str, country: str, city: str,
+                        phones: list = None, emails: list = None, instagram: str = None):
+    database_initialization()
+    secret_key = get_unique_secret_key()
+    try:
+        AutoSchool(school_name=school_name,
+                   country=country,
+                   city=city,
+                   phones=pickle.dumps(phones, pickle.HIGHEST_PROTOCOL),
+                   emails=pickle.dumps(emails, pickle.HIGHEST_PROTOCOL),
+                   instagram=instagram,
+                   secret_key=secret_key,
+                   promo_code=secret_key
+                   ).save()
+    except IntegrityError as err:
+        print(err)
+
+
+def add_auto_school_from_backup(school_name, country, city, phones, emails, instagram, registration_date,
+                                secret_key, promo_code, number_of_references, notified):
+    database_initialization()
+    try:
+        AutoSchool(school_name=school_name,
+                   country=country,
+                   city=city,
+                   phones=pickle.dumps(phones, pickle.HIGHEST_PROTOCOL),
+                   emails=pickle.dumps(emails, pickle.HIGHEST_PROTOCOL),
+                   instagram=instagram,
+                   registration_date=convert_str_to_date(registration_date),
+                   secret_key=secret_key,
+                   promo_code=promo_code,
+                   number_of_references=number_of_references,
+                   notified=notified
+                   ).save()
+    except IntegrityError as err:
+        print(err)
 
 
 def get_all_auto_schools_on_db():
@@ -713,20 +708,25 @@ def get_auto_school_emails_by(secret_key):
     return emails
 
 
-def get_all_auto_schools_emails():
-    emails = []
-    database_initialization()
-    schools = AutoSchool.select()
-    for school in schools:
-        email = pickle.loads(school.emails)
-        emails.extend(email)
-    return emails
+# get unique auto schools или все школы, передавать в функцию и вытаскивать из них адреса почты
+def get_auto_schools_emails(auto_schools):
+    emails = [pickle.loads(school.emails) for school in auto_schools if pickle.loads(school.emails)]
+    return sum(emails, [])
+
+
+def get_auto_schools_phones(auto_schools):
+    phones = [pickle.loads(school.phones) for school in auto_schools if pickle.loads(school.phones)]
+    return sum(phones, [])
+
+
+def get_auto_schools_instagrams(auto_schools):
+    instagrams = [school.instagram for school in auto_schools if school.instagram]
+    return instagrams
 
 
 def delete_auto_schools_by(secret_key):
     database_initialization()
-    query = AutoSchool.delete().where(AutoSchool.secret_key == secret_key)
-    query.execute()
+    AutoSchool.delete().where(AutoSchool.secret_key == secret_key).execute()
 
 
 def get_not_notified_auto_schools():
@@ -766,25 +766,13 @@ def get_not_notified_auto_schools_emails():
 
 def edit_notified_status(school_id):
     database_initialization()
-    query = AutoSchool.update(notified=1).where(AutoSchool.id == school_id)
-    query.execute()
-
-
-def all_secret_keys():
-    secret_keys_list = []
-    database_initialization()
-    promo_codes = AutoSchool.select()
-    for promo_code in promo_codes:
-        secret_keys_list.append(promo_code.secret_key)
-    return secret_keys_list
+    AutoSchool.update(notified=1).where(AutoSchool.id == school_id).execute()
 
 
 def check_secret_key(secret_key):
-    secret_keys = all_secret_keys()
+    _, secret_keys = get_all_promo_codes_and_secret_keys()
     if secret_key in secret_keys:
         return True
-    else:
-        return False
 
 
 def get_random_secret_key():
@@ -811,9 +799,8 @@ def get_number_of_references(promo_code):
 
 def up_number_of_references(promo_code):
     database_initialization()
-    query = AutoSchool.update(number_of_references=AutoSchool.number_of_references + 1).where(
-        AutoSchool.promo_code == promo_code)
-    query.execute()
+    AutoSchool.update(number_of_references=AutoSchool.number_of_references + 1).where(
+        AutoSchool.promo_code == promo_code).execute()
 
 
 def correct_letters_filter(promo_code):
@@ -826,8 +813,6 @@ def promo_code_check_to_correct(promo_code):
     correct_promo_code = correct_letters_filter(promo_code)
     if promo_code == correct_promo_code:
         return True
-    else:
-        return False
 
 
 # ПЛАТЕЖИ ------------------------------------------------------------------------------------------------------------
@@ -905,20 +890,36 @@ def set_users_from_backup():
     path = path_to_users_backup()
     users = get_data_from_json_file(path)
     for user in users:
-        set_user_on_db(user['telegram_id'], user['full_name'], user['country'], user['language'],
-                       user['registration_date'], user['registration_is_over'], user['time_limit'],
-                       user['last_visit'], user['promo_code_used'], user['price_in_rubles'], user['made_payment'],
-                       user['second_week_promotional_offer'], user['sixth_week_promotional_offer'])
+        set_user_on_db(user['telegram_id'],
+                       user['full_name'],
+                       user['country'],
+                       user['language'],
+                       user['registration_date'],
+                       user['registration_is_over'],
+                       user['time_limit'],
+                       user['last_visit'],
+                       user['promo_code_used'],
+                       user['price_in_rubles'],
+                       user['made_payment'],
+                       user['second_week_promotional_offer'],
+                       user['sixth_week_promotional_offer'])
 
 
 def set_auto_schools_from_backup():
     path = path_to_auto_schools_backup()
     auto_schools = get_data_from_json_file(path)
     for auto_school in auto_schools:
-        add_auto_school_on_db(auto_school['school_name'], auto_school['country'], auto_school['city'],
-                              auto_school['phones'], auto_school['emails'], auto_school['registration_date'],
-                              auto_school['secret_key'], auto_school['promo_code'], auto_school['number_of_references'],
-                              auto_school['notified'])
+        add_auto_school_from_backup(auto_school['school_name'],
+                                    auto_school['country'],
+                                    auto_school['city'],
+                                    auto_school['phones'],
+                                    auto_school['emails'],
+                                    auto_school['instagram'],
+                                    auto_school['registration_date'],
+                                    auto_school['secret_key'],
+                                    auto_school['promo_code'],
+                                    auto_school['number_of_references'],
+                                    auto_school['notified'])
 
 
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
@@ -1108,10 +1109,6 @@ def get_active_auto_schools_conversion(auto_schools):
 def get_big_statistics() -> str:
     """
     Получить всю статистику
-    Установка времени на Linux Server:
-    date
-    timedatectl
-    sudo timedatectl set-timezone Asia/Atyrau
     :return: Статистику в строков представлении
     """
     users = get_all_users_in_db()
