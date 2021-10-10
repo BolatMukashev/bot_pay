@@ -62,13 +62,6 @@ class BaseModel(Model):
 
 
 # удалить second_week_promotional_offer, sixth_week_promotional_offer, made_payment
-# import datetime
-# import pytz
-# print(datetime.datetime.now())
-# then = datetime.datetime.now(pytz.utc)
-# print(then)
-# print(then.astimezone(pytz.timezone('Asia/Atyrau')))
-
 class User(BaseModel):
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)

@@ -59,12 +59,6 @@ async def command_set_commands(message: types.Message):
         await message.answer("Команды установлены!")
 
 
-# https://t.me/skillbox_speach_bot?start=test
-# Получить аргумент из команды /start:
-# start_args = message.get_args()
-# пригласи друга и получи +1 день бесплатного пользования!
-
-
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
     """Начало работы, приветственное сообщение и вызов меню регистрации пользователя"""
@@ -80,7 +74,6 @@ async def command_start(message: types.Message):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
-# изменить с учетом добавления кэша
 @dp.message_handler(commands=["question"])
 async def command_question(message: types.Message):
     """Получить новый вопрос из базы"""

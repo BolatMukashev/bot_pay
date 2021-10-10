@@ -18,7 +18,11 @@ async def update_country(call: CallbackQuery, callback_data: dict):
 
     await call.answer(MESSAGE[f'country_edited_ok_{user_language}'], cache_time=1)
     await call.message.edit_reply_markup()
-    await bot.edit_message_text(chat_id=chat_id, message_id=message_id,
+    await bot.edit_message_text(chat_id=chat_id,
+                                message_id=message_id,
                                 text=MESSAGE[f'country_edited_ok_{user_language}'])
     if not get_user_registration_status(telegram_id):
-        await bot.send_message(chat_id, text=MESSAGE[f'registration_ok_{user_language}'], reply_markup=START_button)
+        await bot.send_message(chat_id,
+                               text=MESSAGE[f'registration_ok_{user_language}'],
+                               reply_markup=START_button,
+                               parse_mode='HTML')
