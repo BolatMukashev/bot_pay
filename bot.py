@@ -455,11 +455,11 @@ async def scan_message(message: types.Message):
     """Принимает JSON файл, распарсивает его и добавляем информацию об автошколах в базу"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
-        document = message.document.file_id
-        file = await bot.download_file_by_id(document)
-        data = json.load(io.TextIOWrapper(file, encoding='utf-8'))
+        document_id = message.document.file_id
+        file_address = await bot.download_file_by_id(document_id)
+        file_data = json.load(io.TextIOWrapper(file_address, encoding='utf-8'))
         try:
-            set_auto_schools_in_db(data)
+            set_auto_schools_in_db(file_data)
             await message.answer('Информация об автошколах была добавлена в базу...')
         except KeyError:
             await message.answer('Не корректный набор данных!')

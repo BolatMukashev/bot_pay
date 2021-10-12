@@ -1,1 +1,15 @@
-[{"school_name": "Болат", "country": "Казахстан", "city": "Уральск", "phones": [87775552233, 85552223311], "emails": ["m-bolat@mail.ru"]}, {"school_name": "Кими", "country": "Казахстан", "city": "Орал", "phones": [81452223321], "emails": ["ya.ne.angel.kimi@gmail.com"]}]
+[
+  {"school_name": "Болат",
+  "country": "Казахстан",
+  "city": "Уральск",
+  "phones": [87775552233, 85552223311],
+  "emails": ["m-bolat@mail.ru"],
+  "instagram": null},
+  {"school_name": "Кими",
+    "country": "Казахстан",
+    "city": "Орал",
+    "phones": [81452223321],
+    "emails": ["ya.ne.angel.kimi@gmail.com"],
+    "instagram": "test_inst"
+  }
+]
