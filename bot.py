@@ -216,7 +216,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     language = get_user_language(telegram_id)
     user_promo_code = message.text.upper()
     await state.update_data(user_promo_code=user_promo_code)
-    promo_codes = get_all_promo_codes_and_secret_keys()
+    promo_codes = get_all_promo_codes()
     if user_promo_code in promo_codes:
         up_user_time_limit_days(telegram_id, 5)
         up_number_of_references(user_promo_code)
@@ -419,7 +419,8 @@ async def command_send_email_for_all_auto_schools(message: types.Message):
 async def command_send_email_for_all_auto_schools_action(message: types.Message, state: FSMContext):
     my_message = message.text
     await state.update_data(my_message=my_message)
-    emails = get_all_auto_schools_emails()
+    auto_schools = get_all_auto_schools_on_db()
+    emails = get_auto_schools_emails(auto_schools)
     message_subtitle = 'Произошли изменения'
     html = new_func_and_offers_message(my_message)
     send_emails_to_schools(emails, message_subtitle, html)

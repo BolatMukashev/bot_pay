@@ -9,7 +9,7 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 from messages import MESSAGE, COMMANDS_DESCRIPTIONS
-from typing import Union
+from typing import Union, List
 from tqdm import tqdm as loading_bar
 
 
@@ -622,19 +622,50 @@ def get_all_users_on_dict_format():
     return all_users_list
 
 
-# ПРОМО КОДЫ и АВТОШКОЛЫ ----------------------------------------------------------------------------------------------
+# ПРОМО-КОДЫ и АВТОШКОЛЫ ----------------------------------------------------------------------------------------------
 
 
-def get_all_promo_codes_and_secret_keys():
+def get_all_auto_schools_on_db():
     database_initialization()
-    promo_codes = AutoSchool.select()
-    promo_codes_list = [promo_code.promo_code for promo_code in promo_codes]
-    all_secret_keys = [promo_code.secret_key for promo_code in promo_codes]
-    return promo_codes_list, all_secret_keys
+    all_auto_schools = AutoSchool.select()
+    return all_auto_schools
+
+
+def get_not_notified_auto_schools_on_db():
+    database_initialization()
+    auto_schools = AutoSchool.select().where(AutoSchool.notified == 0)
+    return auto_schools
+
+
+def get_all_secret_keys():
+    auto_schools = get_all_auto_schools_on_db()
+    all_secret_keys = [school.secret_key for school in auto_schools]
+    return all_secret_keys
+
+
+def get_all_promo_codes():
+    auto_schools = get_all_auto_schools_on_db()
+    promo_codes_list = [promo_code.promo_code for promo_code in auto_schools]
+    return promo_codes_list
+
+
+def get_auto_schools_emails(auto_schools):
+    emails = [pickle.loads(school.emails) for school in auto_schools if pickle.loads(school.emails)]
+    return sum(emails, [])
+
+
+def get_auto_schools_phones(auto_schools):
+    phones = [pickle.loads(school.phones) for school in auto_schools if pickle.loads(school.phones)]
+    return sum(phones, [])
+
+
+def get_auto_schools_instagrams(auto_schools):
+    instagrams = [school.instagram for school in auto_schools if school.instagram]
+    return instagrams
 
 
 def check_promo_code(promo_code):
-    promo_codes, _ = get_all_promo_codes_and_secret_keys()
+    promo_codes = get_all_promo_codes()
     if promo_code in promo_codes:
         return True
 
@@ -643,12 +674,6 @@ def edit_promo_code(secret_key, new_promo_code):
     database_initialization()
     query = AutoSchool.update(promo_code=new_promo_code).where(AutoSchool.secret_key == secret_key)
     query.execute()
-
-
-# pydantic json file parse
-def add_new_auto_schools(auto_schools):
-    for auto_school in auto_schools:
-        pass
 
 
 def add_new_auto_school(school_name: str, country: str, city: str,
@@ -669,30 +694,31 @@ def add_new_auto_school(school_name: str, country: str, city: str,
         print(err)
 
 
-def add_auto_school_from_backup(school_name, country, city, phones, emails, instagram, registration_date,
-                                secret_key, promo_code, number_of_references, notified):
+# pydantic json file parse
+def add_new_auto_schools(auto_schools):
+    for auto_school in auto_schools:
+        pass
+
+
+# файл json будет распарсен pydantic'ом и сюда будет передан объект
+def add_auto_school_from_backup(auto_school) -> None:
+    """Добавить автошколу в бд из бэкапа"""
     database_initialization()
     try:
-        AutoSchool(school_name=school_name,
-                   country=country,
-                   city=city,
-                   phones=pickle.dumps(phones, pickle.HIGHEST_PROTOCOL),
-                   emails=pickle.dumps(emails, pickle.HIGHEST_PROTOCOL),
-                   instagram=instagram,
-                   registration_date=convert_str_to_date(registration_date),
-                   secret_key=secret_key,
-                   promo_code=promo_code,
-                   number_of_references=number_of_references,
-                   notified=notified
+        AutoSchool(school_name=auto_school.school_name,
+                   country=auto_school.country,
+                   city=auto_school.city,
+                   phones=pickle.dumps(auto_school.phones, pickle.HIGHEST_PROTOCOL),
+                   emails=pickle.dumps(auto_school.emails, pickle.HIGHEST_PROTOCOL),
+                   instagram=auto_school.instagram,
+                   registration_date=convert_str_to_date(auto_school.registration_date),
+                   secret_key=auto_school.secret_key,
+                   promo_code=auto_school.promo_code,
+                   number_of_references=auto_school.number_of_references,
+                   notified=auto_school.notified
                    ).save()
     except IntegrityError as err:
         print(err)
-
-
-def get_all_auto_schools_on_db():
-    database_initialization()
-    all_auto_schools = AutoSchool.select()
-    return all_auto_schools
 
 
 def get_auto_school_by(secret_key):
@@ -708,22 +734,6 @@ def get_auto_school_emails_by(secret_key):
     return emails
 
 
-# get unique auto schools или все школы, передавать в функцию и вытаскивать из них адреса почты
-def get_auto_schools_emails(auto_schools):
-    emails = [pickle.loads(school.emails) for school in auto_schools if pickle.loads(school.emails)]
-    return sum(emails, [])
-
-
-def get_auto_schools_phones(auto_schools):
-    phones = [pickle.loads(school.phones) for school in auto_schools if pickle.loads(school.phones)]
-    return sum(phones, [])
-
-
-def get_auto_schools_instagrams(auto_schools):
-    instagrams = [school.instagram for school in auto_schools if school.instagram]
-    return instagrams
-
-
 def delete_auto_schools_by(secret_key):
     database_initialization()
     AutoSchool.delete().where(AutoSchool.secret_key == secret_key).execute()
@@ -735,7 +745,9 @@ def get_not_notified_auto_schools():
     return auto_schools
 
 
-def get_all_auto_schools_on_dict_format(auto_schools_in_db):
+# нужен?
+def get_all_auto_schools_on_dict_format(auto_schools_in_db) -> List[dict]:
+    """Преобразует объект в словарь"""
     all_schools = []
     for school in auto_schools_in_db:
         data = {'id': school.id,
@@ -744,6 +756,7 @@ def get_all_auto_schools_on_dict_format(auto_schools_in_db):
                 'city': school.city,
                 'phones': pickle.loads(school.phones),
                 'emails': pickle.loads(school.emails),
+                'instagram': school.instagram,
                 'registration_date': school.registration_date,
                 'secret_key': school.secret_key,
                 'promo_code': school.promo_code,
@@ -753,24 +766,13 @@ def get_all_auto_schools_on_dict_format(auto_schools_in_db):
     return all_schools
 
 
-def get_not_notified_auto_schools_emails():
-    all_emails = []
-    database_initialization()
-    auto_schools = get_not_notified_auto_schools()
-    schools = get_all_auto_schools_on_dict_format(auto_schools)
-    for school in schools:
-        for email in school['emails']:
-            all_emails.append(email)
-    return all_emails
-
-
 def edit_notified_status(school_id):
     database_initialization()
-    AutoSchool.update(notified=1).where(AutoSchool.id == school_id).execute()
+    AutoSchool.update(notified=True).where(AutoSchool.id == school_id).execute()
 
 
 def check_secret_key(secret_key):
-    _, secret_keys = get_all_promo_codes_and_secret_keys()
+    secret_keys = get_all_secret_keys()
     if secret_key in secret_keys:
         return True
 
@@ -805,7 +807,8 @@ def up_number_of_references(promo_code):
 
 def correct_letters_filter(promo_code):
     promo_code = promo_code.upper()
-    correct_promo_code = [c for c in promo_code if c in string.ascii_uppercase + string.digits + '.-_, +#№$!%&?*']
+    allowed_characters = string.ascii_uppercase + string.digits + '.-_, +#№$!%&?*'
+    correct_promo_code = [c for c in promo_code if c in allowed_characters]
     return ''.join(correct_promo_code)
 
 
@@ -876,16 +879,18 @@ def backup_auto_schools():
     create_new_json_file(path, all_auto_schools)
 
 
-def convert_str_to_datetime(date_time_str):
-    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
-    return date_time_obj
+def convert_str_to_datetime(date_time: str) -> datetime:
+    date_time = datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S')
+    return date_time
 
 
-def convert_str_to_date(date_time_str):
-    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
-    return date_time_obj.date()
+def convert_str_to_date(registration_date: str) -> datetime.date:
+    print(registration_date)
+    date = datetime.strptime(registration_date, '%Y-%m-%d')
+    return date
 
 
+# изменить с учетеом парсера pydantic
 def set_users_from_backup():
     path = path_to_users_backup()
     users = get_data_from_json_file(path)
@@ -909,17 +914,7 @@ def set_auto_schools_from_backup():
     path = path_to_auto_schools_backup()
     auto_schools = get_data_from_json_file(path)
     for auto_school in auto_schools:
-        add_auto_school_from_backup(auto_school['school_name'],
-                                    auto_school['country'],
-                                    auto_school['city'],
-                                    auto_school['phones'],
-                                    auto_school['emails'],
-                                    auto_school['instagram'],
-                                    auto_school['registration_date'],
-                                    auto_school['secret_key'],
-                                    auto_school['promo_code'],
-                                    auto_school['number_of_references'],
-                                    auto_school['notified'])
+        add_auto_school_from_backup(auto_school)
 
 
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
@@ -993,14 +988,14 @@ def get_number_of_activated_promo_codes(auto_schools):
 
 def get_number_of_promo_codes_registrations_today(auto_schools):
     today = datetime.now().date()
-    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.registration_date.date() == today]
+    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.registration_date == today]
     return len(promo_codes)
 
 
 def get_number_of_promo_codes_registrations_on_week(auto_schools):
     seven_day_ago = datetime.now().date() - timedelta(days=7)
     promo_codes = [auto_school.id for auto_school in auto_schools if
-                   auto_school.registration_date.date() > seven_day_ago]
+                   auto_school.registration_date > seven_day_ago]
     return len(promo_codes)
 
 

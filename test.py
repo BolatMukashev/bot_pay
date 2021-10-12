@@ -83,7 +83,21 @@ def all_db_testing(questions_list):
 
 all_db_testing(db_list)
 
+
 # pprint(data, depth=3, width=300)
+
+class TestAutoSchool:
+    school_name = 'TestCalss'
+    country = 'Urugvai'
+    city = 'Racon'
+    phones = ['8777755', '556611122']
+    emails = ['testclass@mail.ru']
+    instagram = 'test_instagram'
+    registration_date = '2021-02-13'
+    secret_key = 'ttttttyyyyyyy'
+    promo_code = 'simple_dimple'
+    number_of_references = 5
+    notified = False
 
 
 def test_pay_order():
@@ -117,7 +131,4 @@ def test_auto_schools():
 
 if __name__ == '__main__':
     a = get_all_auto_schools_on_db()
-    print(get_auto_schools_emails(a))
-    print(get_auto_schools_phones(a))
-    print(get_auto_schools_instagrams(a))
-
+    b = get_not_notified_auto_schools_on_db()
