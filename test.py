@@ -132,3 +132,8 @@ def test_auto_schools():
 if __name__ == '__main__':
     a = get_all_auto_schools_on_db()
     b = get_not_notified_auto_schools_on_db()
+    schools = get_all_auto_schools_on_dict_format(a)
+    print(schools[-1])
+    edit_auto_school_by('YjQ4BC6CZcnd4wO0O32CDF', 'phones', [8777, 9777])
+    schools = get_all_auto_schools_on_dict_format(a)
+    print(schools[-1])

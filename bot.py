@@ -4,6 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound, UserDeactivated, BotBlocked
 from db_operations import *
+from json_parser import parse_schools_from_object
 from keyboards.inline.callback_datas import referral_button_call
 from keyboards.inline.country import country_buttons
 from keyboards.inline.language import language_buttons
@@ -221,6 +222,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
         up_user_time_limit_days(telegram_id, 5)
         up_number_of_references(user_promo_code)
         update_user_promo_code_used_status(telegram_id)
+        commit_use_promo_code(telegram_id, user_promo_code)
         change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_20DAYS)
         await message.answer_sticker(STICKERS['all_good'])
         await message.answer(PROMO_CODE[f'promo_code_activated_{language}'])
@@ -441,7 +443,7 @@ async def command_delete_auto_school(message: types.Message):
 async def command_delete_auto_school_action(message: types.Message, state: FSMContext):
     secret_key = message.text
     await state.update_data(secret_key=secret_key)
-    delete_auto_schools_by(secret_key)
+    delete_auto_school_by(secret_key)
     await message.answer('Автошкола успешно удалена из базы!')
     await state.finish()
 
@@ -458,8 +460,9 @@ async def scan_message(message: types.Message):
         document_id = message.document.file_id
         file_address = await bot.download_file_by_id(document_id)
         file_data = json.load(io.TextIOWrapper(file_address, encoding='utf-8'))
+        file_data = parse_schools_from_object(file_data)
         try:
-            set_auto_schools_in_db(file_data)
+            add_new_auto_schools(file_data)
             await message.answer('Информация об автошколах была добавлена в базу...')
         except KeyError:
             await message.answer('Не корректный набор данных!')

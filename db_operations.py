@@ -625,6 +625,10 @@ def get_all_users_on_dict_format():
 # ПРОМО-КОДЫ и АВТОШКОЛЫ ----------------------------------------------------------------------------------------------
 
 
+def commit_use_promo_code(telegram_id, promo_code):
+    PromoCode(telegram_id=telegram_id, promo_code=promo_code).save()
+
+
 def get_all_auto_schools_on_db():
     database_initialization()
     all_auto_schools = AutoSchool.select()
@@ -672,12 +676,40 @@ def check_promo_code(promo_code):
 
 def edit_promo_code(secret_key, new_promo_code):
     database_initialization()
-    query = AutoSchool.update(promo_code=new_promo_code).where(AutoSchool.secret_key == secret_key)
-    query.execute()
+    AutoSchool.update(promo_code=new_promo_code).where(AutoSchool.secret_key == secret_key).execute()
+
+
+def edit_auto_school_by(secret_key, param, new_data):
+    database_initialization()
+    new_data = pickle.dumps(new_data, pickle.HIGHEST_PROTOCOL)
+    if param == 'phones':
+        AutoSchool.update(phones=new_data).where(AutoSchool.secret_key == secret_key).execute()
+    elif param == 'emails':
+        AutoSchool.update(emails=new_data).where(AutoSchool.secret_key == secret_key).execute()
+
+
+def add_new_auto_schools(auto_schools) -> None:
+    """
+    Добавить новые автошколы в базу из документа (объекта)
+    :param auto_schools: Объект со списком автошкол
+    """
+    for school in auto_schools:
+        add_new_auto_school(school.school_name, school.country, school.city,
+                            school.phones, school.emails, school.instagram)
 
 
 def add_new_auto_school(school_name: str, country: str, city: str,
                         phones: list = None, emails: list = None, instagram: str = None):
+    """
+    Добавить новую автошколу в базу
+    :param school_name: название
+    :param country: страна
+    :param city: город
+    :param phones: список с номерами телефонов или None
+    :param emails: список с адресами почты или None
+    :param instagram: адрес инстаграм или None
+    :return:
+    """
     database_initialization()
     secret_key = get_unique_secret_key()
     try:
@@ -694,13 +726,6 @@ def add_new_auto_school(school_name: str, country: str, city: str,
         print(err)
 
 
-# pydantic json file parse
-def add_new_auto_schools(auto_schools):
-    for auto_school in auto_schools:
-        pass
-
-
-# файл json будет распарсен pydantic'ом и сюда будет передан объект
 def add_auto_school_from_backup(auto_school) -> None:
     """Добавить автошколу в бд из бэкапа"""
     database_initialization()
@@ -734,7 +759,7 @@ def get_auto_school_emails_by(secret_key):
     return emails
 
 
-def delete_auto_schools_by(secret_key):
+def delete_auto_school_by(secret_key):
     database_initialization()
     AutoSchool.delete().where(AutoSchool.secret_key == secret_key).execute()
 

@@ -93,6 +93,16 @@ class PayOrder(BaseModel):
         db_table = "pay_orders"
 
 
+class PromoCode(BaseModel):
+    id = PrimaryKeyField(null=False)
+    telegram_id = IntegerField(null=False, unique=True)
+    date = DateTimeField(default=datetime.now)
+    promo_code = CharField(null=False)
+
+    class Meta:
+        db_table = "promo_code_used_history"
+
+
 # phones, emails, instagram -> default None
 class AutoSchool(BaseModel):
     id = PrimaryKeyField(null=False)
@@ -136,7 +146,7 @@ class QuestionKZ(BaseModel):
         db_table = "questions_kz"
 
 
-table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder]
+table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder, PromoCode]
 
-__all__ = ['IntegrityError', 'User', 'PayOrder', 'QuestionRU', 'QuestionKZ', 'AutoSchool', 'create_new_tables',
-           'create_database', 'database_initialization', 'table_names']
+__all__ = ['IntegrityError', 'User', 'PayOrder', 'PromoCode', 'QuestionRU', 'QuestionKZ', 'AutoSchool',
+           'create_new_tables', 'create_database', 'database_initialization', 'table_names']
