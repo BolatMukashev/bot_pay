@@ -31,6 +31,8 @@ DB_HOST = os.getenv('DB_HOST')
 DB_PORT = int(os.getenv('DB_PORT'))
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
+GMAIL = os.getenv('GMAIL')
+
 RUBLES_EXCHANGE_RATE = 5.87
 
 PAY_CONFIGS = {

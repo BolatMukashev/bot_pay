@@ -12,7 +12,7 @@ import config
 
 
 server = 'smtp.gmail.com'
-sender = 'pdd.good.bot@gmail.com'
+sender = config.GMAIL
 
 if config.DEBUG:
     password = config.GMAIL_WINDOWS_PASSWORD
@@ -28,7 +28,7 @@ title = 'PDD GOOD BOT'
 my_message = 'Прочти обязательно!'
 
 
-def send_emails_to_schools(recipients_list, sub_title, html):
+def send_emails_to_schools(recipients_list, sub_title, html, file=False):
     msg = MIMEMultipart('alternative')
     msg['Subject'] = sub_title
     msg['From'] = title
@@ -38,16 +38,18 @@ def send_emails_to_schools(recipients_list, sub_title, html):
     msg['X-Mailer'] = 'Python/' + (python_version())
 
     part_text = MIMEText(my_message, 'plain')
-    part_html = MIMEText(html, 'html')
-    part_file = MIMEBase('application', 'octet-stream; name="{}"'.format(base_name))
-    part_file.set_payload(open(file_path, "rb").read())
-    part_file.add_header('Content-Description', base_name)
-    part_file.add_header('Content-Disposition', 'attachment; filename="{}"; size={}'.format(base_name, file_size))
-    encoders.encode_base64(part_file)
-
     msg.attach(part_text)
+
+    part_html = MIMEText(html, 'html')
     msg.attach(part_html)
-    msg.attach(part_file)
+
+    if file:
+        part_file = MIMEBase('application', 'octet-stream; name="{}"'.format(base_name))
+        part_file.set_payload(open(file_path, "rb").read())
+        part_file.add_header('Content-Description', base_name)
+        part_file.add_header('Content-Disposition', 'attachment; filename="{}"; size={}'.format(base_name, file_size))
+        encoders.encode_base64(part_file)
+        msg.attach(part_file)
 
     mail = smtplib.SMTP_SSL(server)
     mail.login(sender, password)

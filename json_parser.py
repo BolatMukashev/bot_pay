@@ -6,7 +6,7 @@ class School(BaseModel):
     school_name: str
     country: str
     city: str
-    phones: Optional[List[str]] = None
+    phones: Optional[List[int]] = None
     emails: Optional[List[str]] = None
     instagram: Optional[str] = None
 
