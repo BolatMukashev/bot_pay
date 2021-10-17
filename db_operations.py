@@ -649,7 +649,7 @@ def get_all_secret_keys():
 
 def get_all_promo_codes():
     auto_schools = get_all_auto_schools_on_db()
-    promo_codes_list = [promo_code.promo_code for promo_code in auto_schools]
+    promo_codes_list = [promo_code.promo_code.upper() for promo_code in auto_schools]
     return promo_codes_list
 
 

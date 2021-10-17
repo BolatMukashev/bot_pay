@@ -194,7 +194,7 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands=["promo_code"], state='*')
-async def command_promo_code(message: types.Message):
+async def command_promo_code(message: types.Message, state: FSMContext):
     """
     Раздел с Промо-кодами. Тут можно активировать промокод и получить +3 дня к использованию бота и
     скидку 50% на покупку годового доступа
@@ -218,6 +218,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     user_promo_code = message.text.upper()
     await state.update_data(user_promo_code=user_promo_code)
     promo_codes = get_all_promo_codes()
+    print(promo_codes)
     if user_promo_code in promo_codes:
         up_user_time_limit_days(telegram_id, 5)
         up_number_of_references(user_promo_code)
@@ -464,8 +465,8 @@ async def scan_message(message: types.Message):
         try:
             add_new_auto_schools(file_data)
             await message.answer('Информация об автошколах была добавлена в базу...')
-        except KeyError:
-            await message.answer('Не корректный набор данных!')
+        except KeyError as err:
+            await message.answer('Не корректный набор данных!\n{}'.format(err))
 
 
 @dp.message_handler(content_types=['photo'])
