@@ -194,7 +194,7 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands=["promo_code"], state='*')
-async def command_promo_code(message: types.Message, state: FSMContext):
+async def command_promo_code(message: types.Message):
     """
     Раздел с Промо-кодами. Тут можно активировать промокод и получить +3 дня к использованию бота и
     скидку 50% на покупку годового доступа
