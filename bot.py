@@ -218,7 +218,6 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     user_promo_code = message.text.upper()
     await state.update_data(user_promo_code=user_promo_code)
     promo_codes = get_all_promo_codes()
-    print(promo_codes)
     if user_promo_code in promo_codes:
         up_user_time_limit_days(telegram_id, 5)
         up_number_of_references(user_promo_code)
