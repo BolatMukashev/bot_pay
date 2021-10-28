@@ -130,11 +130,4 @@ def test_auto_schools():
 
 
 if __name__ == '__main__':
-    a = get_all_auto_schools_on_db()
-    b = get_not_notified_auto_schools_on_db()
-    # edit_auto_school_by('YjQ4BC6CZcnd4wO0O32CDF', 'phones', [8777, 9777])
-    schools = get_all_auto_schools_on_dict_format(a)
-    edit_auto_school_by('grpm5U0Ia9Clcjv5HkQRMX', 'emails', ['dfdf-erf-dfdfd-vv@mail.kz', 'm-bolat@mail.ru'])
-    for x in schools[-3:]:
-        print(x)
-        print()
+    add_new_auto_school('BolAuto', 'KZ', 'Uralsk', [8777112255], ['m-bolat@mail.ru', 'ya.ne.angel.kimi@gmail.com'])
