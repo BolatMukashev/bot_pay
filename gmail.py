@@ -24,7 +24,7 @@ file_path = "documents/site_preview.pdf"
 base_name = os.path.basename(file_path)
 file_size = os.path.getsize(file_path)
 
-title = 'PDD GOOD BOT'
+title = 'PDD GOOD BOT - новая образовательная платформа'
 my_message = 'Прочти обязательно!'
 
 
@@ -55,8 +55,9 @@ def send_emails_to_schools(recipients_list, sub_title, html, file=False):
     mail.login(sender, password)
     try:
         mail.sendmail(sender, recipients_list, msg.as_string())
-        return 'Сообщения в автошколы были разосланы...'
     except smtplib.SMTPRecipientsRefused:
         return 'Список email-ов пуст'
+    else:
+        return 'Сообщения в автошколы были разосланы...'
     finally:
         mail.quit()
