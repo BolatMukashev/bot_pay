@@ -4,6 +4,7 @@ from auto_schools import auto_schools
 from pprint import pprint
 from db_operations import new_pay_order
 from peewee import IntegrityError
+from PIL import Image, ImageFont, ImageDraw
 
 # проверяем длину вопроса - 255, ответов - 100, пояснений - 200
 
@@ -129,5 +130,25 @@ def test_auto_schools():
         print(err.args[1])
 
 
+def create_poster(image_name, school_name, promo_code) -> None:
+    directory = os.path.join(os.getcwd(), 'static', 'images', image_name)
+    directory2 = os.path.join(os.getcwd(), 'static', 'images', '2' + image_name)
+
+    try:
+        image = Image.open(directory)
+    except FileNotFoundError:
+        print('Файл изображения не найден')
+    else:
+        draw = ImageDraw.Draw(image)
+        font_dir = os.path.join(os.getcwd(), 'static', 'fonts', 'PT_Serif', 'PTSerif-Regular.ttf')
+        font = ImageFont.truetype(font_dir, size=160)
+        school_name_x_coord = 1025 - (len(school_name) / 2 * 110)
+        promo_code_x_coord = 1025 - (len(promo_code) / 2 * 90)
+        draw.text((school_name_x_coord, 200), "\"{}\"".format(school_name), (255, 255, 255), font=font)
+        draw.text((promo_code_x_coord, 580), promo_code, (255, 255, 255), font=font)
+        image.save(directory2, "PNG", optimize=True)
+
+
 if __name__ == '__main__':
-    add_new_auto_school('BolAuto', 'KZ', 'Uralsk', [8777112255], ['m-bolat@mail.ru', 'ya.ne.angel.kimi@gmail.com'])
+    create_poster('poster.png', 'BolAuto', 'Super_Hero28')
+    # add_new_auto_school('BolAuto', 'KZ', 'Uralsk', [8777112255], ['m-bolat@mail.ru', 'ya.ne.angel.kimi@gmail.com'])
