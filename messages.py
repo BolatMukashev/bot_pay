@@ -1,6 +1,8 @@
 MESSAGE = dict(start_admin_text="""
 Показать статистику:
 /statistics
+Узнать о пользователе:
+/get_user_info
 
 MESSAGES
 Отправить картинку + подпись (рус):

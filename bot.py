@@ -21,10 +21,8 @@ from static.html_messages.new_functions_and_offers import new_func_and_offers_me
 from tqdm import tqdm as loading_bar
 
 
-if config.DEBUG:
-    token = config.TEST_BOT_TOKEN
-else:
-    token = config.BOT_TOKEN
+token = config.TEST_BOT_TOKEN if config.DEBUG else config.BOT_TOKEN
+
 
 bot = Bot(token=token, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -36,6 +34,7 @@ class AllStates(StatesGroup):
     UsePromoCode: State = State()
     DeleteAutoSchool: State = State()
     SendEmailToAllAutoSchools: State = State()
+    InfoAboutUser: State = State()
 
 
 @dp.message_handler(commands=["set_commands"], state="*")
@@ -490,6 +489,30 @@ async def command_backup_all_data(message: types.Message):
             await message.answer_document(users_json_file)
         with open(path_2, 'rb') as auto_schools_json_file:
             await message.answer_document(auto_schools_json_file)
+
+
+@dp.message_handler(commands=["get_user_info"])
+async def command_get_user_info(message: types.Message):
+    """Показать всю информацию о пользователе"""
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        await message.answer('Напиши или пришли сообщение от пользователя')
+        await AllStates.InfoAboutUser.set()
+
+
+@dp.message_handler(state=AllStates.InfoAboutUser, content_types=types.ContentTypes.TEXT)
+async def command_get_user_info_action(message: types.Message, state: FSMContext):
+    try:
+        user_info = f'ID: {message.forward_from.id}\n' \
+                    f'Имя: {message.forward_from.full_name}\n' \
+                    f'Ник: @{message.forward_from.username}'
+    except AttributeError:
+        await message.answer('Ошибка! Не могу получить информацию о пользователе.\n'
+                             'Возможно, информация о пользователе скрыта настройками приватности')
+    else:
+        await message.answer(user_info)
+    finally:
+        await state.finish()
 
 
 if __name__ == "__main__":
