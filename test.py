@@ -152,7 +152,7 @@ def create_poster(image_name, school_name, promo_code) -> None:
         font_dir = os.path.join(os.getcwd(), 'static', 'fonts', 'Ubuntu_Mono', 'UbuntuMono-BoldItalic.ttf')
 
         school_name_font_size = 160 if len(school_name) <= 22 else 160 - int((len(school_name) * 1.5))
-        promo_code_font_size = 160
+        promo_code_font_size = 160 if len(promo_code) <= 22 else 160 - int((len(promo_code) * 1.5))
         school_name_font = ImageFont.truetype(font_dir, size=school_name_font_size)
         promo_code_font = ImageFont.truetype(font_dir, size=promo_code_font_size)
 
