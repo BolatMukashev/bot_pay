@@ -507,8 +507,7 @@ async def command_get_user_info_action(message: types.Message, state: FSMContext
                     f'Имя: {message.forward_from.full_name}\n' \
                     f'Ник: @{message.forward_from.username}'
     except AttributeError:
-        await message.answer('Ошибка! Не могу получить информацию о пользователе.\n'
-                             'Возможно, информация о пользователе скрыта настройками приватности')
+        await message.answer(GIFT_CERTIFICATE['identification_error_RU'])
     else:
         await message.answer(user_info)
     finally:
