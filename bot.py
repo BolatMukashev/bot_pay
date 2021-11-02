@@ -50,6 +50,7 @@ async def command_set_commands(message: types.Message):
                         types.BotCommand(command="/pay", description=descriptions['pay']),
                         types.BotCommand(command="/promo_code", description=descriptions['promo_code']),
                         types.BotCommand(command="/promotions", description=descriptions['promotions']),
+                        types.BotCommand(command="/donate", description=descriptions['donate']),
                         types.BotCommand(command="/chat", description=descriptions['chat']),
                         types.BotCommand(command="/error", description=descriptions['error']),
                         types.BotCommand(command="/language", description=descriptions['language']),
@@ -294,8 +295,8 @@ async def command_promotions(message: types.Message):
     image_code = IMAGES['100friends']
 
     markup = types.InlineKeyboardMarkup()
-    pay_button_text = BUTTONS[f'do_it_{user_language}']
-    ref_link = types.InlineKeyboardButton(text=pay_button_text,
+    button_text = BUTTONS[f'do_it_{user_language}']
+    ref_link = types.InlineKeyboardButton(text=button_text,
                                           callback_data=referral_button_call.new(referral='100friends',
                                                                                  value=user_language))
     markup.add(ref_link)
@@ -512,6 +513,23 @@ async def command_get_user_info_action(message: types.Message, state: FSMContext
         await message.answer(user_info)
     finally:
         await state.finish()
+
+
+@dp.message_handler(commands=["donate"])
+async def command_donate(message: types.Message):
+    """Пожертвования на развитие проекта + карта развития проекта"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    image_code = IMAGES['roadmap']
+
+    markup = types.InlineKeyboardMarkup()
+    button_text = BUTTONS[f'help_project_{user_language}']
+    ref_link = types.InlineKeyboardButton(text=button_text, url='https://google.com')
+    markup.add(ref_link)
+
+    if not config.DEBUG:
+        await bot.send_photo(telegram_id, image_code)
+    await message.answer(ROADMAP[f'roadmap_text_{user_language}'], reply_markup=markup)
 
 
 if __name__ == "__main__":
