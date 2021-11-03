@@ -35,6 +35,8 @@ GMAIL = os.getenv('GMAIL')
 
 RUBLES_EXCHANGE_RATE = 5.87
 
+DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12893724215771235'
+
 PAY_CONFIGS = {
     'KASSA_24_LOGIN_RU': os.getenv('KASSA_24_LOGIN_RU'),
     'KASSA_24_PASSWORD_RU': os.getenv('KASSA_24_PASSWORD_RU'),

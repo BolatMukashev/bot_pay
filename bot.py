@@ -524,12 +524,22 @@ async def command_donate(message: types.Message):
 
     markup = types.InlineKeyboardMarkup()
     button_text = BUTTONS[f'help_project_{user_language}']
-    ref_link = types.InlineKeyboardButton(text=button_text, url='https://google.com')
+    ref_link = types.InlineKeyboardButton(text=button_text, url=config.DONATE_URL)
     markup.add(ref_link)
 
     if not config.DEBUG:
         await bot.send_photo(telegram_id, image_code)
     await message.answer(ROADMAP[f'roadmap_text_{user_language}'], reply_markup=markup)
+
+
+@dp.message_handler()
+async def simple_message(message: types.Message):
+    """Показать меню"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    commands = COMMANDS_DESCRIPTIONS.get(user_language, 'ALL')
+    text = [f"/{key} - {value}" for (key, value) in commands.items() if key != 'language_code']
+    await message.answer("\n".join(text))
 
 
 if __name__ == "__main__":
