@@ -267,7 +267,7 @@ async def send_pay_access_message(telegram_id: int, user_language: str, time_lim
     """
     time_stop = datetime.now() + timedelta(minutes=time_limit)
     while True:
-        await asyncio.sleep(60)
+        await asyncio.sleep(10)
         time_now = datetime.now()
         status = await check_pay_status(telegram_id, user_language)
         if status or time_now > time_stop:
@@ -281,11 +281,12 @@ async def check_pay_status(telegram_id: int, user_language: str) -> bool:
     :param telegram_id: id плательщика
     :return: True если есть номер платежа
     """
-    pay_order_number = check_pay_order(telegram_id)
-    if pay_order_number:
-        text = MESSAGE.get(f'pay_registered_message_{user_language}').format(pay_order_number)
-        await bot.send_message(telegram_id, text)
-        return True
+    pay_order = check_pay_order(telegram_id)
+    if pay_order is not None:
+        if pay_order[-1].date.date() == datetime.now().date():
+            text = MESSAGE.get(f'pay_registered_message_{user_language}').format(pay_order[-1].order_number)
+            await bot.send_message(telegram_id, text)
+            return True
 
 
 @dp.message_handler(commands=["promotions"])

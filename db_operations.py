@@ -863,15 +863,15 @@ def new_pay_order(telegram_id: int, order_number: int, price: int) -> None:
         print(exx)
 
 
-def check_pay_order(telegram_id: int) -> str:
-    """Получить номер платежа, тем самым подтвердить что платеж был"""
+def check_pay_order(telegram_id: int):
+    """Получить запись о платеже, тем самым подтвердить что платеж был"""
     database_initialization()
     try:
-        pay_order = PayOrder.get(PayOrder.telegram_id == telegram_id)
+        pay_order = PayOrder.select(PayOrder.date, PayOrder.order_number).where(PayOrder.telegram_id == telegram_id)
         if pay_order:
-            return pay_order.order_number
-    except Exception as exx:
-        print(exx)
+            return pay_order
+    except Exception as err:
+        print('Платеж не найден\n', err)
 
 
 # БЭКАП ДАННЫХ -------------------------------------------------------------------------------------------------------
