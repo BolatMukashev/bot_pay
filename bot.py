@@ -50,6 +50,7 @@ async def command_set_commands(message: types.Message):
                         types.BotCommand(command="/pay", description=descriptions['pay']),
                         types.BotCommand(command="/promo_code", description=descriptions['promo_code']),
                         types.BotCommand(command="/promotions", description=descriptions['promotions']),
+                        types.BotCommand(command="/certificate", description=descriptions['certificate']),
                         types.BotCommand(command="/donate", description=descriptions['donate']),
                         types.BotCommand(command="/chat", description=descriptions['chat']),
                         types.BotCommand(command="/error", description=descriptions['error']),
@@ -530,6 +531,14 @@ async def command_donate(message: types.Message):
     if not config.DEBUG:
         await bot.send_photo(telegram_id, image_code)
     await message.answer(ROADMAP[f'roadmap_text_{user_language}'], reply_markup=markup)
+
+
+@dp.message_handler(commands=["certificate"])
+async def command_certificate(message: types.Message):
+    """Подарочный сертификат на покупку тарифа Премиум Max"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    await message.answer(MESSAGE.get(f'function_error_{user_language}'))
 
 
 @dp.message_handler()
