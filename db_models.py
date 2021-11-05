@@ -74,9 +74,8 @@ class User(BaseModel):
     last_visit = DateTimeField(default=datetime.now)
     promo_code_used = BooleanField(null=False, default=False)
     price_in_rubles = IntegerField(null=False)
-    made_payment = BooleanField(null=False, default=False)
-    second_week_promotional_offer = BooleanField(null=False, default=False)
-    sixth_week_promotional_offer = BooleanField(null=False, default=False)
+    referral = IntegerField(null=True)
+    tariff = CharField(null=False, max_length=50, default='basic')
 
     class Meta:
         db_table = "users"
