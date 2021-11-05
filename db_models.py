@@ -102,7 +102,6 @@ class PromoCode(BaseModel):
         db_table = "promo_code_used_history"
 
 
-# phones, emails, instagram -> default None
 class AutoSchool(BaseModel):
     id = PrimaryKeyField(null=False)
     school_name = CharField(null=False, max_length=100)
@@ -119,6 +118,15 @@ class AutoSchool(BaseModel):
 
     class Meta:
         db_table = "auto_schools"
+
+
+class Leaver(BaseModel):
+    id = PrimaryKeyField(null=False)
+    telegram_id = IntegerField(null=False, unique=True)
+    tariff = CharField(null=False, max_length=50)
+
+    class Meta:
+        db_table = "leavers"
 
 
 class QuestionRU(BaseModel):
@@ -145,7 +153,7 @@ class QuestionKZ(BaseModel):
         db_table = "questions_kz"
 
 
-table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder, PromoCode]
+table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder, PromoCode, Leaver]
 
-__all__ = ['IntegrityError', 'User', 'PayOrder', 'PromoCode', 'QuestionRU', 'QuestionKZ', 'AutoSchool',
+__all__ = ['IntegrityError', 'User', 'PayOrder', 'PromoCode', 'QuestionRU', 'QuestionKZ', 'AutoSchool', 'Leaver',
            'create_new_tables', 'create_database', 'database_initialization', 'table_names']
