@@ -227,11 +227,11 @@ def get_all_questions_from_db(user_language):
 # ПОЛЬЗОВАТЕЛЬ -------------------------------------------------------------------------------------------------------
 
 
-def new_user(telegram_id: int, full_name: str) -> None:
+def new_user(telegram_id: int, full_name: str, referral: int = None) -> None:
     """Добавить нового пользователя в базу"""
     database_initialization()
     try:
-        user = User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE)
+        user = User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE, referral=referral)
         user.save()
     except IntegrityError as err:
         print(err)

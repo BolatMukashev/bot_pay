@@ -65,11 +65,11 @@ async def command_set_commands(message: types.Message):
 async def command_start(message: types.Message):
     """Начало работы, приветственное сообщение и вызов меню регистрации пользователя"""
     telegram_id = message.from_user.id
-    start_args = message.get_args()
-    if valid_id(start_args) and not check_id(telegram_id):
-        up_user_time_limit_days(start_args, 1)
+    referral_telegram_id = message.get_args()
+    if valid_id(referral_telegram_id) and not check_id(telegram_id):
+        up_user_time_limit_days(referral_telegram_id, 1)
     full_name = message.from_user.full_name
-    new_user(telegram_id, full_name)
+    new_user(telegram_id=telegram_id, full_name=full_name, referral=referral_telegram_id)
     await bot.send_sticker(telegram_id, STICKERS['hello'])
     await message.answer(MESSAGE['start_user_text'].format(full_name))
     if not get_user_registration_status(telegram_id):
