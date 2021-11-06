@@ -162,5 +162,6 @@ def create_poster(image_name, school_name, promo_code) -> None:
 
 
 if __name__ == '__main__':
-    create_poster('poster.png', 'Академия Вождения в г.Уральск', 'BIG BOI 24 SUPER')
+    delete_leaver(552233)
+    # create_poster('poster.png', 'Академия Вождения в г.Уральск', 'BIG BOI 24 SUPER')
     # add_new_auto_school('BolAuto', 'KZ', 'Uralsk', [8777112255], ['m-bolat@mail.ru', 'ya.ne.angel.kimi@gmail.com'])

@@ -9,7 +9,7 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 from messages import MESSAGE, COMMANDS_DESCRIPTIONS
-from typing import Union, List
+from typing import List
 from tqdm import tqdm as loading_bar
 
 
@@ -227,15 +227,77 @@ def get_all_questions_from_db(user_language):
 # ПОЛЬЗОВАТЕЛЬ -------------------------------------------------------------------------------------------------------
 
 
-def new_user(telegram_id: int, full_name: str, referral: int = None) -> None:
-    """Добавить нового пользователя в базу"""
+def add_user(telegram_id: int, full_name: str, referral: int = None, tariff: str = 'basic') -> None:
+    """Добавить нового пользователя в базу, таблица users"""
     database_initialization()
     try:
-        user = User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE, referral=referral)
-        user.save()
+        User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE, referral=referral,
+             tariff=tariff).save()
     except IntegrityError as err:
         print(err)
         assert err
+
+
+def delete_user(telegram_id: int) -> None:
+    """Удалить пользователя из таблицы users"""
+    database_initialization()
+    try:
+        User.delete().where(User.telegram_id == telegram_id).execute()
+    except Exception as err:
+        print(err)
+        assert err
+
+
+def move_user_to_leavers(telegram_id: int) -> None:
+    """
+    Переместить пользователя в таблицу leavers
+    :param telegram_id: id
+    :return:
+    """
+    user = get_user_by(telegram_id)
+    add_leaver(user.telegram_id, user.full_name, user.referral, user.tariff)
+    delete_user(telegram_id)
+
+
+def add_leaver(telegram_id: int, full_name: str, tariff: str, referral: int = None) -> None:
+    """Добавить пользователя в базу, таблица leavers"""
+    database_initialization()
+    try:
+        Leaver(telegram_id=telegram_id, full_name=full_name, tariff=tariff, referral=referral).save()
+    except IntegrityError as err:
+        print(err)
+        assert err
+
+
+def get_leaver_by(telegram_id: int) -> Leaver:
+    """
+    Получить ливера по telegram_id
+    :param telegram_id: id
+    :return: объект класса Leaver
+    """
+    leaver = Leaver.get(Leaver.telegram_id == telegram_id)
+    return leaver
+
+
+def delete_leaver(telegram_id: int) -> None:
+    """Удалить пользователя из таблицы leavers"""
+    database_initialization()
+    try:
+        Leaver.delete().where(Leaver.telegram_id == telegram_id).execute()
+    except Exception as err:
+        print(err)
+        assert err
+
+
+def move_leaver_to_users(telegram_id: int) -> None:
+    """
+    Вернуть ливера в таблицу users
+    :param telegram_id: id
+    :return:
+    """
+    leaver = get_leaver_by(telegram_id)
+    add_user(leaver.telegram_id, leaver.full_name, leaver.referral, leaver.tariff)
+    delete_leaver(telegram_id)
 
 
 def set_user_on_db(telegram_id, full_name, country, language, registration_date, registration_is_over, time_limit,
@@ -266,9 +328,16 @@ def set_user_on_db(telegram_id, full_name, country, language, registration_date,
         pass
 
 
-def check_id(telegram_id):
+def check_id(telegram_id) -> bool:
+    """
+    Проверить наличие telegram id  базе, на предмет того что пользователь уже был зарегистрирован ранее
+    :param telegram_id: id пользователя
+    :return: Присутствуе или Нет
+    """
     all_users = get_all_users_telegram_id()
-    if telegram_id in all_users:
+    all_leavers = get_all_leavers_telegram_id()
+    all_ids = all_users + all_leavers
+    if telegram_id in all_ids:
         return True
     else:
         return False
@@ -279,7 +348,12 @@ def valid_id(telegram_id):
         return True
 
 
-def get_user_by(telegram_id):
+def get_user_by(telegram_id) -> User:
+    """
+    Получить пользователя по telegram_id
+    :param telegram_id: id
+    :return: объект класса User
+    """
     database_initialization()
     user = User.get(User.telegram_id == telegram_id)
     return user
@@ -312,7 +386,18 @@ def get_user_language(telegram_id):
     return user.language
 
 
-# database_initialization - надо бы в декоратор завернуть
+def up_daily_limit_to_referral(referral_telegram_id: str, new_user_telegram_id: int, count: int) -> None:
+    """
+    Увеличить ежедневный лимит вопросов для реферала
+    :param referral_telegram_id: id реферала
+    :param new_user_telegram_id: id нового пользователя
+    :param count: количество бонусных вопросов
+    :return:
+    """
+    if valid_id(referral_telegram_id) and not check_id(new_user_telegram_id):
+        up_user_time_limit_days(int(referral_telegram_id), 1)
+
+
 def edit_user_language(telegram_id: int, new_user_language) -> None:
     """
     :param telegram_id: telegram_id
@@ -415,12 +500,15 @@ def user_time_limit_is_over(telegram_id):
         return False
 
 
-def up_user_time_limit_days(telegram_id: Union[int, str], days: int) -> None:
+def up_user_time_limit_days(telegram_id: int, days: int) -> None:
     """
     Продлить доступ к боту 1 пользователю на n дней
     :param telegram_id: Telegram id пользователя
     :param days: Количество дней, на которое нужно увеличить доступ
     """
+    user = get_user_by(telegram_id)
+    if not user.telegram_id:
+        return
     time_limit_is_over = user_time_limit_is_over(telegram_id)
     if time_limit_is_over:
         query = User.update(time_limit=datetime.now() + timedelta(days=days)).where(User.telegram_id == telegram_id)
@@ -539,7 +627,7 @@ def update_time_visit(telegram_id):
     query.execute()
 
 
-def get_all_users_telegram_id(language: str = '', country: str = '') -> list:
+def get_all_users_telegram_id(language: str = '', country: str = '') -> tuple:
     """
     Получить telegram_id пользователей (фильтр по языку)
     :param language: Язык пользователей
@@ -553,7 +641,18 @@ def get_all_users_telegram_id(language: str = '', country: str = '') -> list:
         users = User.select(User.telegram_id).where(User.country == country)
     else:
         users = User.select(User.telegram_id)
-    telegram_ids = [user.telegram_id for user in users]
+    telegram_ids = tuple(user.telegram_id for user in users)
+    return telegram_ids
+
+
+def get_all_leavers_telegram_id() -> tuple:
+    """
+    Получить telegram_id ливеров
+    :return: список id пользователей
+    """
+    database_initialization()
+    users = Leaver.select(Leaver.telegram_id)
+    telegram_ids = tuple(user.telegram_id for user in users)
     return telegram_ids
 
 

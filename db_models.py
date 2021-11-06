@@ -2,7 +2,7 @@ import pymysql
 from peewee import *
 from peewee import InternalError
 from config import DB_CONFIGS
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 
 conn = pymysql.connect(host=DB_CONFIGS['host'],
@@ -18,7 +18,12 @@ db = MySQLDatabase(DB_CONFIGS['db_name'],
                    password=DB_CONFIGS['password'])
 
 
-def create_database(db_name):
+def create_database(db_name: str) -> None:
+    """
+    Создаем новую базу
+    :param db_name: Имя базы
+    :return:
+    """
     try:
         conn.cursor().execute(f'create database {db_name}')
         print('База данных успешно создана...')
@@ -27,6 +32,7 @@ def create_database(db_name):
 
 
 def create_new_tables(db_models):
+    """Создаем новую таблицу в базе"""
     try:
         db.connect()
     except InternalError as err:
@@ -39,21 +45,22 @@ def create_new_tables(db_models):
 
 
 def database_initialization():
+    """Инициализация базы. Закрыват открытое соединение с базой. Если явно не закрывать - будут проблемы с MySQL"""
     if not db.is_closed():
         db.close()
 
 
-def plus_one_day() -> object:
+def plus_one_day() -> datetime:
     """
     :return: Текущая дата + 1 день
     """
-    date = datetime.now() + timedelta(days=1)
-    return date
+    tomorrow = datetime.now() + timedelta(days=1)
+    return tomorrow
 
 
-def get_date() -> object:
-    date = datetime.now().date()
-    return date
+def get_date() -> date:
+    today = datetime.now().date()
+    return today
 
 
 class BaseModel(Model):
@@ -63,6 +70,7 @@ class BaseModel(Model):
 
 # удалить second_week_promotional_offer, sixth_week_promotional_offer, made_payment
 class User(BaseModel):
+    """Пользователь"""
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)
     full_name = CharField(null=True, max_length=300)
@@ -81,7 +89,20 @@ class User(BaseModel):
         db_table = "users"
 
 
+class Leaver(BaseModel):
+    """Ливер"""
+    id = PrimaryKeyField(null=False)
+    telegram_id = IntegerField(null=False, unique=True)
+    tariff = CharField(null=False, max_length=50)
+    referral = IntegerField(null=True)
+    full_name = CharField(null=True, max_length=300)
+
+    class Meta:
+        db_table = "leavers"
+
+
 class PayOrder(BaseModel):
+    """Платёж"""
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False)
     date = DateTimeField(default=datetime.now)
@@ -93,6 +114,7 @@ class PayOrder(BaseModel):
 
 
 class PromoCode(BaseModel):
+    """Промокод регистрация"""
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)
     date = DateTimeField(default=datetime.now)
@@ -103,6 +125,7 @@ class PromoCode(BaseModel):
 
 
 class AutoSchool(BaseModel):
+    """Автошкола"""
     id = PrimaryKeyField(null=False)
     school_name = CharField(null=False, max_length=100)
     country = CharField(null=False, max_length=100)
@@ -120,16 +143,8 @@ class AutoSchool(BaseModel):
         db_table = "auto_schools"
 
 
-class Leaver(BaseModel):
-    id = PrimaryKeyField(null=False)
-    telegram_id = IntegerField(null=False, unique=True)
-    tariff = CharField(null=False, max_length=50)
-
-    class Meta:
-        db_table = "leavers"
-
-
 class QuestionRU(BaseModel):
+    """Вопросы на русском"""
     id = PrimaryKeyField(null=False)
     question = TextField(null=False)
     correct_answer = TextField(null=False)
@@ -142,6 +157,7 @@ class QuestionRU(BaseModel):
 
 
 class QuestionKZ(BaseModel):
+    """Вопросы на казахском"""
     id = PrimaryKeyField(null=False)
     question = TextField(null=False)
     correct_answer = TextField(null=False)
