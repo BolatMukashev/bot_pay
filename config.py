@@ -33,7 +33,15 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 GMAIL = os.getenv('GMAIL')
 
-RUBLES_EXCHANGE_RATE = 5.87
+RUBLES_EXCHANGE_RATE = 6.04
+
+TARIFFS = {
+    'basic': 5,
+    'premium': 30,
+    'premium_max': 1000
+}
+
+referral_bonus = 5
 
 DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12893724215771235'
 

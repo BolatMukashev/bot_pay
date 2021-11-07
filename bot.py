@@ -67,11 +67,11 @@ async def command_start(message: types.Message):
     telegram_id = message.from_user.id
     full_name = message.from_user.full_name
     referral_telegram_id = message.get_args()
-
-    up_daily_limit_to_referral(referral_telegram_id, telegram_id, 5)
-    # check leavers and add to user and del in leaver
+    up_daily_limit_to_referral(referral_telegram_id, telegram_id, config.referral_bonus)
     if telegram_id not in get_all_leavers_telegram_id():
         add_user(telegram_id=telegram_id, full_name=full_name, referral=referral_telegram_id)
+    else:
+        move_leaver_to_users(telegram_id)
     await bot.send_sticker(telegram_id, STICKERS['hello'])
     await message.answer(MESSAGE['start_user_text'].format(full_name))
     if not get_user_registration_status(telegram_id):
@@ -183,17 +183,14 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
     await state.finish()
     users_language, user_country = filter_telegram_id(comm)
     users = get_all_users_telegram_id(language=users_language, country=user_country)
-    no_active_users = 0
     for user_id in loading_bar(users):
         try:
             await bot.send_photo(user_id, photo_id, caption=caption)
         except (ChatNotFound, UserDeactivated, BotBlocked):
-            no_active_users += 1
+            move_user_to_leavers(user_id)
         except Exception as exx:
             await bot.send_message(config.ADMIN_ID, str(exx))
-    await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users) - no_active_users} пользователей ✌🏻\n'
-                                            f'Не доставлено до {no_active_users}\n'
-                                            f'Всего {len(users)} пользователей')
+    await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n')
 
 
 @dp.message_handler(commands=["promo_code"], state='*')

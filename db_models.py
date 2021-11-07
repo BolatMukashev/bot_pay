@@ -93,9 +93,9 @@ class Leaver(BaseModel):
     """Ливер"""
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)
+    full_name = CharField(null=True, max_length=300)
     tariff = CharField(null=False, max_length=50)
     referral = IntegerField(null=True)
-    full_name = CharField(null=True, max_length=300)
 
     class Meta:
         db_table = "leavers"

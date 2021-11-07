@@ -255,7 +255,7 @@ def move_user_to_leavers(telegram_id: int) -> None:
     :return:
     """
     user = get_user_by(telegram_id)
-    add_leaver(user.telegram_id, user.full_name, user.referral, user.tariff)
+    add_leaver(telegram_id=user.telegram_id, full_name=user.full_name, referral=user.referral, tariff=user.tariff)
     delete_user(telegram_id)
 
 
@@ -328,7 +328,7 @@ def set_user_on_db(telegram_id, full_name, country, language, registration_date,
         pass
 
 
-def check_id(telegram_id) -> bool:
+def id_registered_in_base(telegram_id) -> bool:
     """
     Проверить наличие telegram id  базе, на предмет того что пользователь уже был зарегистрирован ранее
     :param telegram_id: id пользователя
@@ -394,7 +394,7 @@ def up_daily_limit_to_referral(referral_telegram_id: str, new_user_telegram_id: 
     :param count: количество бонусных вопросов
     :return:
     """
-    if valid_id(referral_telegram_id) and not check_id(new_user_telegram_id):
+    if valid_id(referral_telegram_id) and not id_registered_in_base(new_user_telegram_id):
         up_user_time_limit_days(int(referral_telegram_id), 1)
 
 
@@ -511,11 +511,10 @@ def up_user_time_limit_days(telegram_id: int, days: int) -> None:
         return
     time_limit_is_over = user_time_limit_is_over(telegram_id)
     if time_limit_is_over:
-        query = User.update(time_limit=datetime.now() + timedelta(days=days)).where(User.telegram_id == telegram_id)
+        User.update(time_limit=datetime.now() + timedelta(days=days)).where(User.telegram_id == telegram_id).execute()
     else:
         time_limit_date = get_user_time_limit(telegram_id)
-        query = User.update(time_limit=time_limit_date + timedelta(days=days)).where(User.telegram_id == telegram_id)
-    query.execute()
+        User.update(time_limit=time_limit_date + timedelta(days=days)).where(User.telegram_id == telegram_id).execute()
 
 
 def up_all_user_time_limit(days: int) -> None:
@@ -1049,6 +1048,10 @@ def get_number_of_users(users) -> int:
     return len(users)
 
 
+def get_number_of_leavers(leavers: tuple) -> int:
+    return len(leavers)
+
+
 def get_number_of_registrations_today(users):
     today = datetime.now().date()
     users = [user.id for user in users if user.registration_date.date() == today]
@@ -1232,7 +1235,10 @@ def get_big_statistics() -> str:
     """
     users = get_all_users_in_db()
     auto_schools = get_all_auto_schools_on_db()
+    leavers = get_all_leavers_telegram_id()
+
     users_len = get_number_of_users(users)
+    leavers_len = get_number_of_leavers(leavers)
     users_today = get_number_of_registrations_today(users)
     users_on_week = get_number_of_registrations_on_week(users)
     users_on_month = get_number_of_registrations_on_month(users)
@@ -1261,7 +1267,8 @@ def get_big_statistics() -> str:
 
     text = [
         f'Зарегистрированных пользователей',
-        f'Всего: {users_len}',
+        f'Активных: {users_len}',
+        f'Ливеров: {leavers_len}',
         f'Сегодня: {users_today}',
         f'За неделю: {users_on_week}',
         f'За месяц: {users_on_month}',
