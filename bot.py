@@ -11,6 +11,7 @@ from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty_RU import penalty_buttons_ru_1
 from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
 from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
+from keyboards.cancel import get_cancel_button
 from messages import *
 from gmail import send_emails_to_schools
 import io
@@ -204,7 +205,8 @@ async def command_promo_code(message: types.Message):
     language = user.language
     user_promo_code_used_status = user.promo_code_used
     if not user_promo_code_used_status:
-        await message.answer(PROMO_CODE[f'promo_code_command_text_{language}'])
+        await message.answer(PROMO_CODE[f'promo_code_command_text_{language}'],
+                             reply_markup=get_cancel_button(language))
         await AllStates.UsePromoCode.set()
     else:
         await message.answer_sticker(STICKERS['NO'])
@@ -215,21 +217,27 @@ async def command_promo_code(message: types.Message):
 async def command_promo_code_action(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     language = get_user_language(telegram_id)
-    user_promo_code = message.text.upper()
-    await state.update_data(user_promo_code=user_promo_code)
-    promo_codes = get_all_promo_codes()
-    if user_promo_code in promo_codes:
-        up_user_time_limit_days(telegram_id, 5)
-        up_number_of_references(user_promo_code)
-        update_user_promo_code_used_status(telegram_id)
-        commit_use_promo_code(telegram_id, user_promo_code)
-        change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_20DAYS)
-        await message.answer_sticker(STICKERS['all_good'])
-        await message.answer(PROMO_CODE[f'promo_code_activated_{language}'])
+    user_promo_code = message.text
+    if user_promo_code == BUTTONS[f'cancel_{language}']:
+        await message.answer(MESSAGE[f'cancel_action_{language}'], reply_markup=types.ReplyKeyboardRemove())
+        await state.finish()
     else:
-        await message.answer_sticker(STICKERS['NO'])
-        await message.answer(PROMO_CODE[f'promo_code_error_{language}'])
-    await state.finish()
+        user_promo_code = message.text.upper()
+        await state.update_data(user_promo_code=user_promo_code)
+        promo_codes = get_all_promo_codes()
+        if user_promo_code in promo_codes:
+            up_user_time_limit_days(telegram_id, 5)
+            up_number_of_references(user_promo_code)
+            update_user_promo_code_used_status(telegram_id)
+            commit_use_promo_code(telegram_id, user_promo_code)
+            change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_20DAYS)
+            await message.answer_sticker(STICKERS['all_good'])
+            await message.answer(PROMO_CODE[f'promo_code_activated_{language}'],
+                                 reply_markup=types.ReplyKeyboardRemove())
+            await state.finish()
+        else:
+            await message.answer_sticker(STICKERS['NO'])
+            await message.answer(PROMO_CODE[f'promo_code_error_{language}'])
 
 
 @dp.message_handler(commands=["pay"])
