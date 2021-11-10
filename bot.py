@@ -13,6 +13,7 @@ from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
 from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from keyboards.cancel import get_cancel_button
 from keyboards.inline.question import get_question_button
+from keyboards.inline.pay_button import get_pay_button
 from messages import *
 from gmail import send_emails_to_schools
 import io
@@ -252,14 +253,7 @@ async def command_pay(message: types.Message):
     pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
                            name=user.full_name)
     url = pay_link.get_pay_url()
-
-    markup = types.InlineKeyboardMarkup()
-    pay_button = BUTTONS[f'pay_{user.language}']
-    pay_link = types.InlineKeyboardButton(text=pay_button, url=url)
-    markup.add(pay_link)
-
-    await message.answer(pay_data.message_text, reply_markup=markup)
-
+    await message.answer(pay_data.message_text, reply_markup=get_pay_button(user.language, url))
     await send_pay_access_message(telegram_id, user.language, 20)
 
 
