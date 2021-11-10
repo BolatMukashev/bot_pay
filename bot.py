@@ -12,6 +12,7 @@ from keyboards.inline.penalty_RU import penalty_buttons_ru_1
 from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
 from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from keyboards.cancel import get_cancel_button
+from keyboards.inline.question import get_question_button
 from messages import *
 from gmail import send_emails_to_schools
 import io
@@ -21,9 +22,7 @@ from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
 from tqdm import tqdm as loading_bar
 
-
 token = config.TEST_BOT_TOKEN if config.DEBUG else config.BOT_TOKEN
-
 
 bot = Bot(token=token, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -231,9 +230,9 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
             update_user_promo_code_used_status(telegram_id)
             commit_use_promo_code(telegram_id, user_promo_code)
             change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_20DAYS)
-            await message.answer_sticker(STICKERS['all_good'])
+            await message.answer_sticker(STICKERS['all_good'], reply_markup=types.ReplyKeyboardRemove())
             await message.answer(PROMO_CODE[f'promo_code_activated_{language}'],
-                                 reply_markup=types.ReplyKeyboardRemove())
+                                 reply_markup=get_question_button(language))
             await state.finish()
         else:
             await message.answer_sticker(STICKERS['NO'])
@@ -292,7 +291,7 @@ async def check_pay_status(telegram_id: int, user_language: str) -> bool:
     if pay_order is not None:
         if pay_order[-1].date.date() == datetime.now().date():
             text = MESSAGE.get(f'pay_registered_message_{user_language}').format(pay_order[-1].order_number)
-            await bot.send_message(telegram_id, text)
+            await bot.send_message(telegram_id, text, reply_markup=get_question_button(user_language))
             return True
 
 
@@ -381,14 +380,14 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
         options = pickle.loads(question.all_answers)
         random.shuffle(options)
         correct_option_id = options.index(question.correct_answer)
-        await quiz_answer.bot.send_poll(telegram_id,
-                                        type='quiz',
-                                        is_anonymous=False,
-                                        is_closed=False,
-                                        question=question.question,
-                                        options=options,
-                                        correct_option_id=correct_option_id,
-                                        explanation=question.explanation)
+        await bot.send_poll(telegram_id,
+                            type='quiz',
+                            is_anonymous=False,
+                            is_closed=False,
+                            question=question.question,
+                            options=options,
+                            correct_option_id=correct_option_id,
+                            explanation=question.explanation)
     else:
         await bot.send_sticker(telegram_id, STICKERS['flower'])
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
@@ -561,4 +560,5 @@ async def simple_message(message: types.Message):
 
 if __name__ == "__main__":
     from handlers import dp
+
     executor.start_polling(dp, skip_updates=True)

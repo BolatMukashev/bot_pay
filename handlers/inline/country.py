@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery
 from bot import dp, bot
 from keyboards.inline.callback_datas import set_country
-from keyboards.inline.start_button import START_button
+from keyboards.inline.start_button import start_keyboard
 from db_operations import edit_user_country, get_user_language
 from messages import MESSAGE
 from db_operations import get_user_registration_status
@@ -24,4 +24,4 @@ async def update_country(call: CallbackQuery, callback_data: dict):
     if not get_user_registration_status(telegram_id):
         await bot.send_message(chat_id,
                                text=MESSAGE[f'registration_ok_{user_language}'],
-                               reply_markup=START_button)
+                               reply_markup=start_keyboard)
