@@ -28,13 +28,14 @@ async def set_rus_penalty_values(call: CallbackQuery, callback_data: dict):
 
 
 @dp.callback_query_handler(russia_pen_buttons.filter(type='rus_penalty_2lvl'))
-async def set_rus_penalty_values(call: CallbackQuery, callback_data: dict):
+async def set_rus_penalty_values(callback_query: CallbackQuery, callback_data: dict):
     type_id = int(callback_data.get('type_id'))
     penalty_type = list(data['values'][type_id].keys())[0]
     value_id = int(callback_data.get('value_id'))
     answer = data['values'][type_id][penalty_type][value_id]
     message = f'{answer["title"]}\n\nШтраф:\n{answer["penalty"]}'
-    await call.message.answer(message)
+    await callback_query.answer()                                   # убирает кружочки (пустое всплывающее уведомление)
+    await callback_query.message.answer(message)
 
 
 @dp.callback_query_handler(go_back_penalty.filter(type='go_back'))

@@ -9,15 +9,16 @@ from db_operations import get_user_language, get_data_from_json_file
 
 
 @dp.callback_query_handler(get_penalty.filter(type='penalty'))
-async def get_penalty(call: CallbackQuery, callback_data: dict):
-    telegram_id = call.from_user.id
+async def get_penalty(callback_query: CallbackQuery, callback_data: dict):
+    telegram_id = callback_query.from_user.id
     language = get_user_language(telegram_id)
     answer_id = int(callback_data.get('value'))
     data = get_data_from_json_file(f'backup/penalty_kazakhstan_{language}.json')
     values = data['items'][answer_id]
     text = [values['title']] + values['answers']
     text.append(values['description'])
-    await call.message.answer('\n\n'.join(text))
+    await callback_query.answer()                               # убирает кружочки (пустое всплывающее уведомление)
+    await callback_query.message.answer('\n\n'.join(text))
 
 
 @dp.callback_query_handler(next_penalty.filter(type='lty'))
