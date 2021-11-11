@@ -114,6 +114,22 @@ class PayOrder(BaseModel):
         db_table = "pay_orders"
 
 
+class Gift(BaseModel):
+    """Подарочный сертификат"""
+    id = PrimaryKeyField(null=False)
+    telegram_id = IntegerField(null=False, unique=True)
+    full_name = CharField(null=True, max_length=300)
+    tariff = CharField(null=False, max_length=50, default='premium_max')
+    referral_id = IntegerField(null=True)
+    text = CharField(null=False, max_length=225)
+    date = DateTimeField(default=datetime.now)
+    order_number = IntegerField(null=False, unique=True)
+    price = IntegerField(null=False)
+
+    class Meta:
+        db_table = "gifts"
+
+
 class PromoCode(BaseModel):
     """Промокод регистрация"""
     id = PrimaryKeyField(null=False)
@@ -170,7 +186,7 @@ class QuestionKZ(BaseModel):
         db_table = "questions_kz"
 
 
-table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder, PromoCode, Leaver]
+table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder, PromoCode, Leaver, Gift]
 
 __all__ = ['IntegrityError', 'User', 'PayOrder', 'PromoCode', 'QuestionRU', 'QuestionKZ', 'AutoSchool', 'Leaver',
-           'create_new_tables', 'create_database', 'database_initialization', 'table_names']
+           'Gift', 'create_new_tables', 'create_database', 'database_initialization', 'table_names']
