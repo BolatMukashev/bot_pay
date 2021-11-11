@@ -18,7 +18,7 @@ class PayLinkIoka:
 
     def get_headers(self) -> dict:
         """формируем заголовок запроса"""
-        headers = {"Content-Type": "application/json; charset=utf-8", "Authorization": "bearer " + self.secret_key}
+        headers = {"Content-Type": "application/json; charset=utf-8", "Authorization": "Bearer " + self.secret_key}
         return headers
 
     def get_json_data(self, order_id) -> dict:
@@ -26,13 +26,13 @@ class PayLinkIoka:
         основное тело запроса на сервер IOKA
         """
         json_data = {
-            "order_id": order_id,
+            "amount": str(self.price),                          # обязательный
             "currency": self.currency,
-            "amount": str(self.price),
-            "client_id": str(self.telegram_id),
-            "back_url": self.back_url,
-            "callback_url": self.callback_url,
+            "order_id": order_id,                               # обязательный
+            "back_url": self.back_url,                          # обязательный
             "additional_params": {"name": self.name},
+            "client_id": str(self.telegram_id),
+            "callback_url": self.callback_url,
             "template": "3D"
         }
         return json_data
