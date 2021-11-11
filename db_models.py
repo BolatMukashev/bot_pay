@@ -1,7 +1,7 @@
 import pymysql
 from peewee import *
 from peewee import InternalError
-from config import DB_CONFIGS
+from config import DB_CONFIGS, TARIFFS
 from datetime import datetime, timedelta, date
 
 
@@ -68,7 +68,6 @@ class BaseModel(Model):
         database = db  # соединение с базой, из шаблона выше
 
 
-# удалить second_week_promotional_offer, sixth_week_promotional_offer, made_payment
 class User(BaseModel):
     """Пользователь"""
     id = PrimaryKeyField(null=False)
@@ -78,12 +77,14 @@ class User(BaseModel):
     language = CharField(null=False, default='RU')
     registration_date = DateTimeField(default=datetime.now)
     registration_is_over = BooleanField(null=False, default=False)
-    time_limit = DateTimeField(default=plus_one_day)
+    time_limit = DateTimeField(default=plus_one_day)                                # delete
     last_visit = DateTimeField(default=datetime.now)
-    promo_code_used = BooleanField(null=False, default=False)
-    price_in_rubles = IntegerField(null=False)
-    referral = IntegerField(null=True)
+    promo_code_used = BooleanField(null=False, default=False)                       # delete
+    price_in_rubles = IntegerField(null=False)                                      # delete
+    referral_id = IntegerField(null=True, default=0)
     tariff = CharField(null=False, max_length=50, default='basic')
+    daily_limit = IntegerField(null=False, default=TARIFFS['basic']['day_limit'])
+    referral_bonus = IntegerField(null=False, default=0)
 
     class Meta:
         db_table = "users"

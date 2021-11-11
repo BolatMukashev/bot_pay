@@ -227,11 +227,11 @@ def get_all_questions_from_db(user_language):
 # ПОЛЬЗОВАТЕЛЬ -------------------------------------------------------------------------------------------------------
 
 
-def add_user(telegram_id: int, full_name: str, referral: int = None, tariff: str = 'basic') -> None:
+def add_user(telegram_id: int, full_name: str, referral_id: int = None, tariff: str = 'basic') -> None:
     """Добавить нового пользователя в базу, таблица users"""
     database_initialization()
     try:
-        User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE, referral=referral,
+        User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE, referral_id=referral_id,
              tariff=tariff).save()
     except IntegrityError as err:
         print(err)
@@ -386,12 +386,11 @@ def get_user_language(telegram_id):
     return user.language
 
 
-def up_daily_limit_to_referral(referral_telegram_id: str, new_user_telegram_id: int, count: int) -> None:
+def up_daily_limit_to_referral(referral_telegram_id: str, new_user_telegram_id: int) -> None:
     """
     Увеличить ежедневный лимит вопросов для реферала
     :param referral_telegram_id: id реферала
     :param new_user_telegram_id: id нового пользователя
-    :param count: количество бонусных вопросов
     :return:
     """
     if valid_id(referral_telegram_id) and not id_registered_in_base(new_user_telegram_id):

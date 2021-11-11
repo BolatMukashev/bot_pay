@@ -64,13 +64,17 @@ async def command_set_commands(message: types.Message):
 
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
-    """Начало работы, приветственное сообщение и вызов меню регистрации пользователя"""
+    """
+    Начало работы. Приветственное сообщение
+    Добавление бонусов пригласившего реферала
+    Вызов меню регистрации пользователя
+    """
     telegram_id = message.from_user.id
     full_name = message.from_user.full_name
     referral_telegram_id = message.get_args()
-    up_daily_limit_to_referral(referral_telegram_id, telegram_id, config.referral_bonus)
+    up_daily_limit_to_referral(referral_telegram_id, telegram_id)
     if telegram_id not in get_all_leavers_telegram_id():
-        add_user(telegram_id=telegram_id, full_name=full_name, referral=referral_telegram_id)
+        add_user(telegram_id=telegram_id, full_name=full_name, referral_id=referral_telegram_id)
     else:
         move_leaver_to_users(telegram_id)
     await bot.send_sticker(telegram_id, STICKERS['hello'])
@@ -81,7 +85,7 @@ async def command_start(message: types.Message):
 
 @dp.message_handler(commands=["question"])
 async def command_question(message: types.Message):
-    """Получить новый вопрос из базы"""
+    """Получить случайный вопрос из базы"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     if not user_time_limit_is_over(telegram_id):
@@ -122,7 +126,7 @@ async def command_country(message: types.Message):
 
 @dp.message_handler(commands=["chat"])
 async def command_chat(message: types.Message):
-    """Ссылка на чат"""
+    """Ссылка на чат (форум)"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(MESSAGE[f'link_to_chat_{user_language}'])
@@ -130,7 +134,7 @@ async def command_chat(message: types.Message):
 
 @dp.message_handler(commands=["error"])
 async def command_error(message: types.Message):
-    """Ссылка на обсуждение ошибок"""
+    """Ссылка на чат обсуждения ошибок"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(MESSAGE[f'link_error_chat_{user_language}'])
@@ -138,7 +142,7 @@ async def command_error(message: types.Message):
 
 @dp.message_handler(commands=["penalty"])
 async def command_penalty(message: types.Message):
-    """Раздел со штрафами. Показывает все штрафы по категориям"""
+    """Раздел со штрафами. Показывает размеры всех штрафов по категориям"""
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
     language = user.language
@@ -156,14 +160,13 @@ async def command_penalty(message: types.Message):
 
 @dp.message_handler(commands=["statistics"])
 async def command_statistics(message: types.Message):
-    """Показать статистику по пользователям, промо-кодам"""
+    """Показать статистику по пользователям, промо-кодам, автошколам"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         result = get_big_statistics()
         await message.answer(result)
 
 
-# переделать, отдельная команда для Ру пользователей, отдельная для КЗ
 @dp.message_handler(commands=["send_post_ru", "send_post_kz", "send_post_russia", "send_post_kazakhstan"], state='*')
 async def command_send_post(message: types.Message, state: FSMContext):
     """Отправить рекламное сообщение всем пользователям - фото+подпись"""

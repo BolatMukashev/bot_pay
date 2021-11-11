@@ -12,8 +12,8 @@ BOT_NAME = os.getenv('BOT_NAME')
 BOT_ADDRESS = os.getenv('BOT_ADDRESS')
 ADMIN_ID = int(os.getenv('ADMIN_ID'))
 
-BASE_PRICE = int(os.getenv('BASE_PRICE'))
-PRICE_AFTER_20DAYS = int(os.getenv('PRICE_AFTER_20DAYS'))
+BASE_PRICE = int(os.getenv('BASE_PRICE'))                               # delete
+PRICE_AFTER_20DAYS = int(os.getenv('PRICE_AFTER_20DAYS'))               # delete
 
 APP_USER_NAME = os.getenv('APP_USER_NAME')
 APP_PASSWORD = os.getenv('APP_PASSWORD')
@@ -36,14 +36,14 @@ GMAIL = os.getenv('GMAIL')
 RUBLES_EXCHANGE_RATE = 6.04
 
 TARIFFS = {
-    'basic': 5,
-    'premium': 30,
-    'premium_max': 1000
+    'basic':  {"day_limit": 5, "price": 0},
+    'premium':  {"day_limit": 30, "price": 200},
+    'premium_max': {"day_limit": 1000, "price": 400}
 }
 
-referral_bonus = 5
+REFERRAL_BONUS_VALUE = 0
 
-DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12893724215771235'
+DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12916339944358246'
 
 PAY_CONFIGS = {
     'KASSA_24_LOGIN_RU': os.getenv('KASSA_24_LOGIN_RU'),
