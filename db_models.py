@@ -83,13 +83,15 @@ class User(BaseModel):
     price_in_rubles = IntegerField(null=False)                                      # delete
     referral_id = IntegerField(null=True, default=0)
     tariff = CharField(null=False, max_length=50, default='basic')
-    daily_limit = IntegerField(null=False, default=TARIFFS['basic']['day_limit'])
+    daily_limit = IntegerField(null=False, default=TARIFFS['basic']['daily_limit'])
     referral_bonus = IntegerField(null=False, default=0)
+    leaver = BooleanField(null=False, default=False)
 
     class Meta:
         db_table = "users"
 
 
+# удалить
 class Leaver(BaseModel):
     """Ливер"""
     id = PrimaryKeyField(null=False)
@@ -118,13 +120,13 @@ class Gift(BaseModel):
     """Подарочный сертификат"""
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)
-    full_name = CharField(null=True, max_length=300)
-    tariff = CharField(null=False, max_length=50, default='premium_max')
-    referral_id = IntegerField(null=True)
-    text = CharField(null=False, max_length=225)
+    full_name = CharField(null=True, max_length=255)                        # nickname
+    text = CharField(null=False, max_length=255)                            # подпись к сертификату
+    referral_id = IntegerField(null=True)                                   # telegram_id купившего сертификат
     date = DateTimeField(default=datetime.now)
     order_number = IntegerField(null=False, unique=True)
     price = IntegerField(null=False)
+    tariff = CharField(null=False, max_length=20, default='premium_max')
 
     class Meta:
         db_table = "gifts"

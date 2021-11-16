@@ -131,6 +131,6 @@ def test_auto_schools():
 
 
 if __name__ == '__main__':
-    move_leaver_to_users(459998758)
+    edit_leaver_status(config.ADMIN_ID, True)
     # create_poster('poster.png', 'Академия Вождения в г.Уральск', 'BIG BOI 24 SUPER')
     # add_new_auto_school('BolAuto', 'KZ', 'Uralsk', [8777112255], ['m-bolat@mail.ru', 'ya.ne.angel.kimi@gmail.com'])

@@ -36,9 +36,9 @@ GMAIL = os.getenv('GMAIL')
 RUBLES_EXCHANGE_RATE = 6.04
 
 TARIFFS = {
-    'basic':  {"day_limit": 5, "price": 0},
-    'premium':  {"day_limit": 30, "price": 200},
-    'premium_max': {"day_limit": 1000, "price": 400}
+    'basic':  {"daily_limit": 5, "price": 0},
+    'premium':  {"daily_limit": 30, "price": 200},
+    'premium_max': {"daily_limit": 999, "price": 400}
 }
 
 REFERRAL_BONUS_VALUE = 0

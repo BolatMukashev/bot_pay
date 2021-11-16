@@ -9,7 +9,7 @@ import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 from messages import MESSAGE, COMMANDS_DESCRIPTIONS
-from typing import List
+from typing import List, Union
 from tqdm import tqdm as loading_bar
 
 
@@ -230,9 +230,10 @@ def get_all_questions_from_db(user_language):
 def add_user(telegram_id: int, full_name: str, referral_id: int = None, tariff: str = 'basic') -> None:
     """Добавить нового пользователя в базу, таблица users"""
     database_initialization()
+    daily_limit = config.TARIFFS[tariff]['daily_limit']
     try:
         User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE, referral_id=referral_id,
-             tariff=tariff).save()
+             tariff=tariff, daily_limit=daily_limit).save()
     except IntegrityError as err:
         print(err)
         assert err
@@ -300,6 +301,21 @@ def move_leaver_to_users(telegram_id: int) -> None:
     delete_leaver(telegram_id)
 
 
+def search_user_in_gifts(telegram_id: int) -> Union[Gift, None]:
+    """
+    Проверить наличие id пользователя в купленных подарочных сертификатах
+    :param telegram_id: id
+    :return: запись о подарочном сертификате / None
+    """
+    database_initialization()
+    try:
+        gift = Gift.get(Gift.telegram_id == telegram_id)
+    except Exception as exx:
+        print(exx)
+    else:
+        return gift
+
+
 def set_user_on_db(telegram_id, full_name, country, language, registration_date, registration_is_over, time_limit,
                    last_visit, promo_code_used, price_in_rubles, made_payment, second_week_promotional_offer,
                    sixth_week_promotional_offer):
@@ -328,21 +344,6 @@ def set_user_on_db(telegram_id, full_name, country, language, registration_date,
         pass
 
 
-def id_registered_in_base(telegram_id) -> bool:
-    """
-    Проверить наличие telegram id  базе, на предмет того что пользователь уже был зарегистрирован ранее
-    :param telegram_id: id пользователя
-    :return: Присутствуе или Нет
-    """
-    all_users = get_all_users_telegram_id()
-    all_leavers = get_all_leavers_telegram_id()
-    all_ids = all_users + all_leavers
-    if telegram_id in all_ids:
-        return True
-    else:
-        return False
-
-
 def valid_id(telegram_id):
     if str(telegram_id).isdigit():
         return True
@@ -355,11 +356,15 @@ def get_user_by(telegram_id) -> User:
     :return: объект класса User
     """
     database_initialization()
-    user = User.get(User.telegram_id == telegram_id)
-    return user
+    try:
+        user = User.get(User.telegram_id == telegram_id)
+    except Exception as exx:
+        print(exx)
+    else:
+        return user
 
 
-def get_all_users_in_db() -> object:
+def get_all_users_in_db() -> User:
     """
     Получить всех пользователей из базы данных (для статистики)
     :return: Данные о всех пользователях из базы
@@ -386,15 +391,16 @@ def get_user_language(telegram_id):
     return user.language
 
 
-def up_daily_limit_to_referral(referral_telegram_id: str, new_user_telegram_id: int) -> None:
+# переименовать?
+def up_daily_limit_to_referral(referral_telegram_id: str) -> None:
     """
     Увеличить ежедневный лимит вопросов для реферала
     :param referral_telegram_id: id реферала
-    :param new_user_telegram_id: id нового пользователя
     :return:
     """
-    if valid_id(referral_telegram_id) and not id_registered_in_base(new_user_telegram_id):
-        up_user_time_limit_days(int(referral_telegram_id), 1)
+    if valid_id(referral_telegram_id):
+        up_user_time_limit_days(referral_telegram_id)
+        up_user_referral_bonus(referral_telegram_id)
 
 
 def edit_user_language(telegram_id: int, new_user_language) -> None:
@@ -403,8 +409,7 @@ def edit_user_language(telegram_id: int, new_user_language) -> None:
     :param new_user_language: 'RU' or 'KZ'
     """
     database_initialization()
-    query = User.update(language=new_user_language).where(User.telegram_id == telegram_id)
-    query.execute()
+    User.update(language=new_user_language).where(User.telegram_id == telegram_id).execute()
     config.users_data_cache[telegram_id] = new_user_language
 
 
@@ -418,8 +423,16 @@ def get_user_country(telegram_id: int) -> str:
 def edit_user_country(telegram_id, user_country) -> None:
     """Изменить страну пользователя"""
     database_initialization()
-    query = User.update(country=user_country).where(User.telegram_id == telegram_id)
-    query.execute()
+    User.update(country=user_country).where(User.telegram_id == telegram_id).execute()
+
+
+def edit_leaver_status(telegram_id: int, status: bool) -> None:
+    """
+    :param telegram_id: telegram_id
+    :param status: True / False
+    """
+    database_initialization()
+    User.update(leaver=status).where(User.telegram_id == telegram_id).execute()
 
 
 def get_user_pay_status(telegram_id: int) -> str:
@@ -499,14 +512,14 @@ def user_time_limit_is_over(telegram_id):
         return False
 
 
-def up_user_time_limit_days(telegram_id: int, days: int) -> None:
+def up_user_time_limit_days(telegram_id: Union[int, str], days: int = 1) -> None:
     """
     Продлить доступ к боту 1 пользователю на n дней
     :param telegram_id: Telegram id пользователя
     :param days: Количество дней, на которое нужно увеличить доступ
     """
     user = get_user_by(telegram_id)
-    if not user.telegram_id:
+    if not user:
         return
     time_limit_is_over = user_time_limit_is_over(telegram_id)
     if time_limit_is_over:
@@ -531,8 +544,15 @@ def up_all_user_time_limit(days: int) -> None:
 
 def up_admin_time_limit_3minute():
     database_initialization()
-    query = User.update(time_limit=datetime.now() + timedelta(minutes=3)).where(User.telegram_id == config.ADMIN_ID)
-    query.execute()
+    User.update(time_limit=datetime.now() + timedelta(minutes=3)).where(User.telegram_id == config.ADMIN_ID).execute()
+
+
+def up_user_referral_bonus(telegram_id: Union[int, str], count: int = 1):
+    database_initialization()
+    try:
+        User.update(referral_bonus=User.referral_bonus + count).where(User.telegram_id == telegram_id).execute()
+    except Exception as exx:
+        print(exx)
 
 
 def get_time_visit(telegram_id):
@@ -717,6 +737,20 @@ def get_all_users_on_dict_format():
                        'sixth_week_promotional_offer': user.sixth_week_promotional_offer}
         all_users_list.append(simple_user)
     return all_users_list
+
+
+# ПОДАРОЧНЫЕ СЕРТИФИКАТЫ ----------------------------------------------------------------------------------------------
+
+
+def get_all_gifts_telegram_id() -> tuple:
+    """
+    Получить telegram_id ливеров
+    :return: список id пользователей
+    """
+    database_initialization()
+    users = Gift.select(Gift.telegram_id)
+    telegram_ids = tuple(user.telegram_id for user in users)
+    return telegram_ids
 
 
 # ПРОМО-КОДЫ и АВТОШКОЛЫ ----------------------------------------------------------------------------------------------

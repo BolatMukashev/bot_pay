@@ -72,15 +72,45 @@ async def command_start(message: types.Message):
     telegram_id = message.from_user.id
     full_name = message.from_user.full_name
     referral_telegram_id = message.get_args()
-    up_daily_limit_to_referral(referral_telegram_id, telegram_id)
-    if telegram_id not in get_all_leavers_telegram_id():
-        add_user(telegram_id=telegram_id, full_name=full_name, referral_id=referral_telegram_id)
+    question_button = ''
+
+    # запихнуть в функцию?
+    user = get_user_by(telegram_id)
+    invited_user = search_user_in_gifts(telegram_id)
+    if user:
+        if user.leaver:
+            edit_leaver_status(telegram_id, False)
+            question_button = get_question_button(user.language)
+    elif invited_user:
+        add_user(telegram_id, full_name, referral_id=invited_user.referral_id, tariff='premium_max')
+        up_daily_limit_to_referral(referral_telegram_id)
+        await send_message_about_successful_attracting(referral_telegram_id)
     else:
-        move_leaver_to_users(telegram_id)
+        add_user(telegram_id, full_name, referral_id=referral_telegram_id)
+        up_daily_limit_to_referral(referral_telegram_id)
+        await send_message_about_successful_attracting(referral_telegram_id)
+
     await bot.send_sticker(telegram_id, STICKERS['hello'])
-    await message.answer(MESSAGE['start_user_text'].format(full_name))
+    await message.answer(MESSAGE['start_user_text'].format(full_name), reply_markup=question_button)
     if not get_user_registration_status(telegram_id):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
+
+
+async def send_message_about_successful_attracting(telegram_id: Union[str, int]) -> None:
+    """
+    Сообщение рефералу об увеличении дневного лимита
+    :param telegram_id: id
+    :return:
+    """
+    user = get_user_by(telegram_id)
+    if not user.leaver:
+        text = MESSAGE.get(f'attraction_text_{user.language}')
+        try:
+            await bot.send_message(telegram_id, text)
+        except (ChatNotFound, UserDeactivated, BotBlocked):
+            edit_leaver_status(telegram_id, True)
+        except Exception as exx:
+            await bot.send_message(config.ADMIN_ID, str(exx))
 
 
 @dp.message_handler(commands=["question"])
@@ -191,7 +221,7 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
         try:
             await bot.send_photo(user_id, photo_id, caption=caption)
         except (ChatNotFound, UserDeactivated, BotBlocked):
-            move_user_to_leavers(user_id)
+            edit_leaver_status(user_id, True)
         except Exception as exx:
             await bot.send_message(config.ADMIN_ID, str(exx))
     await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n')
@@ -550,7 +580,7 @@ async def simple_message(message: types.Message):
     """Показать меню"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    commands = COMMANDS_DESCRIPTIONS.get(user_language, 'ALL')
+    commands = COMMANDS_DESCRIPTIONS.get(user_language, COMMANDS_DESCRIPTIONS['ALL'])
     text = [f"/{key} - {value}" for (key, value) in commands.items() if key != 'language_code']
     await message.answer("\n".join(text))
 
