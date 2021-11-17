@@ -37,15 +37,15 @@ RUBLES_EXCHANGE_RATE = 6.04
 
 TARIFFS = {
     'basic':  {"daily_limit": 5, "price": 0},
-    'premium':  {"daily_limit": 30, "price": 200},
-    'premium_max': {"daily_limit": 999, "price": 400}
+    'premium':  {"daily_limit": 30, "price": 150},
+    'premium_max': {"daily_limit": 999, "price": 300}
 }
 
-REFERRAL_BONUS_VALUE = 0
+REFERRAL_BONUS_VALUE = 5
 
-DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12916339944358246'
+DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12916339944358246'     # изменить на ioka
 
-PAY_CONFIGS = {
+KASSA_24_PAY_CONFIGS = {
     'KASSA_24_LOGIN_RU': os.getenv('KASSA_24_LOGIN_RU'),
     'KASSA_24_PASSWORD_RU': os.getenv('KASSA_24_PASSWORD_RU'),
     'KASSA_24_LOGIN_KZ': os.getenv('KASSA_24_LOGIN_KZ'),

@@ -512,6 +512,29 @@ def user_time_limit_is_over(telegram_id):
         return False
 
 
+def get_user_daily_limit(telegram_id) -> int:
+    """
+    Получить доступный дневной лимит вопросов пользователя
+    :param telegram_id: id
+    :return: лимит вопросов
+    """
+    database_initialization()
+    user = User.get(User.telegram_id == telegram_id)
+    daily_limit = user.daily_limit
+    return daily_limit
+
+
+def update_user_daily_limit(telegram_id, count: int):
+    """
+    Получить доступный дневной лимит вопросов пользователя
+    :param telegram_id: id
+    :param count: число, на которое стоит увеличить или уменьшить дневной лимит +/- number
+    :return:
+    """
+    database_initialization()
+    User.update(daily_limit=User.daily_limit + count).where(User.telegram_id == telegram_id).execute()
+
+
 def up_user_time_limit_days(telegram_id: Union[int, str], days: int = 1) -> None:
     """
     Продлить доступ к боту 1 пользователю на n дней

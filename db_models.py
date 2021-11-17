@@ -86,6 +86,7 @@ class User(BaseModel):
     daily_limit = IntegerField(null=False, default=TARIFFS['basic']['daily_limit'])
     referral_bonus = IntegerField(null=False, default=0)
     leaver = BooleanField(null=False, default=False)
+    notified = IntegerField(null=False, default=3)
 
     class Meta:
         db_table = "users"

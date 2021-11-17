@@ -36,6 +36,7 @@ class AllStates(StatesGroup):
     DeleteAutoSchool: State = State()
     SendEmailToAllAutoSchools: State = State()
     InfoAboutUser: State = State()
+    PollAnswers: State = State()
 
 
 @dp.message_handler(commands=["set_commands"], state="*")
@@ -115,10 +116,22 @@ async def send_message_about_successful_attracting(telegram_id: Union[str, int])
 
 @dp.message_handler(commands=["question"])
 async def command_question(message: types.Message):
-    """Получить случайный вопрос из базы"""
+    """Отправить случайный вопрос из базы"""
     telegram_id = message.from_user.id
+    await send_quiz(telegram_id)
+
+
+# возможно нужно делать через состояния. id ответа из quiz_answer.option_ids а правильный id из состояния
+@dp.poll_answer_handler()
+async def handle_poll_answer(quiz_answer: types.PollAnswer):
+    """В ответ на викторину, отправляем новую викторину"""
+    telegram_id = quiz_answer.user.id
+    await send_quiz(telegram_id)
+
+
+async def send_quiz(telegram_id):
     user_language = get_user_language(telegram_id)
-    if not user_time_limit_is_over(telegram_id):
+    if get_user_daily_limit(telegram_id) > 0:
         question = get_random_question(user_language)
         if config.DEBUG is False and question.image_code:
             await bot.send_photo(telegram_id, question.image_code)
@@ -133,6 +146,7 @@ async def command_question(message: types.Message):
                             options=options,
                             correct_option_id=correct_option_id,
                             explanation=question.explanation)
+        update_user_daily_limit(telegram_id, -1)
     else:
         await bot.send_sticker(telegram_id, STICKERS['flower'])
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
@@ -393,33 +407,6 @@ async def command_set_50_percent_price_for_losers(message: types.Message):
                 await bot.send_message(config.ADMIN_ID, str(exx))
         await bot.send_message(config.ADMIN_ID, '50% скидка установлена ✌🏻\n'
                                                 f'Оповещены {len(losers) - no_active_users} из {len(losers)}')
-
-
-@dp.poll_answer_handler()
-async def handle_poll_answer(quiz_answer: types.PollAnswer):
-    """Отправляем новый вопрос в ответ на отвеченный вопрос"""
-    telegram_id = quiz_answer.user.id
-    user_language = get_user_language(telegram_id)
-    if not user_time_limit_is_over(telegram_id):
-        question = get_random_question(user_language)
-        if config.DEBUG is False and question.image_code:
-            await bot.send_photo(telegram_id, question.image_code)
-        options = pickle.loads(question.all_answers)
-        random.shuffle(options)
-        correct_option_id = options.index(question.correct_answer)
-        await bot.send_poll(telegram_id,
-                            type='quiz',
-                            is_anonymous=False,
-                            is_closed=False,
-                            question=question.question,
-                            options=options,
-                            correct_option_id=correct_option_id,
-                            explanation=question.explanation)
-    else:
-        await bot.send_sticker(telegram_id, STICKERS['flower'])
-        limit_error_message = MESSAGE[f'limit_error_{user_language}']
-        await bot.send_message(telegram_id, limit_error_message)
-    update_time_visit(telegram_id)
 
 
 # АВТОШКОЛЫ -----------------------------------------------------------------------------------------------------------
