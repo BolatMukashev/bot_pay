@@ -14,7 +14,7 @@ from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from keyboards.cancel import get_cancel_button
 from keyboards.inline.question import get_question_button
 from keyboards.inline.button_with_url import get_url_button
-from messages import *
+import messages
 from gmail import send_emails_to_schools
 import io
 import asyncio
@@ -91,7 +91,7 @@ async def command_start(message: types.Message):
         up_daily_limit_to_referral(referral_telegram_id)
         await send_message_about_successful_attracting(referral_telegram_id)
 
-    await bot.send_sticker(telegram_id, STICKERS['hello'])
+    await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
     await message.answer(MESSAGE['start_user_text'].format(full_name), reply_markup=question_button)
     if not get_user_registration_status(telegram_id):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
@@ -148,7 +148,7 @@ async def send_quiz(telegram_id):
                             explanation=question.explanation)
         update_user_daily_limit(telegram_id, -1)
     else:
-        await bot.send_sticker(telegram_id, STICKERS['flower'])
+        await bot.send_sticker(telegram_id, messages.STICKERS['flower'])
         limit_error_message = MESSAGE[f'limit_error_{user_language}']
         await bot.send_message(telegram_id, limit_error_message)
     update_time_visit(telegram_id)
@@ -252,12 +252,12 @@ async def command_promo_code(message: types.Message):
     language = user.language
     user_promo_code_used_status = user.promo_code_used
     if not user_promo_code_used_status:
-        await message.answer(PROMO_CODE[f'promo_code_command_text_{language}'],
+        await message.answer(messages.PROMO_CODE[f'promo_code_command_text_{language}'],
                              reply_markup=get_cancel_button(language))
         await AllStates.UsePromoCode.set()
     else:
-        await message.answer_sticker(STICKERS['NO'])
-        await message.answer(PROMO_CODE[f'promo_code_was_used_{language}'])
+        await message.answer_sticker(messages.STICKERS['NO'])
+        await message.answer(messages.PROMO_CODE[f'promo_code_was_used_{language}'])
 
 
 @dp.message_handler(state=AllStates.UsePromoCode, content_types=types.ContentTypes.TEXT)
@@ -265,7 +265,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     language = get_user_language(telegram_id)
     user_promo_code = message.text
-    if user_promo_code == BUTTONS[f'cancel_{language}']:
+    if user_promo_code == messages.BUTTONS[f'cancel_{language}']:
         await message.answer(MESSAGE[f'cancel_action_{language}'], reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
     else:
@@ -278,13 +278,13 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
             update_user_promo_code_used_status(telegram_id)
             commit_use_promo_code(telegram_id, user_promo_code)
             change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_20DAYS)
-            await message.answer_sticker(STICKERS['all_good'], reply_markup=types.ReplyKeyboardRemove())
-            await message.answer(PROMO_CODE[f'promo_code_activated_{language}'],
+            await message.answer_sticker(messages.STICKERS['all_good'], reply_markup=types.ReplyKeyboardRemove())
+            await message.answer(messages.PROMO_CODE[f'promo_code_activated_{language}'],
                                  reply_markup=get_question_button(language))
             await state.finish()
         else:
-            await message.answer_sticker(STICKERS['NO'])
-            await message.answer(PROMO_CODE[f'promo_code_error_{language}'])
+            await message.answer_sticker(messages.STICKERS['NO'])
+            await message.answer(messages.PROMO_CODE[f'promo_code_error_{language}'])
 
 
 @dp.message_handler(commands=["pay"])
@@ -300,7 +300,7 @@ async def command_pay(message: types.Message):
     pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
                            name=user.full_name)
 
-    link_button = get_url_button(BUTTONS[f'pay_{user.language}'], pay_link.get_pay_url())
+    link_button = get_url_button(messages.BUTTONS[f'pay_{user.language}'], pay_link.get_pay_url())
     await message.answer(pay_data.message_text, reply_markup=link_button)
     await send_pay_access_message(telegram_id, user.language, 20)
 
@@ -342,10 +342,10 @@ async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    image_code = IMAGES['100friends']
+    image_code = messages.IMAGES['100friends']
 
     markup = types.InlineKeyboardMarkup()
-    button_text = BUTTONS[f'do_it_{user_language}']
+    button_text = messages.BUTTONS[f'do_it_{user_language}']
     ref_link = types.InlineKeyboardButton(text=button_text,
                                           callback_data=referral_button_call.new(referral='100friends',
                                                                                  value=user_language))
@@ -353,7 +353,7 @@ async def command_promotions(message: types.Message):
 
     if not config.DEBUG:
         await bot.send_photo(telegram_id, image_code)
-    await message.answer(PROMOTIONS[f'100friends_{user_language}'], reply_markup=markup)
+    await message.answer(messages.PROMOTIONS[f'100friends_{user_language}'], reply_markup=markup)
 
 
 @dp.message_handler(commands=["info"])
@@ -361,10 +361,10 @@ async def command_help(message: types.Message):
     """Раздел Инфо о боте"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    await message.answer_sticker(STICKERS['message'])
+    await message.answer_sticker(messages.STICKERS['message'])
     await message.answer(MESSAGE[f'info_{user_language}'])
     if telegram_id == config.ADMIN_ID:
-        await message.answer(MESSAGE['start_admin_text'])
+        await message.answer(messages.ADMIN_MENU_TEXT)
 
 
 @dp.message_handler(commands=["up_admin_time_limit"])
@@ -400,8 +400,8 @@ async def command_set_50_percent_price_for_losers(message: types.Message):
         for user in loading_bar(losers):
             try:
                 await bot.send_photo(user['telegram_id'],
-                                     IMAGES['50percent'],
-                                     caption=OFFERS[f'second_week_promotional_offer_{user["language"]}'])
+                                     messages.IMAGES['50percent'],
+                                     caption=messages.OFFERS[f'second_week_promotional_offer_{user["language"]}'])
             except (ChatNotFound, UserDeactivated, BotBlocked):
                 no_active_users += 1
             except Exception as exx:
@@ -531,7 +531,7 @@ async def command_get_user_info_action(message: types.Message, state: FSMContext
                     f'Имя: {message.forward_from.full_name}\n' \
                     f'Ник: @{message.forward_from.username}'
     except AttributeError:
-        await message.answer(GIFT_CERTIFICATE['identification_error_RU'])
+        await message.answer(messages.GIFT_CERTIFICATE['identification_error_RU'])
     else:
         await message.answer(user_info)
     finally:
@@ -544,12 +544,12 @@ async def command_donate(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
 
-    image_code = IMAGES[f'roadmap_{user_language}']
+    image_code = messages.IMAGES[f'roadmap_{user_language}']
     if not config.DEBUG:
         await bot.send_photo(telegram_id, image_code)
 
-    link_button = get_url_button(text=BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
-    await message.answer(ROADMAP[f'roadmap_text_{user_language}'], reply_markup=link_button)
+    link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
+    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'], reply_markup=link_button)
 
 
 @dp.message_handler(commands=["certificate"])
