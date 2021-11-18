@@ -39,30 +39,6 @@ class AllStates(StatesGroup):
     PollAnswers: State = State()
 
 
-@dp.message_handler(commands=["set_commands"], state="*")
-async def command_set_commands(message: types.Message):
-    """Установить команды в боковом меню, в зависимости от языка"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        commands_list = ["set_commands", "set_commands_ru", "set_commands_kz"]
-        for command in commands_list:
-            descriptions = get_commands_descriptions_and_language_code(command)
-            commands = [types.BotCommand(command="/question", description=descriptions['question']),
-                        types.BotCommand(command="/penalty", description=descriptions['penalty']),
-                        types.BotCommand(command="/pay", description=descriptions['pay']),
-                        types.BotCommand(command="/promo_code", description=descriptions['promo_code']),
-                        types.BotCommand(command="/promotions", description=descriptions['promotions']),
-                        types.BotCommand(command="/certificate", description=descriptions['certificate']),
-                        types.BotCommand(command="/donate", description=descriptions['donate']),
-                        types.BotCommand(command="/chat", description=descriptions['chat']),
-                        types.BotCommand(command="/error", description=descriptions['error']),
-                        types.BotCommand(command="/language", description=descriptions['language']),
-                        types.BotCommand(command="/country", description=descriptions['country']),
-                        types.BotCommand(command="/info", description=descriptions['info'])]
-            await bot.set_my_commands(commands=commands, language_code=descriptions['language_code'])
-        await message.answer("Команды установлены!")
-
-
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
     """
@@ -502,6 +478,30 @@ async def command_certificate(message: types.Message):
 
 
 # АДМИНКА -------------------------------------------------------------------------------------------------------------
+
+
+@dp.message_handler(commands=["set_commands"], state="*")
+async def command_set_commands(message: types.Message):
+    """Установить команды в боковом меню, в зависимости от языка"""
+    user_id = message.from_user.id
+    if user_id == config.ADMIN_ID:
+        commands_list = ["set_commands", "set_commands_ru", "set_commands_kz"]
+        for command in commands_list:
+            descriptions = get_commands_descriptions_and_language_code(command)
+            commands = [types.BotCommand(command="/question", description=descriptions['question']),
+                        types.BotCommand(command="/penalty", description=descriptions['penalty']),
+                        types.BotCommand(command="/pay", description=descriptions['pay']),
+                        types.BotCommand(command="/promo_code", description=descriptions['promo_code']),
+                        types.BotCommand(command="/promotions", description=descriptions['promotions']),
+                        types.BotCommand(command="/certificate", description=descriptions['certificate']),
+                        types.BotCommand(command="/donate", description=descriptions['donate']),
+                        types.BotCommand(command="/chat", description=descriptions['chat']),
+                        types.BotCommand(command="/error", description=descriptions['error']),
+                        types.BotCommand(command="/language", description=descriptions['language']),
+                        types.BotCommand(command="/country", description=descriptions['country']),
+                        types.BotCommand(command="/info", description=descriptions['info'])]
+            await bot.set_my_commands(commands=commands, language_code=descriptions['language_code'])
+        await message.answer("Команды установлены!")
 
 
 @dp.message_handler(commands=["up_admin_daily_limit"])
