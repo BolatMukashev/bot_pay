@@ -257,8 +257,8 @@ EMAIL
 /send_email_for_all_auto_schools
 
 ACTIONS
-+3 минуты админу:
-/up_admin_time_limit
++5 вопросов админу:
+/up_admin_daily_limit
 +3 дня использования всем!
 /up_time_limit_for_all_at_days_03
 +30 дней использования всем!
@@ -267,8 +267,6 @@ ACTIONS
 /set_50_percent_price_for_losers
 Удалить Автошколу из базы:
 /delete_auto_school
-Бэкап данных:
-/backup_all_data
 Установить команды:
 /set_commands
 

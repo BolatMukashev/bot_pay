@@ -84,11 +84,11 @@ async def command_start(message: types.Message):
             question_button = get_question_button(user.language)
     elif invited_user:
         add_user(telegram_id, full_name, referral_id=invited_user.referral_id, tariff='premium_max')
-        up_daily_limit_to_referral(referral_telegram_id)
+        up_user_referral_bonus(referral_telegram_id)
         await send_message_about_successful_attracting(referral_telegram_id)
     else:
         add_user(telegram_id, full_name, referral_id=referral_telegram_id)
-        up_daily_limit_to_referral(referral_telegram_id)
+        up_user_referral_bonus(referral_telegram_id)
         await send_message_about_successful_attracting(referral_telegram_id)
 
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
@@ -367,28 +367,7 @@ async def command_help(message: types.Message):
         await message.answer(messages.ADMIN_MENU_TEXT)
 
 
-@dp.message_handler(commands=["up_admin_time_limit"])
-async def command_up_admin_q_a(message: types.Message):
-    """Добавить 3 минуты к времени использования админу, для тестов"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        up_admin_time_limit_3minute()
-        await message.answer('+3 минуты добавлено')
-
-
-@dp.message_handler(commands=["up_time_limit_for_all_at_days_03", "up_time_limit_for_all_at_days_30"])
-async def command_up_time_limit_for_all_at_n_day(message: types.Message):
-    """
-    Добавить +n дня пользования ботом всем пользователям.
-    Акция на праздник или компенсация за ремонт
-    """
-    telegram_id = message.from_user.id
-    if telegram_id == config.ADMIN_ID:
-        days = int(message.text[-2:])
-        up_all_user_time_limit(days=days)
-        await message.answer(f'+{days} дней использования всем пользователям АКТИВИРОВАНО!')
-
-
+# переделать в 50% скидку для всех на праздники
 @dp.message_handler(commands=["set_50_percent_price_for_losers"])
 async def command_set_50_percent_price_for_losers(message: types.Message):
     """Сделать 50% скидку на покупку годового доступа для лузеров и отправить соответствующий пост"""
@@ -471,9 +450,6 @@ async def command_delete_auto_school_action(message: types.Message, state: FSMCo
     await state.finish()
 
 
-# ОСТАЛЬНОЕ -----------------------------------------------------------------------------------------------------------
-
-
 # добавить парсер и валидацию от Pydantic
 @dp.message_handler(content_types=['document'])
 async def scan_message(message: types.Message):
@@ -491,6 +467,9 @@ async def scan_message(message: types.Message):
             await message.answer('Не корректный набор данных!\n{}'.format(err))
 
 
+# ОСТАЛЬНОЕ -----------------------------------------------------------------------------------------------------------
+
+
 @dp.message_handler(content_types=['photo'])
 async def scan_photo(message: types.Message):
     """Получить id фотографии, для админа"""
@@ -500,19 +479,38 @@ async def scan_photo(message: types.Message):
         await message.answer(photo_id)
 
 
-@dp.message_handler(commands=["backup_all_data"])
-async def command_backup_all_data(message: types.Message):
-    """Бэкап данных(пользователи и школы) и отправка админу в виде файлов JSON"""
+@dp.message_handler(commands=["donate"])
+async def command_donate(message: types.Message):
+    """Пожертвования на развитие проекта + карта развития проекта"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+
+    image_code = messages.IMAGES[f'roadmap_{user_language}']
+    if not config.DEBUG:
+        await bot.send_photo(telegram_id, image_code)
+
+    link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
+    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'], reply_markup=link_button)
+
+
+@dp.message_handler(commands=["certificate"])
+async def command_certificate(message: types.Message):
+    """Подарочный сертификат на покупку тарифа Премиум Max"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    await message.answer(MESSAGE.get(f'function_error_{user_language}'))
+
+
+# АДМИНКА -------------------------------------------------------------------------------------------------------------
+
+
+@dp.message_handler(commands=["up_admin_daily_limit"])
+async def command_up_admin_daily_limit(message: types.Message):
+    """Добавить 5 вопросов админу, для тестов"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
-        backup_users()
-        backup_auto_schools()
-        path_1 = path_to_users_backup()
-        path_2 = path_to_auto_schools_backup()
-        with open(path_1, 'rb') as users_json_file:
-            await message.answer_document(users_json_file)
-        with open(path_2, 'rb') as auto_schools_json_file:
-            await message.answer_document(auto_schools_json_file)
+        up_admin_daily_limit()
+        await message.answer('Добавлено 5 вопросов к дневному лимиту')
 
 
 @dp.message_handler(commands=["get_user_info"])
@@ -538,26 +536,7 @@ async def command_get_user_info_action(message: types.Message, state: FSMContext
         await state.finish()
 
 
-@dp.message_handler(commands=["donate"])
-async def command_donate(message: types.Message):
-    """Пожертвования на развитие проекта + карта развития проекта"""
-    telegram_id = message.from_user.id
-    user_language = get_user_language(telegram_id)
-
-    image_code = messages.IMAGES[f'roadmap_{user_language}']
-    if not config.DEBUG:
-        await bot.send_photo(telegram_id, image_code)
-
-    link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
-    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'], reply_markup=link_button)
-
-
-@dp.message_handler(commands=["certificate"])
-async def command_certificate(message: types.Message):
-    """Подарочный сертификат на покупку тарифа Премиум Max"""
-    telegram_id = message.from_user.id
-    user_language = get_user_language(telegram_id)
-    await message.answer(MESSAGE.get(f'function_error_{user_language}'))
+# ДОЛЖНО БЫТЬ ВСЕГДА В КОНЦЕ КОДА, НЕ ПЕРЕМЕЩАТЬ! ---------------------------------------------------------------------
 
 
 @dp.message_handler()
@@ -572,5 +551,4 @@ async def simple_message(message: types.Message):
 
 if __name__ == "__main__":
     from handlers import dp
-
     executor.start_polling(dp, skip_updates=True)

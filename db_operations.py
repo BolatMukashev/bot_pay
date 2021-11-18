@@ -391,18 +391,6 @@ def get_user_language(telegram_id):
     return user.language
 
 
-# переименовать?
-def up_daily_limit_to_referral(referral_telegram_id: str) -> None:
-    """
-    Увеличить ежедневный лимит вопросов для реферала
-    :param referral_telegram_id: id реферала
-    :return:
-    """
-    if valid_id(referral_telegram_id):
-        up_user_time_limit_days(referral_telegram_id)
-        up_user_referral_bonus(referral_telegram_id)
-
-
 def edit_user_language(telegram_id: int, new_user_language) -> None:
     """
     :param telegram_id: telegram_id
@@ -565,17 +553,43 @@ def up_all_user_time_limit(days: int) -> None:
     User.update(time_limit=today + timedelta(days=days)).where(User.time_limit < today).execute()
 
 
-def up_admin_time_limit_3minute():
+def up_admin_daily_limit() -> None:
+    """
+    Увеличить дневной лимит админу
+    :return:
+    """
     database_initialization()
-    User.update(time_limit=datetime.now() + timedelta(minutes=3)).where(User.telegram_id == config.ADMIN_ID).execute()
+    User.update(daily_limit=User.daily_limit + 5).where(User.telegram_id == config.ADMIN_ID).execute()
 
 
-def up_user_referral_bonus(telegram_id: Union[int, str], count: int = 1):
+def up_user_daily_limit(telegram_id: Union[int, str], count: int = 1) -> None:
+    """
+    Увеличить число дневного лимита (единоразово, при подключении тарифов Премиум и Премиум Мах)
+    :param telegram_id: id
+    :param count: число
+    :return:
+    """
     database_initialization()
-    try:
-        User.update(referral_bonus=User.referral_bonus + count).where(User.telegram_id == telegram_id).execute()
-    except Exception as exx:
-        print(exx)
+    if valid_id(telegram_id):
+        try:
+            User.update(daily_limit=User.daily_limit + count).where(User.telegram_id == telegram_id).execute()
+        except Exception as exx:
+            print(exx)
+
+
+def up_user_referral_bonus(telegram_id: Union[int, str], count: int = 1) -> None:
+    """
+    Увеличить число Реферального бонуса
+    :param telegram_id: id
+    :param count: число
+    :return:
+    """
+    database_initialization()
+    if valid_id(telegram_id):
+        try:
+            User.update(referral_bonus=User.referral_bonus + count).where(User.telegram_id == telegram_id).execute()
+        except Exception as exx:
+            print(exx)
 
 
 def get_time_visit(telegram_id):
