@@ -524,12 +524,21 @@ async def command_get_user_info(message: types.Message):
 
 @dp.message_handler(state=AllStates.InfoAboutUser, content_types=types.ContentTypes.TEXT)
 async def command_get_user_info_action(message: types.Message, state: FSMContext):
+    user_info = 'ID: {}\n' \
+                'Имя: {}\n' \
+                'Ник: @{}'
     try:
-        user_info = f'ID: {message.forward_from.id}\n' \
-                    f'Имя: {message.forward_from.full_name}\n' \
-                    f'Ник: @{message.forward_from.username}'
+        user_id = message.forward_from.id
+        full_name = message.forward_from.full_name
+        username = message.forward_from.username
+        user_info = user_info.format(user_id, full_name, username)
     except AttributeError:
+        user_id = message.from_user.id
+        full_name = message.from_user.full_name
+        username = message.from_user.username
+        user_info = user_info.format(user_id, full_name, username)
         await message.answer(messages.GIFT_CERTIFICATE['identification_error_RU'])
+        await message.answer(user_info)
     else:
         await message.answer(user_info)
     finally:
@@ -551,4 +560,5 @@ async def simple_message(message: types.Message):
 
 if __name__ == "__main__":
     from handlers import dp
+
     executor.start_polling(dp, skip_updates=True)
