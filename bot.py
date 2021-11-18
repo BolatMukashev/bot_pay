@@ -13,7 +13,7 @@ from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
 from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
 from keyboards.cancel import get_cancel_button
 from keyboards.inline.question import get_question_button
-from keyboards.inline.pay_button import get_pay_button
+from keyboards.inline.button_with_url import get_url_button
 from messages import *
 from gmail import send_emails_to_schools
 import io
@@ -299,8 +299,9 @@ async def command_pay(message: types.Message):
     pay_data = PayData(user.country, user.language, user.price_in_rubles)
     pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
                            name=user.full_name)
-    url = pay_link.get_pay_url()
-    await message.answer(pay_data.message_text, reply_markup=get_pay_button(user.language, url))
+
+    link_button = get_url_button(BUTTONS[f'pay_{user.language}'], pay_link.get_pay_url())
+    await message.answer(pay_data.message_text, reply_markup=link_button)
     await send_pay_access_message(telegram_id, user.language, 20)
 
 
@@ -542,16 +543,13 @@ async def command_donate(message: types.Message):
     """Пожертвования на развитие проекта + карта развития проекта"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    image_code = IMAGES['roadmap']
 
-    markup = types.InlineKeyboardMarkup()
-    button_text = BUTTONS[f'help_project_{user_language}']
-    ref_link = types.InlineKeyboardButton(text=button_text, url=config.DONATE_URL)
-    markup.add(ref_link)
-
+    image_code = IMAGES[f'roadmap_{user_language}']
     if not config.DEBUG:
         await bot.send_photo(telegram_id, image_code)
-    await message.answer(ROADMAP[f'roadmap_text_{user_language}'], reply_markup=markup)
+
+    link_button = get_url_button(text=BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
+    await message.answer(ROADMAP[f'roadmap_text_{user_language}'], reply_markup=link_button)
 
 
 @dp.message_handler(commands=["certificate"])
