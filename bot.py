@@ -67,8 +67,13 @@ async def command_start(message: types.Message):
         up_user_referral_bonus(referral_telegram_id)
         await send_message_about_successful_attracting(referral_telegram_id)
 
+    user = get_user_by(telegram_id)
+    tariff = get_user_tariff(user)
+    daily_limit = config.TARIFFS[user.tariff]['daily_limit'] + (5 * user.referral_bonus)
+    _, limit_time = get_time_limit(user)
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
-    await message.answer(MESSAGE['start_user_text'].format(full_name), reply_markup=question_button)
+    hello_text = MESSAGE['start_user_text'].format(user.full_name, tariff, daily_limit, limit_time)
+    await message.answer(hello_text, reply_markup=question_button)
     if not get_user_registration_status(telegram_id):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
 
@@ -80,7 +85,7 @@ async def send_message_about_successful_attracting(telegram_id: Union[str, int])
     :return:
     """
     user = get_user_by(telegram_id)
-    if not user.leaver:
+    if user:
         text = MESSAGE.get(f'attraction_text_{user.language}')
         try:
             await bot.send_message(telegram_id, text)
@@ -106,9 +111,10 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
 
 
 async def send_quiz(telegram_id):
-    user_language = get_user_language(telegram_id)
-    if get_user_daily_limit(telegram_id) > 0:
-        question = get_random_question(user_language)
+    user = get_user_by(telegram_id)
+    # user_language = get_user_language(telegram_id)  заморозил кэш
+    if user.daily_limit > 0:
+        question = get_random_question(user.language)
         if config.DEBUG is False and question.image_code:
             await bot.send_photo(telegram_id, question.image_code)
         options = pickle.loads(question.all_answers)
@@ -122,10 +128,12 @@ async def send_quiz(telegram_id):
                             options=options,
                             correct_option_id=correct_option_id,
                             explanation=question.explanation)
-        update_user_daily_limit(telegram_id, -1)
+        start_time, _ = get_time_limit(user)
+        if not start_time:
+            update_user_daily_limit(telegram_id, -1)
     else:
         await bot.send_sticker(telegram_id, messages.STICKERS['flower'])
-        limit_error_message = MESSAGE[f'limit_error_{user_language}']
+        limit_error_message = MESSAGE[f'limit_error_{user.language}']
         await bot.send_message(telegram_id, limit_error_message)
     update_time_visit(telegram_id)
 

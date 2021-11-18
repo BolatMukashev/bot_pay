@@ -380,6 +380,16 @@ def get_user_name_by(telegram_id):
     return user.full_name
 
 
+def get_user_tariff(user: User) -> str:
+    """
+    Вернуть строковое представление тарифа
+    :param user: Объект пользователя
+    :return: строковое представление тарифа
+    """
+    tariff = config.TARIFFS[user.tariff]['translate']
+    return tariff
+
+
 def get_user_language(telegram_id):
     """Получить язык пользователя из кэша/базы"""
     user_language = config.users_data_cache.get(telegram_id)
@@ -596,6 +606,22 @@ def get_time_visit(telegram_id):
     database_initialization()
     user = User.get(User.telegram_id == telegram_id)
     return user.last_visit
+
+
+def get_time_limit(user: User) -> (timedelta, str):
+    """
+    Пользователя достопно нелимитированных 3 часа при регистрации
+    :param user: Объект пользователя
+    :return: количество оставшихся секунд из 10800 (3 часа) и строковое представление в час/минута
+    """
+    start_time = user.registration_date - datetime.now()
+    sec_limit = 10800 + start_time.total_seconds()
+    if sec_limit > 0:
+        hours = sec_limit // 3600
+        minutes = (sec_limit % 3600) / 60
+        return sec_limit, f'{round(hours)} часа {round(minutes)} минут'
+    else:
+        return 0, '0 часов 0 минут'
 
 
 def get_price_in_rubles_on_user(telegram_id):

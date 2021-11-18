@@ -1,5 +1,8 @@
 MESSAGE = dict(start_user_text='Добро пожаловать <b>{}</b>!\n'
-                               'У вас есть <b>24 часа</b> чтобы ознакомится с нашей Образовательной платформой',
+                               'Ваш тариф: <b>{}</b>\n'
+                               'Количество доступных вопросов в день: <b>{}</b>\n'
+                               'У вас есть нелимитированных <b>{}</b> чтобы ознакомится с нашей Образовательной '
+                               'платформой',
                language_choice='Выберите язык\n'
                                '------------------------\n'
                                'Тілді таңдаңыз',
@@ -236,7 +239,9 @@ IMAGES = {
     '50percent': 'AgACAgIAAxkBAAJJ_mFKJUPa3raFEIrcXN52xQMdQwrhAALvtjEbECJQSrt4_xDHMSCrAQADAgADcwADIQQ',
     'test_img': 'AgACAgIAAxkBAAIVFWFKKS30e59wdOZts8xDlTnYxVBQAALItDEbc-dZSszgkrm9TU6sAQADAgADcwADIQQ',
     'roadmap_RU': 'AgACAgIAAxkBAAKFaWGV2Vap1sw_hBm9aC2M0OkmHa9SAAKmtDEbDLaxSJbsVkiuteLjAQADAgADcwADIgQ',
-    'roadmap_KZ': 'AgACAgIAAxkBAAKFa2GV2V3wCnxtqAdDORCEwjIzCEOaAAKntDEbDLaxSHKipB5AYU2XAQADAgADcwADIgQ'
+    'roadmap_KZ': 'AgACAgIAAxkBAAKFa2GV2V3wCnxtqAdDORCEwjIzCEOaAAKntDEbDLaxSHKipB5AYU2XAQADAgADcwADIgQ',
+    'tariffs_RU': 'AgACAgIAAxkBAAKFbWGWFIA-js_dJJv3LVWzIZxIx-T8AALetDEbDLaxSLjSVblEGrjVAQADAgADcwADIgQ',
+    'tariffs_KZ': 'AgACAgIAAxkBAAKFbWGWFIA-js_dJJv3LVWzIZxIx-T8AALetDEbDLaxSLjSVblEGrjVAQADAgADcwADIgQ'
 }
 
 ADMIN_MENU_TEXT = """
