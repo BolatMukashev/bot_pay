@@ -33,7 +33,7 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 GMAIL = os.getenv('GMAIL')
 
-RUBLES_EXCHANGE_RATE = 6.04
+RUBLES_EXCHANGE_RATE = 6
 
 TARIFFS = {
     'basic':  {"daily_limit": 5, "price": 0, 'translate': 'Базовый'},

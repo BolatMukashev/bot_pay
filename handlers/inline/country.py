@@ -3,7 +3,7 @@ from bot import dp, bot
 from keyboards.inline.callback_datas import set_country
 from keyboards.inline.start_button import start_keyboard
 from db_operations import edit_user_country, get_user_language
-from messages import MESSAGE
+from messages import MESSAGE, IMAGES, TEST_IMAGES
 from db_operations import get_user_registration_status, get_user_by, get_user_tariff, get_time_limit
 import config
 
@@ -28,4 +28,5 @@ async def update_country(call: CallbackQuery, callback_data: dict):
         daily_limit = config.TARIFFS[user.tariff]['daily_limit'] + (5 * user.referral_bonus)
         _, limit_time = get_time_limit(user)
         text = MESSAGE[f'registration_ok_{user_language}'].format(tariff, daily_limit, limit_time)
-        await bot.send_message(chat_id, text=text, reply_markup=start_keyboard)
+        image = TEST_IMAGES[f'tariffs_{user_country}_{user_language}'] if config.DEBUG else IMAGES[f'tariffs_{user_country}_{user_language}']
+        await bot.send_photo(telegram_id, image, caption=text, reply_markup=start_keyboard)

@@ -57,7 +57,7 @@ async def command_start(message: types.Message):
     if user:
         if user.leaver:
             edit_leaver_status(telegram_id, False)
-            question_button = get_question_button(user.language)
+        question_button = get_question_button(user.language)
     elif invited_user:
         add_user(telegram_id, full_name, referral_id=invited_user.referral_id, tariff='premium_max')
         up_user_referral_bonus(referral_telegram_id)
@@ -108,27 +108,30 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
 async def send_quiz(telegram_id):
     user = get_user_by(telegram_id)
     # user_language = get_user_language(telegram_id)  заморозил кэш
-    if user.daily_limit > 0:
-        question = get_random_question(user.language)
-        if config.DEBUG is False and question.image_code:
-            await bot.send_photo(telegram_id, question.image_code)
-        options = pickle.loads(question.all_answers)
-        random.shuffle(options)
-        correct_option_id = options.index(question.correct_answer)
-        await bot.send_poll(telegram_id,
-                            type='quiz',
-                            is_anonymous=False,
-                            is_closed=False,
-                            question=question.question,
-                            options=options,
-                            correct_option_id=correct_option_id,
-                            explanation=question.explanation)
-        start_time, _ = get_time_limit(user)
-        if not start_time:
-            update_user_daily_limit(telegram_id, -1)
+    if user:
+        if user.daily_limit > 0:
+            question = get_random_question(user.language)
+            if config.DEBUG is False and question.image_code:
+                await bot.send_photo(telegram_id, question.image_code)
+            options = pickle.loads(question.all_answers)
+            random.shuffle(options)
+            correct_option_id = options.index(question.correct_answer)
+            await bot.send_poll(telegram_id,
+                                type='quiz',
+                                is_anonymous=False,
+                                is_closed=False,
+                                question=question.question,
+                                options=options,
+                                correct_option_id=correct_option_id,
+                                explanation=question.explanation)
+            start_time, _ = get_time_limit(user)
+            if not start_time:
+                update_user_daily_limit(telegram_id, -1)
+        else:
+            await bot.send_sticker(telegram_id, messages.STICKERS['flower'])
+            await bot.send_message(telegram_id, MESSAGE[f'limit_error_{user.language}'])
     else:
-        await bot.send_sticker(telegram_id, messages.STICKERS['flower'])
-        await bot.send_message(telegram_id, MESSAGE[f'limit_error_{user.language}'])
+        await bot.send_message(telegram_id, 'Что то полшло не по плану. Нажмите /question')
     update_time_visit(telegram_id)
 
 
@@ -263,6 +266,18 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
         else:
             await message.answer_sticker(messages.STICKERS['NO'])
             await message.answer(messages.PROMO_CODE[f'promo_code_error_{language}'])
+
+
+@dp.message_handler(commands=["tariffs"])
+async def command_pay(message: types.Message):
+    telegram_id = message.from_user.id
+    user = get_user_by(telegram_id)
+    tariff = get_user_tariff(user)
+    daily_limit = config.TARIFFS[user.tariff]['daily_limit'] + (5 * user.referral_bonus)
+    text = MESSAGE[f'tariff_{user.language}'].format(tariff, daily_limit)
+    image = messages.TEST_IMAGES[f'tariffs_{user.country}_{user.language}'] if config.DEBUG else messages.IMAGES[
+        f'tariffs_{user.country}_{user.language}']
+    await bot.send_photo(telegram_id, image, caption=text)              # reply_markup=...
 
 
 @dp.message_handler(commands=["pay"])

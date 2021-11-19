@@ -12,13 +12,25 @@ MESSAGE = dict(start_user_text='Добро пожаловать <b>{}</b>!\n',
                                   'Ваш тариф: <b>{}</b>\n'
                                   'Количество доступных вопросов в день: <b>{}</b>\n'
                                   'У вас есть нелимитированных <b>{}</b> чтобы ознакомится с нашей Образовательной '
-                                  'платформой'
+                                  'платформой\n'
                                   'Нажми кнопку <b>СТАРТ</b>',
                registration_ok_KZ='Тіркеу сәтті аяқталды!\n'
                                   'Сіздің тарифіңіз: <b>{}</b>\n'
                                   'Күніне қолжетімді сұрақтар саны: <b>{}</b>\n'
-                                  'Біздің білім беру платформасын тексеру үшін сізде шексіз <b>{}</b> бар'
+                                  'Біздің білім беру платформасын тексеру үшін сізде шексіз <b>{}</b> бар\n'
                                   '<b>СТАРТ</b> батырмасын басыңыз',
+               tariff_RU='Ваш тариф: <b>{}</b>\n'
+                         'Количество доступных вопросов в день: <b>{}</b>\n\n'
+                         'Чтобы увеличить количество доступных за день вопросов до 30 - приобретите тариф '
+                         '<b>\"Премиум\"</b>\n\n'
+                         'А чтобы пользоваться нашим сервисом без ограничений - приобретите тариф <b>\"Премиум '
+                         'Max\"</b>',
+               tariff_KZ='Сіздің тарифіңіз: <b>{}</b>\n'
+                         'Күніне қолжетімді сұрақтар саны: <b>{}</b>\n\n'
+                         'Күніне қолжетімді сұрақтар санын 30-ға дейін арттыру үшін - <b>\"Премиум\"</b> тарифті '
+                         'сатып алыңыз\n\n'
+                         'Ал біздің қызметімізді шектеусіз пайдалану үшін – <b>\"Премиум Max\"</b> тарифті сатып '
+                         'алыңыз',
                info_RU='Telegram налагает ограничения на количество символов в тексте при составлении опросов '
                        'и викторин.\n'
                        'Поэтому некоторые слова в ответах были заменены на более короткие аналоги, например:\n'
@@ -248,7 +260,14 @@ IMAGES = {
     'tariffs_RU_RU': 'AgACAgIAAxkBAAKFzGGXK_DcXrgeiOHE6CRWrDlXFyejAAIGujEbniq5SH28EwQ1zHpCAQADAgADcwADIgQ',
     'tariffs_RU_KZ': 'AgACAgIAAxkBAAKFzGGXK_DcXrgeiOHE6CRWrDlXFyejAAIGujEbniq5SH28EwQ1zHpCAQADAgADcwADIgQ',
     'tariffs_KZ_RU': 'AgACAgIAAxkBAAKFzmGXK_vMqBZm6QdZ9t19Zc8h85_DAAIIujEbniq5SJ3IY3R6OuKmAQADAgADcwADIgQ',
-    'tariffs_KZ_KZ': 'AgACAgIAAxkBAAKF0GGXLAABVz_-27a210gM9Qqz6pgCZwACCboxG54quUhHoUfXR7_y_wEAAwIAA3MAAyIE',
+    'tariffs_KZ_KZ': 'AgACAgIAAxkBAAKF0GGXLAABVz_-27a210gM9Qqz6pgCZwACCboxG54quUhHoUfXR7_y_wEAAwIAA3MAAyIE'
+}
+
+TEST_IMAGES = {
+    'tariffs_RU_RU': 'AgACAgIAAxkBAAIbXmGXg7mppaX3k7u6YgwW7hY6GyAYAAIGujEbniq5SDRAdtiyqIS0AQADAgADcwADIgQ',
+    'tariffs_RU_KZ': 'AgACAgIAAxkBAAIbXmGXg7mppaX3k7u6YgwW7hY6GyAYAAIGujEbniq5SDRAdtiyqIS0AQADAgADcwADIgQ',
+    'tariffs_KZ_RU': 'AgACAgIAAxkBAAIbYGGXhAVWvQvsdnYFK8-SXOPvw22kAAIIujEbniq5SMTOERv_GzxbAQADAgADcwADIgQ',
+    'tariffs_KZ_KZ': 'AgACAgIAAxkBAAIbYmGXhBz2lgjytEbbMxGyIx8frIU2AAIJujEbniq5SNU4JRvd2wABmAEAAwIAA3MAAyIE'
 }
 
 ADMIN_MENU_TEXT = """
