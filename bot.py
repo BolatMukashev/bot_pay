@@ -499,7 +499,7 @@ async def command_set_commands(message: types.Message):
             descriptions = get_commands_descriptions_and_language_code(command)
             commands = [types.BotCommand(command="/question", description=descriptions['question']),
                         types.BotCommand(command="/penalty", description=descriptions['penalty']),
-                        types.BotCommand(command="/pay", description=descriptions['pay']),
+                        types.BotCommand(command="/tariffs", description=descriptions['tariffs']),
                         types.BotCommand(command="/promo_code", description=descriptions['promo_code']),
                         types.BotCommand(command="/promotions", description=descriptions['promotions']),
                         types.BotCommand(command="/certificate", description=descriptions['certificate']),
