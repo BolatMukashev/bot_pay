@@ -5,7 +5,6 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound, UserDeactivated, BotBlocked
 from db_operations import *
 from json_parser import parse_schools_from_object
-from keyboards.inline.callback_datas import referral_button_call
 from keyboards.inline.country import country_buttons
 from keyboards.inline.language import language_buttons
 from keyboards.inline.penalty_RU import penalty_buttons_ru_1
@@ -18,6 +17,7 @@ import messages
 from gmail import send_emails_to_schools
 import io
 import asyncio
+from keyboards.inline.referral import get_referral_button
 from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
@@ -36,7 +36,7 @@ class AllStates(StatesGroup):
     DeleteAutoSchool: State = State()
     SendEmailToAllAutoSchools: State = State()
     InfoAboutUser: State = State()
-    PollAnswers: State = State()
+    AnswersToPoll: State = State()
 
 
 @dp.message_handler(commands=["start"])
@@ -67,12 +67,8 @@ async def command_start(message: types.Message):
         up_user_referral_bonus(referral_telegram_id)
         await send_message_about_successful_attracting(referral_telegram_id)
 
-    user = get_user_by(telegram_id)
-    tariff = get_user_tariff(user)
-    daily_limit = config.TARIFFS[user.tariff]['daily_limit'] + (5 * user.referral_bonus)
-    _, limit_time = get_time_limit(user)
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
-    hello_text = MESSAGE['start_user_text'].format(user.full_name, tariff, daily_limit, limit_time)
+    hello_text = MESSAGE['start_user_text'].format(full_name)
     await message.answer(hello_text, reply_markup=question_button)
     if not get_user_registration_status(telegram_id):
         await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
@@ -102,7 +98,6 @@ async def command_question(message: types.Message):
     await send_quiz(telegram_id)
 
 
-# возможно нужно делать через состояния. id ответа из quiz_answer.option_ids а правильный id из состояния
 @dp.poll_answer_handler()
 async def handle_poll_answer(quiz_answer: types.PollAnswer):
     """В ответ на викторину, отправляем новую викторину"""
@@ -133,8 +128,7 @@ async def send_quiz(telegram_id):
             update_user_daily_limit(telegram_id, -1)
     else:
         await bot.send_sticker(telegram_id, messages.STICKERS['flower'])
-        limit_error_message = MESSAGE[f'limit_error_{user.language}']
-        await bot.send_message(telegram_id, limit_error_message)
+        await bot.send_message(telegram_id, MESSAGE[f'limit_error_{user.language}'])
     update_time_visit(telegram_id)
 
 
@@ -326,18 +320,10 @@ async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    image_code = messages.IMAGES['100friends']
-
-    markup = types.InlineKeyboardMarkup()
-    button_text = messages.BUTTONS[f'do_it_{user_language}']
-    ref_link = types.InlineKeyboardButton(text=button_text,
-                                          callback_data=referral_button_call.new(referral='100friends',
-                                                                                 value=user_language))
-    markup.add(ref_link)
-
     if not config.DEBUG:
-        await bot.send_photo(telegram_id, image_code)
-    await message.answer(messages.PROMOTIONS[f'100friends_{user_language}'], reply_markup=markup)
+        await bot.send_photo(telegram_id, messages.IMAGES['100friends'])
+    await message.answer(messages.PROMOTIONS[f'100friends_{user_language}'],
+                         reply_markup=get_referral_button(user_language))
 
 
 @dp.message_handler(commands=["info"])
@@ -436,7 +422,7 @@ async def command_delete_auto_school_action(message: types.Message, state: FSMCo
 
 # добавить парсер и валидацию от Pydantic
 @dp.message_handler(content_types=['document'])
-async def scan_message(message: types.Message):
+async def scan_docs(message: types.Message):
     """Принимает JSON файл, распарсивает его и добавляем информацию об автошколах в базу"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
@@ -568,5 +554,4 @@ async def simple_message(message: types.Message):
 
 if __name__ == "__main__":
     from handlers import dp
-
     executor.start_polling(dp, skip_updates=True)

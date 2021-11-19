@@ -619,9 +619,11 @@ def get_time_limit(user: User) -> (timedelta, str):
     if sec_limit > 0:
         hours = sec_limit // 3600
         minutes = (sec_limit % 3600) / 60
-        return sec_limit, f'{round(hours)} часа {round(minutes)} минут'
+        return sec_limit, '{} {} {} минут'.format(
+            round(hours), 'часа' if user.language == 'RU' else 'сағат', round(minutes)
+        )
     else:
-        return 0, '0 часов 0 минут'
+        return 0, '0 часов 0 минут' if user.language == 'RU' else '0 сағат 0 минут'
 
 
 def get_price_in_rubles_on_user(telegram_id):
