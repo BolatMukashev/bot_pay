@@ -335,8 +335,8 @@ async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    if not config.DEBUG:
-        await bot.send_photo(telegram_id, messages.IMAGES['100friends'])
+    image = messages.TEST_IMAGES['100friends'] if config.DEBUG else messages.IMAGES['100friends']
+    await bot.send_photo(telegram_id, image)
     await message.answer(messages.PROMOTIONS[f'100friends_{user_language}'],
                          reply_markup=get_referral_button(user_language))
 
@@ -455,24 +455,15 @@ async def scan_docs(message: types.Message):
 # ОСТАЛЬНОЕ -----------------------------------------------------------------------------------------------------------
 
 
-@dp.message_handler(content_types=['photo'])
-async def scan_photo(message: types.Message):
-    """Получить id фотографии, для админа"""
-    telegram_id = message.from_user.id
-    if telegram_id == config.ADMIN_ID:
-        photo_id = message.photo[0].file_id
-        await message.answer(photo_id)
-
-
 @dp.message_handler(commands=["donate"])
 async def command_donate(message: types.Message):
     """Пожертвования на развитие проекта + карта развития проекта"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
 
-    image_code = messages.IMAGES[f'roadmap_{user_language}']
-    if not config.DEBUG:
-        await bot.send_photo(telegram_id, image_code)
+    image_code = messages.TEST_IMAGES[f'roadmap_{user_language}'] if config.DEBUG else messages.IMAGES[
+        f'roadmap_{user_language}']
+    await bot.send_photo(telegram_id, image_code)
 
     link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
     await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'], reply_markup=link_button)
@@ -552,6 +543,15 @@ async def command_get_user_info_action(message: types.Message, state: FSMContext
         await message.answer(user_info)
     finally:
         await state.finish()
+
+
+@dp.message_handler(content_types=['photo'])
+async def scan_photo(message: types.Message):
+    """Получить id фотографии, для админа"""
+    telegram_id = message.from_user.id
+    if telegram_id == config.ADMIN_ID:
+        photo_id = message.photo[0].file_id
+        await message.answer(photo_id)
 
 
 # ДОЛЖНО БЫТЬ ВСЕГДА В КОНЦЕ КОДА, НЕ ПЕРЕМЕЩАТЬ! ---------------------------------------------------------------------
