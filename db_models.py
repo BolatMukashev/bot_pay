@@ -79,7 +79,7 @@ class User(BaseModel):
     registration_is_over = BooleanField(null=False, default=False)
     time_limit = DateTimeField(default=plus_one_day)                                # delete
     last_visit = DateTimeField(default=datetime.now)
-    promo_code_used = BooleanField(null=False, default=False)                       # delete
+    promo_code_used = BooleanField(null=False, default=False)
     price_in_rubles = IntegerField(null=False)                                      # delete
     referral_id = IntegerField(null=True, default=0)
     tariff = CharField(null=False, max_length=50, default='basic')

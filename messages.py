@@ -20,12 +20,14 @@ MESSAGE = dict(start_user_text='Добро пожаловать <b>{}</b>!\n',
                                   'Біздің білім беру платформасын тексеру үшін сізде шексіз <b>{}</b> бар\n'
                                   '<b>СТАРТ</b> батырмасын басыңыз',
                tariff_RU='Ваш тариф: <b>{}</b>\n'
-                         'Количество доступных вопросов в день: <b>{}</b>\n\n'
+                         'Количество доступных вопросов в день: <b>{}</b>\n'
+                         'Из них использовано сегодня: <b>{}</b>\n\n'
                          'Увеличить количество доступных за день вопросов до 30 - приобрети тариф '
                          '<b>\"Премиум\"</b>\n\n'
                          'Или пользуйся нашим сервисом без ограничений - приобрети тариф <b>\"Премиум Max\"</b>',
                tariff_KZ='Сіздің тарифіңіз: <b>{}</b>\n'
-                         'Күніне қолжетімді сұрақтар саны: <b>{}</b>\n\n'
+                         'Күніне қолжетімді сұрақтар саны: <b>{}</b>\n'
+                         'Оның бүгінгі күні қолданылған: <b>{}</b>\n\n'
                          'Күніне қолжетімді сұрақтар санын 30-ға дейін арттыру үшін - <b>\"Премиум\"</b> тарифті '
                          'сатып ал\n\n'
                          'Ал біздің қызметімізді шектеусіз пайдалану үшін – <b>\"Премиум Max\"</b> тарифті сатып ал',
@@ -267,7 +269,7 @@ TEST_IMAGES = {
     'roadmap_RU': 'AgACAgIAAxkBAAIbpGGXlnrkCmlbUqevR5FexrpmHvqgAAIKujEbniq5SCTbK5SFPK4rAQADAgADcwADIgQ',
     'roadmap_KZ': 'AgACAgIAAxkBAAIbpmGXloDxY0bz0MTMMxfaT-EuGcBKAAILujEbniq5SJazTwABG0EYUwEAAwIAA3MAAyIE',
     'tariffs_RU_RU': 'AgACAgIAAxkBAAIbXmGXg7mppaX3k7u6YgwW7hY6GyAYAAIGujEbniq5SDRAdtiyqIS0AQADAgADcwADIgQ',
-    'tariffs_RU_KZ': 'AgACAgIAAxkBAAIbXmGXg7mppaX3k7u6YgwW7hY6GyAYAAIGujEbniq5SDRAdtiyqIS0AQADAgADcwADIgQ',
+    'tariffs_RU_KZ': 'AgACAgIAAxkBAAIb_2GbcIkLRNLtoOJLMEwTXtdj-GcDAAKRtjEbwBjYSCTKGxX-S9nfAQADAgADcwADIgQ',
     'tariffs_KZ_RU': 'AgACAgIAAxkBAAIbYGGXhAVWvQvsdnYFK8-SXOPvw22kAAIIujEbniq5SMTOERv_GzxbAQADAgADcwADIgQ',
     'tariffs_KZ_KZ': 'AgACAgIAAxkBAAIbYmGXhBz2lgjytEbbMxGyIx8frIU2AAIJujEbniq5SNU4JRvd2wABmAEAAwIAA3MAAyIE',
     'cosmo_girl': 'AgACAgIAAxkBAAIb3WGbW17DPiebizVxnMuIujqpinmfAAJhtjEbwBjYSKBMjaJIah99AQADAgADcwADIgQ'

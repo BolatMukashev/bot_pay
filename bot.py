@@ -172,17 +172,15 @@ async def command_penalty(message: types.Message):
     """Раздел со штрафами. Показывает размеры всех штрафов по категориям"""
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    language = user.language
-    country = user.country
-    if country == 'RU':
-        data = get_data_from_json_file('backup/penalty_russia.json')
-        await message.answer(data['title'], reply_markup=russian_penalty_titles)
-    else:
-        data = get_data_from_json_file(f'backup/penalty_kazakhstan_{language}.json')
-        if language == 'RU':
-            await message.answer(data['title'], reply_markup=penalty_buttons_ru_1)
-        if language == 'KZ':
-            await message.answer(data['title'], reply_markup=penalty_buttons_kz_1)
+    filename = 'backup/penalty_russia.json' if user.country == 'RU' \
+        else f'backup/penalty_kazakhstan_{user.language}.json'
+    data = get_data_from_json_file(filename)
+    penalty_keyboard = russian_penalty_titles
+    if user.country == 'KZ' and user.language == 'RU':
+        penalty_keyboard = penalty_buttons_ru_1
+    elif user.country == 'KZ' and user.language == 'KZ':
+        penalty_keyboard = penalty_buttons_kz_1
+    await message.answer(data['title'], reply_markup=penalty_keyboard)
 
 
 @dp.message_handler(commands=["statistics"])
@@ -259,8 +257,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
             up_user_time_limit_days(telegram_id, 5)
             up_number_of_references(user_promo_code)
             update_user_promo_code_used_status(telegram_id)
-            commit_use_promo_code(telegram_id, user_promo_code)
-            change_price_in_rubles_on_user(telegram_id, config.PRICE_AFTER_20DAYS)
+            commit_use_promo_code_in_base(telegram_id, user_promo_code)
             await message.answer_sticker(messages.STICKERS['all_good'], reply_markup=types.ReplyKeyboardRemove())
             await message.answer(messages.PROMO_CODE[f'promo_code_activated_{language}'],
                                  reply_markup=get_question_button(language))
@@ -270,13 +267,14 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
             await message.answer(messages.PROMO_CODE[f'promo_code_error_{language}'])
 
 
-@dp.message_handler(commands=["tariffs"])
+@dp.message_handler(commands=["tariffs", "pay"])
 async def command_pay(message: types.Message):
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    tariff = get_user_tariff(user)
     daily_limit = config.TARIFFS[user.tariff]['daily_limit'] + (5 * user.referral_bonus)
-    text = MESSAGE[f'tariff_{user.language}'].format(tariff, daily_limit)
+    daily_limit_now = daily_limit - user.daily_limit
+    text = MESSAGE[f'tariff_{user.language}'].format(config.TARIFFS[user.tariff]['translate'], daily_limit,
+                                                     daily_limit_now)
     image = messages.TEST_IMAGES[f'tariffs_{user.country}_{user.language}'] if config.DEBUG else messages.IMAGES[
         f'tariffs_{user.country}_{user.language}']
     await bot.send_photo(telegram_id, image, caption=text)              # reply_markup=...
@@ -291,7 +289,7 @@ async def command_pay(message: types.Message):
     """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
-    pay_data = PayData(user.country, user.language, user.price_in_rubles)
+    pay_data = PayData(user, 'premium')
     pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
                            name=user.full_name)
 
@@ -337,7 +335,8 @@ async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    image = messages.TEST_IMAGES[f'100friends_{user_language}'] if config.DEBUG else messages.IMAGES['100friends']
+    image = messages.IMAGES[f'100friends_{user_language}'] if not config.DEBUG else messages.TEST_IMAGES[
+        f'100friends_{user_language}']
     await bot.send_photo(telegram_id, image)
     await message.answer(messages.PROMOTIONS[f'100friends_{user_language}'],
                          reply_markup=get_referral_button(user_language))
@@ -352,28 +351,6 @@ async def command_help(message: types.Message):
     await message.answer(MESSAGE[f'info_{user_language}'])
     if telegram_id == config.ADMIN_ID:
         await message.answer(messages.ADMIN_MENU_TEXT)
-
-
-# переделать в 50% скидку для всех на праздники
-@dp.message_handler(commands=["set_50_percent_price_for_losers"])
-async def command_set_50_percent_price_for_losers(message: types.Message):
-    """Сделать 50% скидку на покупку годового доступа для лузеров и отправить соответствующий пост"""
-    user_id = message.from_user.id
-    if user_id == config.ADMIN_ID:
-        losers = get_losers()
-        set_50_percent_price_for_losers()
-        no_active_users = 0
-        for user in loading_bar(losers):
-            try:
-                await bot.send_photo(user['telegram_id'],
-                                     messages.IMAGES['50percent'],
-                                     caption=messages.OFFERS[f'second_week_promotional_offer_{user["language"]}'])
-            except (ChatNotFound, UserDeactivated, BotBlocked):
-                no_active_users += 1
-            except Exception as exx:
-                await bot.send_message(config.ADMIN_ID, str(exx))
-        await bot.send_message(config.ADMIN_ID, '50% скидка установлена ✌🏻\n'
-                                                f'Оповещены {len(losers) - no_active_users} из {len(losers)}')
 
 
 # АВТОШКОЛЫ -----------------------------------------------------------------------------------------------------------

@@ -227,12 +227,13 @@ def get_all_questions_from_db(user_language):
 # ПОЛЬЗОВАТЕЛЬ -------------------------------------------------------------------------------------------------------
 
 
+# price_in_rubles удалить
 def add_user(telegram_id: int, full_name: str, referral_id: int = None, tariff: str = 'basic') -> None:
     """Добавить нового пользователя в базу, таблица users"""
     database_initialization()
     daily_limit = config.TARIFFS[tariff]['daily_limit']
     try:
-        User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=config.BASE_PRICE, referral_id=referral_id,
+        User(telegram_id=telegram_id, full_name=full_name, price_in_rubles=300, referral_id=referral_id,
              tariff=tariff, daily_limit=daily_limit).save()
     except IntegrityError as err:
         print(err)
@@ -380,16 +381,6 @@ def get_user_name_by(telegram_id):
     return user.full_name
 
 
-def get_user_tariff(user: User) -> str:
-    """
-    Вернуть строковое представление тарифа
-    :param user: Объект пользователя
-    :return: строковое представление тарифа
-    """
-    tariff = config.TARIFFS[user.tariff]['translate']
-    return tariff
-
-
 def get_user_language(telegram_id):
     """Получить язык пользователя из кэша/базы"""
     user_language = config.users_data_cache.get(telegram_id)
@@ -468,18 +459,20 @@ def get_monetary_unit(user_country, user_language):
 
 
 class PayData:
-    def __init__(self, user_country: str, user_language: str, price_in_rubles: int):
+    def __init__(self, obj: User, purchased_tariff):
         """
         Прием оплаты в рублях не работает (платежная система IOKA)
         (398 - код тенге, 643 - код рубля)
-        :param user_country: Страна пользователя
-        :param user_language: Язык пользователя
+        :param obj: Пользователь
         """
-        self.user_country = user_country
-        self.user_language = user_language
-        self.price_ruble = price_in_rubles
-        self.price_tenge = int(self.price_ruble * config.RUBLES_EXCHANGE_RATE)
+        self.purchased_tariff = purchased_tariff
+        self.user_country = obj.coutry
+        self.user_language = obj.language
         self.code = 398
+        self.event = 2 if config.EVENT else 1
+        self.discount = 2 if obj.promo_code_used else 1
+        self.price_ruble = config.TARIFFS[purchased_tariff]['price'] / self.event / self.discount
+        self.price_tenge = self.price_ruble * config.RUBLES_EXCHANGE_RATE
 
         if self.user_country == 'KZ':
             self.message_text = MESSAGE[f'pay_message_{self.user_language}'].format(self.price_tenge, 'тенге', '')
@@ -753,34 +746,6 @@ def filter_telegram_id(command: str):
     return language, country
 
 
-def get_losers():
-    """
-    Получить пользователей из бд, у которых лемит закончился 2 недели назад, а цена 100%
-    :return: Итерируемы объект со списком telegram id пользователей
-    """
-    database_initialization()
-    twenty_days_ago = datetime.now() - timedelta(days=20)
-    losers = User.select(User.telegram_id, User.language).where(
-        (User.time_limit < twenty_days_ago) &
-        (User.price_in_rubles != config.PRICE_AFTER_20DAYS)
-    )
-    losers = [{'telegram_id': user.telegram_id, 'language': user.language} for user in losers]
-    return losers
-
-
-def set_50_percent_price_for_losers():
-    """
-    Установить цену в 50% для пользователей, у которых лемит закончился 2 недели назад, а цена 100%
-    """
-    database_initialization()
-    twenty_days_ago = datetime.now() - timedelta(days=20)
-    User.update(price_in_rubles=config.PRICE_AFTER_20DAYS,
-                second_week_promotional_offer=1).where(
-        (User.time_limit < twenty_days_ago) &
-        (User.price_in_rubles != config.PRICE_AFTER_20DAYS)
-    ).execute()
-
-
 def get_all_users_on_dict_format():
     all_users_list = []
     database_initialization()
@@ -821,7 +786,7 @@ def get_all_gifts_telegram_id() -> tuple:
 # ПРОМО-КОДЫ и АВТОШКОЛЫ ----------------------------------------------------------------------------------------------
 
 
-def commit_use_promo_code(telegram_id, promo_code):
+def commit_use_promo_code_in_base(telegram_id, promo_code):
     PromoCode(telegram_id=telegram_id, promo_code=promo_code).save()
 
 

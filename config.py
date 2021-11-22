@@ -5,15 +5,14 @@ load_dotenv()
 
 DEBUG = bool(int(os.getenv('DEBUG')))
 
+EVENT = False
+
 TEST_BOT_TOKEN = os.getenv('TEST_BOT_TOKEN')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 BOT_NAME = os.getenv('BOT_NAME')
 BOT_ADDRESS = os.getenv('BOT_ADDRESS')
 ADMIN_ID = int(os.getenv('ADMIN_ID'))
-
-BASE_PRICE = int(os.getenv('BASE_PRICE'))                               # delete
-PRICE_AFTER_20DAYS = int(os.getenv('PRICE_AFTER_20DAYS'))               # delete
 
 APP_USER_NAME = os.getenv('APP_USER_NAME')
 APP_PASSWORD = os.getenv('APP_PASSWORD')
@@ -37,7 +36,7 @@ RUBLES_EXCHANGE_RATE = 6
 
 TARIFFS = {
     'basic':  {"daily_limit": 5, "price": 0, 'translate': 'Базовый'},
-    'premium':  {"daily_limit": 30, "price": 150, 'translate': 'Премиум'},
+    'premium':  {"daily_limit": 30, "price": 200, 'translate': 'Премиум'},
     'premium_max': {"daily_limit": 999, "price": 300, 'translate': 'Премиум Max'}
 }
 
