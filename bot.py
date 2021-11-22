@@ -111,6 +111,8 @@ async def send_quiz(telegram_id):
     if user:
         if user.daily_limit > 0:
             question = get_random_question(user.language)
+            if config.DEBUG:
+                await bot.send_photo(telegram_id, messages.TEST_IMAGES.get('cosmo_girl'))
             if config.DEBUG is False and question.image_code:
                 await bot.send_photo(telegram_id, question.image_code)
             options = pickle.loads(question.all_answers)
@@ -335,7 +337,7 @@ async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    image = messages.TEST_IMAGES['100friends'] if config.DEBUG else messages.IMAGES['100friends']
+    image = messages.TEST_IMAGES[f'100friends_{user_language}'] if config.DEBUG else messages.IMAGES['100friends']
     await bot.send_photo(telegram_id, image)
     await message.answer(messages.PROMOTIONS[f'100friends_{user_language}'],
                          reply_markup=get_referral_button(user_language))
