@@ -10,11 +10,12 @@ class PayLinkIoka:
     back_url = "https://t.me/pdd_good_bot/"
     callback_url = "https://pddgoodbot.ru/accept"
 
-    def __init__(self, telegram_id: int, price: int, currency: int, name: str):
+    def __init__(self, telegram_id: int, price: int, currency: int, name: str, tariff: str):
         self.telegram_id = telegram_id
         self.price = price
         self.currency = currency
         self.name = name
+        self.tariff = tariff
 
     def get_headers(self) -> dict:
         """формируем заголовок запроса"""
@@ -30,7 +31,8 @@ class PayLinkIoka:
             "currency": self.currency,
             "order_id": order_id,                               # обязательный
             "back_url": self.back_url,                          # обязательный
-            "additional_params": {"name": self.name},
+            "additional_params": {"name": self.name,
+                                  "tariff": self.tariff},
             "client_id": str(self.telegram_id),
             "callback_url": self.callback_url,
             "template": "3D"

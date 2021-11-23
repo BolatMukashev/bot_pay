@@ -89,8 +89,9 @@ def accept():
         telegram_id = int(request.json['client_id'])
         order_id = int(request.json["order_id"])
         price = int(float(request.json["amount"]))
-        new_pay_order(telegram_id, order_id, price)
-        up_user_time_limit_days(telegram_id, 365)
+        tariff = request.json["additional_params"]["tariff"]
+        new_pay_order(telegram_id, order_id, price, tariff)
+        change_tariff(telegram_id, tariff)
     return 'all good'
 
 

@@ -8,7 +8,7 @@ import config
 import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
-from messages import MESSAGE, COMMANDS_DESCRIPTIONS
+from messages import COMMANDS_DESCRIPTIONS, PAY
 from typing import List, Union
 from tqdm import tqdm as loading_bar
 
@@ -250,56 +250,36 @@ def delete_user(telegram_id: int) -> None:
         assert err
 
 
-def move_user_to_leavers(telegram_id: int) -> None:
+def change_tariff(telegram_id: int, new_tariff: str) -> None:
     """
-    Переместить пользователя в таблицу leavers
+    Изменить тариф пользователя
     :param telegram_id: id
+    :param new_tariff: название тарифа
     :return:
     """
-    user = get_user_by(telegram_id)
-    add_leaver(telegram_id=user.telegram_id, full_name=user.full_name, referral=user.referral, tariff=user.tariff)
-    delete_user(telegram_id)
+    edit_user_tariff(telegram_id, new_tariff)
+    update_user_daily_limit(telegram_id, config.TARIFFS[new_tariff]['daily_limit'])
 
 
-def add_leaver(telegram_id: int, full_name: str, tariff: str, referral: int = None) -> None:
-    """Добавить пользователя в базу, таблица leavers"""
-    database_initialization()
-    try:
-        Leaver(telegram_id=telegram_id, full_name=full_name, tariff=tariff, referral=referral).save()
-    except IntegrityError as err:
-        print(err)
-        assert err
-
-
-def get_leaver_by(telegram_id: int) -> Leaver:
+def edit_user_tariff(telegram_id: int, new_tariff: str) -> None:
     """
-    Получить ливера по telegram_id
+    Изменить тариф пользователя
     :param telegram_id: id
-    :return: объект класса Leaver
-    """
-    leaver = Leaver.get(Leaver.telegram_id == telegram_id)
-    return leaver
-
-
-def delete_leaver(telegram_id: int) -> None:
-    """Удалить пользователя из таблицы leavers"""
-    database_initialization()
-    try:
-        Leaver.delete().where(Leaver.telegram_id == telegram_id).execute()
-    except Exception as err:
-        print(err)
-        assert err
-
-
-def move_leaver_to_users(telegram_id: int) -> None:
-    """
-    Вернуть ливера в таблицу users
-    :param telegram_id: id
+    :param new_tariff: название тарифа
     :return:
     """
-    leaver = get_leaver_by(telegram_id)
-    add_user(leaver.telegram_id, leaver.full_name, leaver.referral, leaver.tariff)
-    delete_leaver(telegram_id)
+    User.update(tariff=new_tariff).where(User.telegram_id == telegram_id).execute()
+
+
+def update_user_daily_limit(telegram_id, count: int):
+    """
+    Получить доступный дневной лимит вопросов пользователя
+    :param telegram_id: id
+    :param count: число, на которое стоит увеличить или уменьшить дневной лимит +/- number
+    :return:
+    """
+    database_initialization()
+    User.update(daily_limit=User.daily_limit + count).where(User.telegram_id == telegram_id).execute()
 
 
 def search_user_in_gifts(telegram_id: int) -> Union[Gift, None]:
@@ -424,66 +404,25 @@ def edit_leaver_status(telegram_id: int, status: bool) -> None:
     User.update(leaver=status).where(User.telegram_id == telegram_id).execute()
 
 
-def get_user_pay_status(telegram_id: int) -> str:
-    """Получить статус оплаты"""
-    database_initialization()
-    user = User.get(User.telegram_id == telegram_id)
-    return user.made_payment
-
-
-def get_monetary_unit_by_user_country(telegram_id):
-    database_initialization()
-    user = get_user_by(telegram_id)
-    user_country = user.country
-    user_language = user.language
-    if user_country == 'KZ':
-        return 'тенге'
-    elif user_country == 'RU' and user_language == 'RU':
-        return 'рублей'
-    elif user_country == 'RU' and user_language == 'KZ':
-        return 'рубль'
-    else:
-        return 'рублей'
-
-
-# для платежки kassa24
-def get_monetary_unit(user_country, user_language):
-    if user_country == 'KZ':
-        return 'тенге'
-    elif user_country == 'RU' and user_language == 'RU':
-        return 'рублей'
-    elif user_country == 'RU' and user_language == 'KZ':
-        return 'рубль'
-    else:
-        return 'рублей'
-
-
 class PayData:
     def __init__(self, obj: User, purchased_tariff):
         """
+        Высчитывает финальную стоимость тарифа и формирует текст описания
         Прием оплаты в рублях не работает (платежная система IOKA)
         (398 - код тенге, 643 - код рубля)
         :param obj: Пользователь
         """
         self.purchased_tariff = purchased_tariff
-        self.user_country = obj.coutry
+        self.tariff_translate = config.TARIFFS[purchased_tariff]['translate']
+        self.user_country = obj.country
         self.user_language = obj.language
         self.code = 398
         self.event = 2 if config.EVENT else 1
         self.discount = 2 if obj.promo_code_used else 1
-        self.price_ruble = config.TARIFFS[purchased_tariff]['price'] / self.event / self.discount
-        self.price_tenge = self.price_ruble * config.RUBLES_EXCHANGE_RATE
-
-        if self.user_country == 'KZ':
-            self.message_text = MESSAGE[f'pay_message_{self.user_language}'].format(self.price_tenge, 'тенге', '')
-
-        elif self.user_country == 'RU' and self.user_language == 'RU':
-            self.message_text = MESSAGE[f'pay_message_{self.user_language}'].format(self.price_ruble, 'рублей',
-                                                                                    f'({self.price_tenge} тенге)')
-
-        elif self.user_country == 'RU' and self.user_language == 'KZ':
-            self.message_text = MESSAGE[f'pay_message_{self.user_language}'].format(self.price_ruble, 'рубль',
-                                                                                    f'({self.price_tenge} тенге)')
+        self.price_ruble = int(config.TARIFFS[purchased_tariff]['price'] / self.event / self.discount)
+        self.price_tenge = int(self.price_ruble * config.RUBLES_EXCHANGE_RATE)
+        self.message_text = PAY[f'message_{self.user_country}_{self.user_language}'].format(
+            tariff=self.tariff_translate, price_ruble=self.price_ruble, price_tenge=self.price_tenge)
 
 
 def get_user_time_limit(telegram_id):
@@ -513,17 +452,6 @@ def get_user_daily_limit(telegram_id) -> int:
     user = User.get(User.telegram_id == telegram_id)
     daily_limit = user.daily_limit
     return daily_limit
-
-
-def update_user_daily_limit(telegram_id, count: int):
-    """
-    Получить доступный дневной лимит вопросов пользователя
-    :param telegram_id: id
-    :param count: число, на которое стоит увеличить или уменьшить дневной лимит +/- number
-    :return:
-    """
-    database_initialization()
-    User.update(daily_limit=User.daily_limit + count).where(User.telegram_id == telegram_id).execute()
 
 
 def up_user_time_limit_days(telegram_id: Union[int, str], days: int = 1) -> None:
@@ -619,42 +547,6 @@ def get_time_limit(user: User) -> (timedelta, str):
         return 0, '0 часов 0 минут' if user.language == 'RU' else '0 сағат 0 минут'
 
 
-def get_price_in_rubles_on_user(telegram_id):
-    database_initialization()
-    user = User.get(User.telegram_id == telegram_id)
-    return user.price_ruble
-
-
-def get_finally_price(telegram_id):
-    database_initialization()
-    user = get_user_by(telegram_id)
-    price_in_rubles = user.price_ruble
-    user_country = user.country
-    if user_country == 'KZ':
-        return round(price_in_rubles * 5)
-    else:
-        return price_in_rubles
-
-
-def get_finally_price_by(price_in_rubles: int, user_country: str) -> int:
-    """
-    Преобразует цену в рублях в цену в тенге, если пользователь из Казахстана
-    :param price_in_rubles: Цена из базы, у пользователя, в рублях
-    :param user_country: Страна проживания пользователя
-    :return:
-    """
-    if user_country == 'KZ':
-        return int(price_in_rubles * config.RUBLES_EXCHANGE_RATE)
-    else:
-        return price_in_rubles
-
-
-def change_price_in_rubles_on_user(telegram_id, new_price):
-    database_initialization()
-    query = User.update(price_in_rubles=new_price).where(User.telegram_id == telegram_id)
-    query.execute()
-
-
 def get_user_registration_status(telegram_id):
     database_initialization()
     user = User.get(User.telegram_id == telegram_id)
@@ -664,18 +556,6 @@ def get_user_registration_status(telegram_id):
 def update_registration_status(telegram_id):
     database_initialization()
     query = User.update(registration_is_over=True).where(User.telegram_id == telegram_id)
-    query.execute()
-
-
-def update_second_week_promotional_offer_status(telegram_id):
-    database_initialization()
-    query = User.update(second_week_promotional_offer=True).where(User.telegram_id == telegram_id)
-    query.execute()
-
-
-def update_sixth_week_promotional_offer_status(telegram_id):
-    database_initialization()
-    query = User.update(sixth_week_promotional_offer=True).where(User.telegram_id == telegram_id)
     query.execute()
 
 
@@ -1007,32 +887,37 @@ def promo_code_check_to_correct(promo_code):
 # ПЛАТЕЖИ ------------------------------------------------------------------------------------------------------------
 
 
-def new_pay_order(telegram_id: int, order_number: int, price: int) -> None:
+def new_pay_order(telegram_id: int, order_number: int, price: int, tariff: str) -> None:
     """
     Добавить информацию о новом платеже в базу
+    :param tariff: тариф
     :param telegram_id: id плательщика
     :param order_number: номер платежа
     :param price: цена во время оплаты (в тенге)
     """
     database_initialization()
     try:
-        pay_order = PayOrder(telegram_id=telegram_id, order_number=order_number, price=price)
-        pay_order.save()
+        PayOrder(telegram_id=telegram_id, order_number=order_number, price=price, tariff=tariff).save()
     except IntegrityError:
         pass
     except Exception as exx:
         print(exx)
 
 
-def check_pay_order(telegram_id: int):
-    """Получить запись о платеже, тем самым подтвердить что платеж был"""
+def check_pay_orders(telegram_id: int) -> Union[PayOrder, None]:
+    """
+    Получить запись о платеже, тем самым подтвердить что платеж был
+    :param telegram_id: id плательщика
+    :return: объект со списком платежей / None
+    """
     database_initialization()
     try:
-        pay_order = PayOrder.select(PayOrder.date, PayOrder.order_number).where(PayOrder.telegram_id == telegram_id)
-        if pay_order:
-            return pay_order
+        pay_order = PayOrder.select().where(PayOrder.telegram_id == telegram_id)
     except Exception as err:
         print('Платеж не найден\n', err)
+    else:
+        if pay_order:
+            return pay_order
 
 
 # БЭКАП ДАННЫХ -------------------------------------------------------------------------------------------------------

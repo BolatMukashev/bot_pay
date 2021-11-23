@@ -79,7 +79,7 @@ class User(BaseModel):
     registration_is_over = BooleanField(null=False, default=False)
     time_limit = DateTimeField(default=plus_one_day)                                # delete
     last_visit = DateTimeField(default=datetime.now)
-    promo_code_used = BooleanField(null=False, default=False)
+    promo_code_used = BooleanField(null=False, default=False)                       # переименовать в discount (PayData)
     price_in_rubles = IntegerField(null=False)                                      # delete
     referral_id = IntegerField(null=True, default=0)
     tariff = CharField(null=False, max_length=50, default='basic')
@@ -112,6 +112,7 @@ class PayOrder(BaseModel):
     date = DateTimeField(default=datetime.now)
     order_number = IntegerField(null=False, unique=True)
     price = IntegerField(null=False)
+    tariff = CharField(null=False, max_length=20)
 
     class Meta:
         db_table = "pay_orders"
@@ -122,7 +123,7 @@ class Gift(BaseModel):
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)
     full_name = CharField(null=True, max_length=255)                        # nickname
-    text = CharField(null=False, max_length=255)                            # подпись к сертификату
+    text = CharField(null=False, max_length=255)                            # подпись к сертификату (добавить от кого?)
     referral_id = IntegerField(null=True)                                   # telegram_id купившего сертификат
     date = DateTimeField(default=datetime.now)
     order_number = IntegerField(null=False, unique=True)

@@ -7,6 +7,7 @@ from db_operations import *
 from json_parser import parse_schools_from_object
 from keyboards.inline.country import country_buttons
 from keyboards.inline.language import language_buttons
+from keyboards.inline.pay import get_pay_keyboard
 from keyboards.inline.penalty_RU import penalty_buttons_ru_1
 from keyboards.inline.penalty_KZ import penalty_buttons_kz_1
 from keyboards.inline.penalty_RUSSIA import russian_penalty_titles
@@ -18,7 +19,6 @@ from gmail import send_emails_to_schools
 import io
 import asyncio
 from keyboards.inline.referral import get_referral_button
-from pay_system_ioka import PayLinkIoka
 from static.html_messages.hello_auto_school import hello_auto_school_message
 from static.html_messages.new_functions_and_offers import new_func_and_offers_message
 from tqdm import tqdm as loading_bar
@@ -68,10 +68,10 @@ async def command_start(message: types.Message):
         await send_message_about_successful_attracting(referral_telegram_id)
 
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
-    hello_text = MESSAGE['start_user_text'].format(full_name)
+    hello_text = messages.MESSAGE['start_user_text'].format(full_name)
     await message.answer(hello_text, reply_markup=question_button)
     if not get_user_registration_status(telegram_id):
-        await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
+        await message.answer(messages.MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
 async def send_message_about_successful_attracting(telegram_id: Union[str, int]) -> None:
@@ -82,7 +82,7 @@ async def send_message_about_successful_attracting(telegram_id: Union[str, int])
     """
     user = get_user_by(telegram_id)
     if user:
-        text = MESSAGE.get(f'attraction_text_{user.language}')
+        text = messages.MESSAGE.get(f'attraction_text_{user.language}')
         try:
             await bot.send_message(telegram_id, text)
         except (ChatNotFound, UserDeactivated, BotBlocked):
@@ -131,7 +131,7 @@ async def send_quiz(telegram_id):
                 update_user_daily_limit(telegram_id, -1)
         else:
             await bot.send_sticker(telegram_id, messages.STICKERS['flower'])
-            await bot.send_message(telegram_id, MESSAGE[f'limit_error_{user.language}'])
+            await bot.send_message(telegram_id, messages.MESSAGE[f'limit_error_{user.language}'])
     else:
         await bot.send_message(telegram_id, 'Что то полшло не по плану. Нажмите /question')
     update_time_visit(telegram_id)
@@ -140,7 +140,7 @@ async def send_quiz(telegram_id):
 @dp.message_handler(commands=["language"])
 async def command_language(message: types.Message):
     """Вызвать меню смены языка"""
-    await message.answer(MESSAGE['language_choice'], reply_markup=language_buttons)
+    await message.answer(messages.MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
 @dp.message_handler(commands=["country"])
@@ -148,7 +148,7 @@ async def command_country(message: types.Message):
     """Вызвать меню смены страны"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    await message.answer(MESSAGE[f'country_choice_{user_language}'], reply_markup=country_buttons)
+    await message.answer(messages.MESSAGE[f'country_choice_{user_language}'], reply_markup=country_buttons)
 
 
 @dp.message_handler(commands=["chat"])
@@ -156,7 +156,7 @@ async def command_chat(message: types.Message):
     """Ссылка на чат (форум)"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    await message.answer(MESSAGE[f'link_to_chat_{user_language}'])
+    await message.answer(messages.MESSAGE[f'link_to_chat_{user_language}'])
 
 
 @dp.message_handler(commands=["error"])
@@ -164,7 +164,7 @@ async def command_error(message: types.Message):
     """Ссылка на чат обсуждения ошибок"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    await message.answer(MESSAGE[f'link_error_chat_{user_language}'])
+    await message.answer(messages.MESSAGE[f'link_error_chat_{user_language}'])
 
 
 @dp.message_handler(commands=["penalty"])
@@ -247,7 +247,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     language = get_user_language(telegram_id)
     user_promo_code = message.text
     if user_promo_code == messages.BUTTONS[f'cancel_{language}']:
-        await message.answer(MESSAGE[f'cancel_action_{language}'], reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(messages.MESSAGE[f'cancel_action_{language}'], reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
     else:
         user_promo_code = message.text.upper()
@@ -269,33 +269,19 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["tariffs", "pay"])
 async def command_pay(message: types.Message):
+    """
+    Раздел Оплаты
+    :return: клавиатура с тарифами Премиум и Премиум Мах
+    """
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
     daily_limit = config.TARIFFS[user.tariff]['daily_limit'] + (5 * user.referral_bonus)
     daily_limit_now = daily_limit - user.daily_limit
-    text = MESSAGE[f'tariff_{user.language}'].format(config.TARIFFS[user.tariff]['translate'], daily_limit,
-                                                     daily_limit_now)
+    text = messages.MESSAGE[f'tariff_{user.language}'].format(config.TARIFFS[user.tariff]['translate'], daily_limit,
+                                                              daily_limit_now)
     image = messages.TEST_IMAGES[f'tariffs_{user.country}_{user.language}'] if config.DEBUG else messages.IMAGES[
         f'tariffs_{user.country}_{user.language}']
-    await bot.send_photo(telegram_id, image, caption=text)              # reply_markup=...
-
-
-@dp.message_handler(commands=["pay"])
-async def command_pay(message: types.Message):
-    """
-    Раздел Оплаты.
-    Команда pay посылает запрос в платежную систему, получает в ответ платежную ссылку и передает эту ссылку на оплату
-    клиенту
-    """
-    telegram_id = message.from_user.id
-    user = get_user_by(telegram_id)
-    pay_data = PayData(user, 'premium')
-    pay_link = PayLinkIoka(telegram_id=telegram_id, price=pay_data.price_tenge, currency=pay_data.code,
-                           name=user.full_name)
-
-    link_button = get_url_button(messages.BUTTONS[f'pay_{user.language}'], pay_link.get_pay_url())
-    await message.answer(pay_data.message_text, reply_markup=link_button)
-    await send_pay_access_message(telegram_id, user.language, 20)
+    await bot.send_photo(telegram_id, image, caption=text, reply_markup=get_pay_keyboard(user.language))
 
 
 async def send_pay_access_message(telegram_id: int, user_language: str, time_limit: int) -> None:
@@ -310,24 +296,35 @@ async def send_pay_access_message(telegram_id: int, user_language: str, time_lim
     while True:
         await asyncio.sleep(10)
         time_now = datetime.now()
-        status = await check_pay_status(telegram_id, user_language)
+        status = await check_pay_status_and_send_order_message(telegram_id, user_language)
         if status or time_now > time_stop:
             break
 
 
-async def check_pay_status(telegram_id: int, user_language: str) -> bool:
+async def check_pay_status_and_send_order_message(telegram_id: int, user_language: str) -> bool:
     """
     Проверить статус платежа
     :param user_language: язык пользователя
     :param telegram_id: id плательщика
     :return: True если есть номер платежа
     """
-    pay_order = check_pay_order(telegram_id)
-    if pay_order is not None:
+    pay_order = check_pay_orders(telegram_id)
+    if pay_order:
         if pay_order[-1].date.date() == datetime.now().date():
-            text = MESSAGE.get(f'pay_registered_message_{user_language}').format(pay_order[-1].order_number)
-            await bot.send_message(telegram_id, text, reply_markup=get_question_button(user_language))
+            await send_order_message(telegram_id, user_language, order_number=pay_order[-1].order_number)
             return True
+
+
+async def send_order_message(telegram_id: int, user_language: str, order_number: int) -> None:
+    """
+    Отправить ордер как потдверждение платежа
+    :param telegram_id: id
+    :param user_language: язык пользователя
+    :param order_number: номер платежа
+    :return:
+    """
+    text = messages.MESSAGE.get(f'pay_registered_message_{user_language}').format(order_number)
+    await bot.send_message(telegram_id, text, reply_markup=get_question_button(user_language))
 
 
 @dp.message_handler(commands=["promotions"])
@@ -348,7 +345,7 @@ async def command_help(message: types.Message):
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer_sticker(messages.STICKERS['message'])
-    await message.answer(MESSAGE[f'info_{user_language}'])
+    await message.answer(messages.MESSAGE[f'info_{user_language}'])
     if telegram_id == config.ADMIN_ID:
         await message.answer(messages.ADMIN_MENU_TEXT)
 
@@ -453,7 +450,7 @@ async def command_certificate(message: types.Message):
     """Подарочный сертификат на покупку тарифа Премиум Max"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    await message.answer(MESSAGE.get(f'function_error_{user_language}'))
+    await message.answer(messages.MESSAGE.get(f'function_error_{user_language}'))
 
 
 # АДМИНКА -------------------------------------------------------------------------------------------------------------
@@ -548,4 +545,5 @@ async def simple_message(message: types.Message):
 
 if __name__ == "__main__":
     from handlers import dp
+
     executor.start_polling(dp, skip_updates=True)

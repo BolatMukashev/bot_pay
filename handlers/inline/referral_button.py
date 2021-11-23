@@ -10,6 +10,7 @@ import config
 async def referral_button_handler(call: CallbackQuery):
     telegram_id = call.from_user.id
     user_language = get_user_language(telegram_id)
+    await call.answer()
     await call.message.answer(PROMOTIONS[f'100friends_action_message1_{user_language}'])
     await call.message.answer(PROMOTIONS[f'100friends_action_message2_{user_language}'] + "\n" +
                               f'{config.BOT_ADDRESS}?start={telegram_id}')

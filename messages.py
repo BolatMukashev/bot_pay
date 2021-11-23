@@ -1,3 +1,9 @@
+"""
+Применение адаптации языка, пример:
+pay_message_RU_RU - где:
+первая RU - страна, вторая RU - язык
+"""
+
 MESSAGE = dict(start_user_text='Добро пожаловать <b>{}</b>!\n',
                language_choice='Выберите язык\n'
                                '------------------------\n'
@@ -54,16 +60,6 @@ MESSAGE = dict(start_user_text='Добро пожаловать <b>{}</b>!\n',
                               '/pay - премиум қолжетімділікті сатып алу\n\n'
                               '/promo_code - промокодты қолдану\n\n'
                               '/promotions - жеңілдіктер мен акциялар\n\n',
-               pay_message_RU='Получите ГОД безлемитного доступа к нашей образовательной платформе.\n'
-                              'Для Вас это будет стоить всего {} {}! {}\n'
-                              '<i>Ссылка на оплату будет активна 20 минут</i>',
-               pay_message_KZ='Біздің білім беру платформасына БIР ЖЫЛ шектеусіз қол жеткізіңіз.\n'
-                              'Сіз үшін бұл бар болғаны {} {}! {}\n'
-                              '<i>Төлем сілтемесі 20 минут бойы белсенді болады</i>',
-               pay_registered_message_RU='Ваш платёж принят\n'
-                                         'Номер платежа: {}',
-               pay_registered_message_KZ='Сіздің төлеміңіз қабылданды\n'
-                                         'Төлем нөмірі: {}',
                bot_link_RU='Вернуться к боту',
                bot_link_KZ='Ботқа оралу',
                link_to_chat_RU='Обсудить вопросы 👉🏻 https://t.me/pdd_forum',
@@ -77,6 +73,28 @@ MESSAGE = dict(start_user_text='Добро пожаловать <b>{}</b>!\n',
                attraction_text_RU='Вы привели друга! Ваш дневной лимит увеличен на +5 вопросов',
                attraction_text_KZ='Сіз дос әкелдіңіз! Сіздің күнделікті лимитіңіз +5 сұраққа ұлғайтылды'
                )
+
+PAY = dict(message_RU_RU='Подключение тарифа <b>\"{tariff}\"</b>\n'
+                         'Для Вас это будет стоить всего <b>{price_ruble}</b> рублей! (<i>{price_tenge}</i> ₸)\n'
+                         'Срок действия тарифа неограничен\n'
+                         '<i>Ссылка на оплату будет активна 20 минут</i>',
+           message_RU_KZ='<b>\"{tariff}\"</b> тарифіне қосылу\n'
+                         'Бұл сізге бар болғаны <b>{price_ruble}</b> рубльді құрайды! (<i>{price_tenge}</i> ₸)\n'
+                         'Тарифтің әрекет ету мерзімі шектеусіз\n'
+                         '<i>Төлем сілтемесі 20 минут бойы белсенді болады</i>',
+           message_KZ_RU='Подключение тарифа <b>\"{tariff}\"</b>\n'
+                         'Для Вас это будет стоить всего <b>{price_tenge}</b> тенге!\n'
+                         'Срок действия тарифа неограничен\n'
+                         '<i>Ссылка на оплату будет активна 20 минут</i>',
+           message_KZ_KZ='<b>\"{tariff}\"</b> тарифіне қосылу\n'
+                         'Бұл сізге бар болғаны <b>{price_tenge}</b> тенге құрайды!\n'
+                         'Тарифтің әрекет ету мерзімі шектеусіз\n'
+                         '<i>Төлем сілтемесі 20 минут бойы белсенді болады</i>',
+           pay_registered_message_RU='Ваш платёж принят\n'
+                                     'Номер платежа: {}',
+           pay_registered_message_KZ='Сіздің төлеміңіз қабылданды\n'
+                                     'Төлем нөмірі: {}'
+           )
 
 PROMO_CODE = {
     'registered': 'Данный промокод уже зарегистрирован',
@@ -191,7 +209,11 @@ BUTTONS = {
     'cancel_RU': 'Отмена',
     'cancel_KZ': 'Жою',
     'get_question_RU': 'Продолжить обучение',
-    'get_question_KZ': 'Оқуды жалғастыру'
+    'get_question_KZ': 'Оқуды жалғастыру',
+    'pay_premium_RU': 'Подключить \"Премиум\"',
+    'pay_premium_KZ': '\"Премиум\" тарифті қосу',
+    'pay_premium_max_RU': 'Подключить \"Премиум Max\"',
+    'pay_premium_max_KZ': '\"Премиум Max\" тарифті қосу'
 }
 
 COMMANDS_DESCRIPTIONS = {
@@ -260,7 +282,11 @@ IMAGES = {
     'tariffs_RU_RU': 'AgACAgIAAxkBAAKFzGGXK_DcXrgeiOHE6CRWrDlXFyejAAIGujEbniq5SH28EwQ1zHpCAQADAgADcwADIgQ',
     'tariffs_RU_KZ': 'AgACAgIAAxkBAAKFzGGXK_DcXrgeiOHE6CRWrDlXFyejAAIGujEbniq5SH28EwQ1zHpCAQADAgADcwADIgQ',
     'tariffs_KZ_RU': 'AgACAgIAAxkBAAKFzmGXK_vMqBZm6QdZ9t19Zc8h85_DAAIIujEbniq5SJ3IY3R6OuKmAQADAgADcwADIgQ',
-    'tariffs_KZ_KZ': 'AgACAgIAAxkBAAKF0GGXLAABVz_-27a210gM9Qqz6pgCZwACCboxG54quUhHoUfXR7_y_wEAAwIAA3MAAyIE'
+    'tariffs_KZ_KZ': 'AgACAgIAAxkBAAKF0GGXLAABVz_-27a210gM9Qqz6pgCZwACCboxG54quUhHoUfXR7_y_wEAAwIAA3MAAyIE',
+    'tariff_premium_RU': 'AgACAgIAAxkBAAKM-WGcj1FFBLAysUILlOrJxKcb_O1iAAJXtjEbNQTgSOjprFyKnbvcAQADAgADcwADIgQ',
+    'tariff_premium_KZ': 'AgACAgIAAxkBAAKM-2Gcj1jgaZNNGRa6WVGYafNt0jH6AAJYtjEbNQTgSCQtDEeSh8VSAQADAgADcwADIgQ',
+    'tariff_premium_max_RU': 'AgACAgIAAxkBAAKM_WGcj15wyYtiTbr1rCZzUWatSCDoAAJZtjEbNQTgSFpE4bqigQpvAQADAgADcwADIgQ',
+    'tariff_premium_max_KZ': 'AgACAgIAAxkBAAKM_2Gcj2MbzavNEjlvrtINC0FOd0_BAAJatjEbNQTgSNFaaP9CK0v7AQADAgADcwADIgQ'
 }
 
 TEST_IMAGES = {
@@ -272,7 +298,11 @@ TEST_IMAGES = {
     'tariffs_RU_KZ': 'AgACAgIAAxkBAAIb_2GbcIkLRNLtoOJLMEwTXtdj-GcDAAKRtjEbwBjYSCTKGxX-S9nfAQADAgADcwADIgQ',
     'tariffs_KZ_RU': 'AgACAgIAAxkBAAIbYGGXhAVWvQvsdnYFK8-SXOPvw22kAAIIujEbniq5SMTOERv_GzxbAQADAgADcwADIgQ',
     'tariffs_KZ_KZ': 'AgACAgIAAxkBAAIbYmGXhBz2lgjytEbbMxGyIx8frIU2AAIJujEbniq5SNU4JRvd2wABmAEAAwIAA3MAAyIE',
-    'cosmo_girl': 'AgACAgIAAxkBAAIb3WGbW17DPiebizVxnMuIujqpinmfAAJhtjEbwBjYSKBMjaJIah99AQADAgADcwADIgQ'
+    'tariff_premium_RU': 'AgACAgIAAxkBAAIcZmGcjwEsKCWAad8Q5Bo-ymHYJTXAAAJXtjEbNQTgSGpWezgsGceHAQADAgADcwADIgQ',
+    'tariff_premium_KZ': 'AgACAgIAAxkBAAIcaGGcjwsg1Ila5OHb3xXiV9cAAQ3cvAACWLYxGzUE4EjFpodAAAGQ6_gBAAMCAANzAAMiBA',
+    'tariff_premium_max_RU': 'AgACAgIAAxkBAAIcamGcjxPPG7qXJUOZIAXyI_LFUrJdAAJZtjEbNQTgSHWJh8wguRHsAQADAgADcwADIgQ',
+    'tariff_premium_max_KZ': 'AgACAgIAAxkBAAIcbGGcjxn6uVYWyVFx7vNHngZbkjqPAAJatjEbNQTgSGPiG7Kp6OgaAQADAgADcwADIgQ',
+    'cosmo_girl': 'AgACAgIAAxkBAAIb3WGbW17DPiebizVxnMuIujqpinmfAAJhtjEbwBjYSKBMjaJIah99AQADAgADcwADIgQ',
 }
 
 ADMIN_MENU_TEXT = """

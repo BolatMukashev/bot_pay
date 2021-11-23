@@ -1,4 +1,7 @@
 import json
+
+import config
+from bot import check_pay_status_and_send_order_message
 from db_operations import *
 from auto_schools import auto_schools
 from pprint import pprint
@@ -131,6 +134,10 @@ def test_auto_schools():
 
 
 if __name__ == '__main__':
-    update_user_daily_limit(config.ADMIN_ID, 5)
+    pay_order = check_pay_orders(1356662374)
+    if pay_order:
+        print(pay_order[-1].date.date())
+    # edit_user_tariff(config.ADMIN_ID, None)
+    # update_user_daily_limit(config.ADMIN_ID, 5)
     # create_poster('poster.png', 'Академия Вождения в г.Уральск', 'BIG BOI 24 SUPER')
     # add_new_auto_school('BolAuto', 'KZ', 'Uralsk', [8777112255], ['m-bolat@mail.ru', 'ya.ne.angel.kimi@gmail.com'])
