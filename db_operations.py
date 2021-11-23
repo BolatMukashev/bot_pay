@@ -493,7 +493,7 @@ def up_admin_daily_limit() -> None:
     User.update(daily_limit=User.daily_limit + 5).where(User.telegram_id == config.ADMIN_ID).execute()
 
 
-def up_user_daily_limit(telegram_id: Union[int, str], count: int = 1) -> None:
+def up_user_daily_limit(telegram_id: Union[int, str], count: int = 5) -> None:
     """
     Увеличить число дневного лимита (единоразово, при подключении тарифов Премиум и Премиум Мах)
     :param telegram_id: id

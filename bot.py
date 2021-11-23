@@ -61,10 +61,12 @@ async def command_start(message: types.Message):
     elif invited_user:
         add_user(telegram_id, full_name, referral_id=invited_user.referral_id, tariff='premium_max')
         up_user_referral_bonus(referral_telegram_id)
+        up_user_daily_limit(referral_telegram_id)
         await send_message_about_successful_attracting(referral_telegram_id)
     else:
         add_user(telegram_id, full_name, referral_id=referral_telegram_id)
         up_user_referral_bonus(referral_telegram_id)
+        up_user_daily_limit(referral_telegram_id)
         await send_message_about_successful_attracting(referral_telegram_id)
 
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
