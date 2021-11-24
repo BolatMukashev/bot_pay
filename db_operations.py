@@ -601,17 +601,6 @@ def get_all_users_telegram_id(language: str = '', country: str = '') -> tuple:
     return telegram_ids
 
 
-def get_all_leavers_telegram_id() -> tuple:
-    """
-    Получить telegram_id ливеров
-    :return: список id пользователей
-    """
-    database_initialization()
-    users = Leaver.select(Leaver.telegram_id)
-    telegram_ids = tuple(user.telegram_id for user in users)
-    return telegram_ids
-
-
 def filter_telegram_id(command: str):
     language = ''
     country = ''
@@ -991,13 +980,25 @@ def set_auto_schools_from_backup():
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
 
 
-def get_number_of_users(users) -> int:
-    users = [user.id for user in users]
-    return len(users)
+def get_number_of_users() -> int:
+    users = User.select().count()
+    return users
 
 
-def get_number_of_leavers(leavers: tuple) -> int:
-    return len(leavers)
+def get_number_of_active_users() -> int:
+    active_users = User.select().where(User.leaver == 0).count()
+    return active_users
+
+
+def get_percentage_between_active_and_liveried_users(users_count, active_users_count, leavers_count):
+    active_users = round(active_users_count * 100 / users_count)
+    leavers = round(leavers_count * 100 / users_count)
+    return active_users, leavers
+
+
+def get_number_of_leavers() -> int:
+    leavers = User.select().where(User.leaver == 1).count()
+    return leavers
 
 
 def get_number_of_registrations_today(users):
@@ -1102,7 +1103,7 @@ def get_number_of_payed_users():
 
 
 def get_promo_code_conversion(users):
-    all_users_len = get_number_of_users(users)
+    all_users_len = get_number_of_users()
     promo_code_used_users = get_number_of_promo_code_used_users(users)
     try:
         conversion = round(promo_code_used_users * 100 / all_users_len, 2)
@@ -1111,8 +1112,8 @@ def get_promo_code_conversion(users):
     return conversion
 
 
-def get_pay_conversion(users):
-    all_users_len = get_number_of_users(users)
+def get_pay_conversion():
+    all_users_len = get_number_of_users()
     payed_users = get_number_of_payed_users()
     try:
         conversion = round(payed_users * 100 / all_users_len, 2)
@@ -1121,39 +1122,39 @@ def get_pay_conversion(users):
     return conversion
 
 
-def get_ru_language_users_count(users):
-    ru_users = [user.id for user in users if user.language == 'RU']
-    return len(ru_users)
+def get_ru_language_users_count():
+    ru_users = User.select().where(User.language == 'RU').count()
+    return ru_users
 
 
-def get_kz_language_users_count(users):
-    kz_users = [user.id for user in users if user.language == 'KZ']
-    return len(kz_users)
+def get_kz_language_users_count():
+    kz_users = User.select().where(User.language == 'KZ').count()
+    return kz_users
 
 
-def get_percent_of_language_choice(users):
-    all_users_len = get_number_of_users(users)
-    ru_users = get_ru_language_users_count(users)
-    kz_users = get_kz_language_users_count(users)
+def get_percent_of_language_choice():
+    all_users_len = get_number_of_users()
+    ru_users = get_ru_language_users_count()
+    kz_users = get_kz_language_users_count()
     result_ru = round(ru_users * 100 / all_users_len, 2)
     result_kz = round(kz_users * 100 / all_users_len, 2)
     return result_ru, result_kz
 
 
-def get_number_of_users_from_russia(users):
-    ru_users = [user.id for user in users if user.country == 'RU']
-    return len(ru_users)
+def get_number_of_users_from_russia():
+    ru_users = User.select().where(User.country == 'RU').count()
+    return ru_users
 
 
-def get_number_of_users_from_kazakhstan(users):
-    kz_users = [user.id for user in users if user.country == 'KZ']
-    return len(kz_users)
+def get_number_of_users_from_kazakhstan():
+    kz_users = User.select().where(User.country == 'KZ').count()
+    return kz_users
 
 
-def get_percent_of_country_choice(users):
-    all_users_len = get_number_of_users(users)
-    ru_users = get_number_of_users_from_russia(users)
-    kz_users = get_number_of_users_from_kazakhstan(users)
+def get_percent_of_country_choice():
+    all_users_len = get_number_of_users()
+    ru_users = get_number_of_users_from_russia()
+    kz_users = get_number_of_users_from_kazakhstan()
     result_ru = round(ru_users * 100 / all_users_len, 2)
     result_kz = round(kz_users * 100 / all_users_len, 2)
     return result_ru, result_kz
@@ -1183,10 +1184,13 @@ def get_big_statistics() -> str:
     """
     users = get_all_users_in_db()
     auto_schools = get_all_auto_schools_on_db()
-    leavers = get_all_leavers_telegram_id()
 
-    users_len = get_number_of_users(users)
-    leavers_len = get_number_of_leavers(leavers)
+    users_len = get_number_of_users()
+    active_users_len = get_number_of_active_users()
+    leavers_len = get_number_of_leavers()
+    percentage_active_users, percentage_leavers = get_percentage_between_active_and_liveried_users(users_len,
+                                                                                                   active_users_len,
+                                                                                                   leavers_len)
     users_today = get_number_of_registrations_today(users)
     users_on_week = get_number_of_registrations_on_week(users)
     users_on_month = get_number_of_registrations_on_month(users)
@@ -1205,9 +1209,9 @@ def get_big_statistics() -> str:
     promo_code_conversion = get_promo_code_conversion(users)
 
     payed_users = get_number_of_payed_users()
-    pay_conversion = get_pay_conversion(users)
-    ru_language_users, kz_language_users = get_percent_of_language_choice(users)
-    users_from_russia, users_from_kazakhstan = get_percent_of_country_choice(users)
+    pay_conversion = get_pay_conversion()
+    ru_language_users, kz_language_users = get_percent_of_language_choice()
+    users_from_russia, users_from_kazakhstan = get_percent_of_country_choice()
 
     all_auto_schools = get_number_of_auto_schools(auto_schools)
     active_auto_schools = get_number_of_active_auto_schools(auto_schools)
@@ -1215,12 +1219,14 @@ def get_big_statistics() -> str:
 
     text = [
         f'Зарегистрированных пользователей',
-        f'Активных: {users_len}',
-        f'Ливеров: {leavers_len}',
+        f'Всего: {users_len}',
         f'Сегодня: {users_today}',
         f'За неделю: {users_on_week}',
         f'За месяц: {users_on_month}',
         f'За год: {users_on_year}',
+        ' ',
+        f'Активных: {active_users_len} - {percentage_active_users} %',
+        f'Ливеров: {leavers_len} - {percentage_leavers} %',
         ' ',
         f'Онлайн',
         f'Сегодня: {users_online_today}',
