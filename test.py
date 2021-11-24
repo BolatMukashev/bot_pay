@@ -134,9 +134,10 @@ def test_auto_schools():
 
 
 if __name__ == '__main__':
-    pay_order = check_pay_orders(1356662374)
+    pay_order = check_pay_orders(config.ADMIN_ID)
     if pay_order:
-        print(pay_order[-1].date.date())
+        if pay_order[-1].date.date() == datetime.now().date():
+            print(pay_order[-1].order_number)
     # edit_user_tariff(config.ADMIN_ID, None)
     # update_user_daily_limit(config.ADMIN_ID, 5)
     # create_poster('poster.png', 'Академия Вождения в г.Уральск', 'BIG BOI 24 SUPER')

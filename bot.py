@@ -314,7 +314,8 @@ async def check_pay_status_and_send_order_message(telegram_id: int, user_languag
     pay_order = check_pay_orders(telegram_id)
     if pay_order:
         if pay_order[-1].date.date() == datetime.now().date():
-            await send_order_message(telegram_id, user_language, order_number=pay_order[-1].order_number)
+            order_number = pay_order[-1].order_number
+            await send_order_message(telegram_id, user_language, order_number)
             return True
 
 
@@ -326,7 +327,7 @@ async def send_order_message(telegram_id: int, user_language: str, order_number:
     :param order_number: номер платежа
     :return:
     """
-    text = messages.MESSAGE.get(f'pay_registered_message_{user_language}').format(order_number)
+    text = messages.PAY.get(f'pay_registered_message_{user_language}').format(order_number)
     await bot.send_message(telegram_id, text, reply_markup=get_question_button(user_language))
 
 
