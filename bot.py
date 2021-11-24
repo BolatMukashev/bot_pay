@@ -435,8 +435,8 @@ async def scan_docs(message: types.Message):
 # ОСТАЛЬНОЕ -----------------------------------------------------------------------------------------------------------
 
 
-@dp.message_handler(commands=["donate"])
-async def command_donate(message: types.Message):
+@dp.message_handler(commands=["roadmap"])
+async def command_roadmap(message: types.Message):
     """Пожертвования на развитие проекта + карта развития проекта"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
@@ -445,8 +445,8 @@ async def command_donate(message: types.Message):
         f'roadmap_{user_language}']
     await bot.send_photo(telegram_id, image_code)
 
-    link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
-    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'], reply_markup=link_button)
+    # link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
+    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'])         # reply_markup=link_button
 
 
 @dp.message_handler(commands=["certificate"])
@@ -474,7 +474,7 @@ async def command_set_commands(message: types.Message):
                         types.BotCommand(command="/promo_code", description=descriptions['promo_code']),
                         types.BotCommand(command="/promotions", description=descriptions['promotions']),
                         types.BotCommand(command="/certificate", description=descriptions['certificate']),
-                        types.BotCommand(command="/donate", description=descriptions['donate']),
+                        types.BotCommand(command="/roadmap", description=descriptions['roadmap']),
                         types.BotCommand(command="/chat", description=descriptions['chat']),
                         types.BotCommand(command="/error", description=descriptions['error']),
                         types.BotCommand(command="/language", description=descriptions['language']),
