@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-EVENT = True
+EVENT = False
 
 RUBLES_EXCHANGE_RATE = 6
 
