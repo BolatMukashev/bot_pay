@@ -199,29 +199,34 @@ async def command_send_post(message: types.Message, state: FSMContext):
     """Отправить рекламное сообщение всем пользователям - фото+подпись"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
-        await message.answer('Отправь рекламное фото и сообщение, оно будет перенаправлено всем пользователям!')
+        await message.answer('Отправь рекламное фото и сообщение, оно будет перенаправлено всем пользователям!',
+                             reply_markup=get_cancel_button())
         await AllStates.SendPromotionalPost.set()
         await state.update_data(location=message.text)
 
 
 @dp.message_handler(state=AllStates.SendPromotionalPost, content_types=['text', 'photo'])
 async def command_send_post_action(message: types.Message, state: FSMContext):
-    photo_id = message.photo[0].file_id
-    caption = message.caption
-    await state.update_data(photo_id=photo_id)
-    data = await state.get_data()
-    comm = data['location']
-    await state.finish()
-    users_language, user_country = filter_telegram_id(comm)
-    users = get_all_users_telegram_id(language=users_language, country=user_country)
-    for user_id in loading_bar(users):
-        try:
-            await bot.send_photo(user_id, photo_id, caption=caption)
-        except (ChatNotFound, UserDeactivated, BotBlocked):
-            edit_leaver_status(user_id, True)
-        except Exception as exx:
-            await bot.send_message(config.ADMIN_ID, str(exx))
-    await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n')
+    if message.text == messages.BUTTONS['cancel_RU']:
+        await message.answer(messages.MESSAGE['cancel_action_RU'], reply_markup=types.ReplyKeyboardRemove())
+        await state.finish()
+    else:
+        photo_id = message.photo[0].file_id
+        caption = message.caption
+        await state.update_data(photo_id=photo_id)
+        data = await state.get_data()
+        comm = data['location']
+        await state.finish()
+        users_language, user_country = filter_telegram_id(comm)
+        users = get_all_users_telegram_id(language=users_language, country=user_country)
+        for user_id in loading_bar(users):
+            try:
+                await bot.send_photo(user_id, photo_id, caption=caption)
+            except (ChatNotFound, UserDeactivated, BotBlocked):
+                edit_leaver_status(user_id, True)
+            except Exception as exx:
+                await bot.send_message(config.ADMIN_ID, str(exx))
+        await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n')
 
 
 @dp.message_handler(commands=["promo_code"], state='*')
@@ -380,21 +385,26 @@ async def command_send_email_for_all_auto_schools(message: types.Message):
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
         await message.answer('Пиши текст.\n'
-                             'Сообщение будет встроенно в HTML код и будет отправлено всем Автошколам!')
+                             'Сообщение будет встроенно в HTML код и будет отправлено всем Автошколам!',
+                             reply_markup=get_cancel_button())
         await AllStates.SendEmailToAllAutoSchools.set()
 
 
 @dp.message_handler(state=AllStates.SendEmailToAllAutoSchools, content_types=types.ContentTypes.TEXT)
 async def command_send_email_for_all_auto_schools_action(message: types.Message, state: FSMContext):
-    my_message = message.text
-    await state.update_data(my_message=my_message)
-    auto_schools = get_all_auto_schools_on_db()
-    emails = get_auto_schools_emails(auto_schools)
-    message_subtitle = 'Произошли изменения'
-    html = new_func_and_offers_message(my_message)
-    send_emails_to_schools(emails, message_subtitle, html)
-    await message.answer('Сообщения о изменениях были отправлены автошколам! ✅')
-    await state.finish()
+    if message.text == messages.BUTTONS['cancel_RU']:
+        await message.answer(messages.MESSAGE['cancel_action_RU'], reply_markup=types.ReplyKeyboardRemove())
+        await state.finish()
+    else:
+        my_message = message.text
+        await state.update_data(my_message=my_message)
+        auto_schools = get_all_auto_schools_on_db()
+        emails = get_auto_schools_emails(auto_schools)
+        message_subtitle = 'Произошли изменения'
+        html = new_func_and_offers_message(my_message)
+        send_emails_to_schools(emails, message_subtitle, html)
+        await message.answer('Сообщения о изменениях были отправлены автошколам! ✅')
+        await state.finish()
 
 
 @dp.message_handler(commands=["delete_auto_school"], state='*')
@@ -402,17 +412,21 @@ async def command_delete_auto_school(message: types.Message):
     """Удалить Автошколу по запросу"""
     user_id = message.from_user.id
     if user_id == config.ADMIN_ID:
-        await message.answer('Напиши секретный ключ автошколы:')
+        await message.answer('Напиши секретный ключ автошколы:', reply_markup=get_cancel_button())
         await AllStates.DeleteAutoSchool.set()
 
 
 @dp.message_handler(state=AllStates.DeleteAutoSchool, content_types=types.ContentTypes.TEXT)
 async def command_delete_auto_school_action(message: types.Message, state: FSMContext):
-    secret_key = message.text
-    await state.update_data(secret_key=secret_key)
-    delete_auto_school_by(secret_key)
-    await message.answer('Автошкола успешно удалена из базы!')
-    await state.finish()
+    if message.text == messages.BUTTONS['cancel_RU']:
+        await message.answer(messages.MESSAGE['cancel_action_RU'], reply_markup=types.ReplyKeyboardRemove())
+        await state.finish()
+    else:
+        secret_key = message.text
+        await state.update_data(secret_key=secret_key)
+        delete_auto_school_by(secret_key)
+        await message.answer('Автошкола успешно удалена из базы!')
+        await state.finish()
 
 
 # добавить парсер и валидацию от Pydantic
@@ -446,7 +460,7 @@ async def command_roadmap(message: types.Message):
     await bot.send_photo(telegram_id, image_code)
 
     # link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
-    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'])         # reply_markup=link_button
+    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'])  # reply_markup=link_button
 
 
 @dp.message_handler(commands=["certificate"])
