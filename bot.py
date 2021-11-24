@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound, UserDeactivated, BotBlocked
 from db_operations import *
-from json_parser import parse_schools_from_object
+from parsers.json_parser import parse_schools_from_object
 from keyboards.inline.country import country_buttons
 from keyboards.inline.language import language_buttons
 from keyboards.inline.pay import get_pay_keyboard
@@ -62,12 +62,12 @@ async def command_start(message: types.Message):
         add_user(telegram_id, full_name, referral_id=invited_user.referral_id, tariff='premium_max')
         up_user_referral_bonus(referral_telegram_id)
         up_user_daily_limit(referral_telegram_id)
-        await send_message_about_successful_attracting(referral_telegram_id)
+        await send_message_to_user(referral_telegram_id, messages.MESSAGE.get(f'attraction_text_{user.language}'))
     else:
         add_user(telegram_id, full_name, referral_id=referral_telegram_id)
         up_user_referral_bonus(referral_telegram_id)
         up_user_daily_limit(referral_telegram_id)
-        await send_message_about_successful_attracting(referral_telegram_id)
+        await send_message_to_user(referral_telegram_id, messages.MESSAGE.get(f'attraction_text_{user.language}'))
 
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
     hello_text = messages.MESSAGE['start_user_text'].format(full_name)
@@ -76,15 +76,15 @@ async def command_start(message: types.Message):
         await message.answer(messages.MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
-async def send_message_about_successful_attracting(telegram_id: Union[str, int]) -> None:
+async def send_message_to_user(telegram_id: Union[str, int], text: str) -> None:
     """
     Сообщение рефералу об увеличении дневного лимита
     :param telegram_id: id
+    :param text: текст сообщения
     :return:
     """
     user = get_user_by(telegram_id)
     if user:
-        text = messages.MESSAGE.get(f'attraction_text_{user.language}')
         try:
             await bot.send_message(telegram_id, text)
         except (ChatNotFound, UserDeactivated, BotBlocked):
@@ -256,7 +256,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
         await state.update_data(user_promo_code=user_promo_code)
         promo_codes = get_all_promo_codes()
         if user_promo_code in promo_codes:
-            up_user_time_limit_days(telegram_id, 5)
+            up_user_time_limit_days(telegram_id)
             up_number_of_references(user_promo_code)
             update_user_promo_code_used_status(telegram_id)
             commit_use_promo_code_in_base(telegram_id, user_promo_code)
@@ -279,10 +279,11 @@ async def command_pay(message: types.Message):
     user = get_user_by(telegram_id)
     daily_limit = config.TARIFFS[user.tariff]['daily_limit'] + (5 * user.referral_bonus)
     daily_limit_now = daily_limit - user.daily_limit
+    event = '_event' if config.EVENT else ''
     text = messages.MESSAGE[f'tariff_{user.language}'].format(config.TARIFFS[user.tariff]['translate'], daily_limit,
                                                               daily_limit_now)
-    image = messages.TEST_IMAGES[f'tariffs_{user.country}_{user.language}'] if config.DEBUG else messages.IMAGES[
-        f'tariffs_{user.country}_{user.language}']
+    image_code_path = messages.IMAGES if not config.DEBUG else messages.TEST_IMAGES
+    image = image_code_path[f'tariffs_{user.country}_{user.language}{event}']
     await bot.send_photo(telegram_id, image, caption=text, reply_markup=get_pay_keyboard(user.language))
 
 
@@ -526,8 +527,6 @@ async def get_attr_from_message(message: types.Message):
         user = get_user_by(telegram_id)
         await message.answer(messages.GIFT_CERTIFICATE[f'identification_error_{user.language}'])
     return user_id, full_name, username
-
-send_message_about_successful_attracting(...)               # переделать метод, чтоб подставлять текст
 
 
 @dp.message_handler(content_types=['photo'])

@@ -3,9 +3,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG = bool(int(os.getenv('DEBUG')))
+EVENT = True
 
-EVENT = False
+RUBLES_EXCHANGE_RATE = 6
+
+TARIFFS = {
+    'basic':  {"daily_limit": 5, "price": 0, 'translate': 'Базовый'},
+    'premium':  {"daily_limit": 30, "price": 200, 'translate': 'Премиум'},
+    'premium_max': {"daily_limit": 999, "price": 300, 'translate': 'Премиум Max'}
+}
+
+REFERRAL_BONUS_VALUE = 5
+
+DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12916339944358246'     # изменить на ioka
+
+DEBUG = bool(int(os.getenv('DEBUG')))
 
 TEST_BOT_TOKEN = os.getenv('TEST_BOT_TOKEN')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -31,18 +43,6 @@ DB_PORT = int(os.getenv('DB_PORT'))
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 GMAIL = os.getenv('GMAIL')
-
-RUBLES_EXCHANGE_RATE = 6
-
-TARIFFS = {
-    'basic':  {"daily_limit": 5, "price": 0, 'translate': 'Базовый'},
-    'premium':  {"daily_limit": 30, "price": 200, 'translate': 'Премиум'},
-    'premium_max': {"daily_limit": 999, "price": 300, 'translate': 'Премиум Max'}
-}
-
-REFERRAL_BONUS_VALUE = 5
-
-DONATE_URL = 'https://ecommerce.pult24.kz/invoice?id=12916339944358246'     # изменить на ioka
 
 KASSA_24_PAY_CONFIGS = {
     'KASSA_24_LOGIN_RU': os.getenv('KASSA_24_LOGIN_RU'),
