@@ -134,7 +134,7 @@ def test_auto_schools():
 
 
 if __name__ == '__main__':
-    print(get_all_leavers_telegram_id())
+    print(len(get_all_users_telegram_id()))
     # edit_user_tariff(config.ADMIN_ID, None)
     # update_user_daily_limit(config.ADMIN_ID, 5)
     # create_poster('poster.png', 'Академия Вождения в г.Уральск', 'BIG BOI 24 SUPER')

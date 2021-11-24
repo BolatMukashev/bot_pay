@@ -592,11 +592,11 @@ def get_all_users_telegram_id(language: str = '', country: str = '') -> tuple:
     """
     database_initialization()
     if language:
-        users = User.select(User.telegram_id).where(User.language == language)
+        users = User.select(User.telegram_id).where((User.language == language) & (User.leaver == 0))
     elif country:
-        users = User.select(User.telegram_id).where(User.country == country)
+        users = User.select(User.telegram_id).where((User.country == country) & (User.leaver == 0))
     else:
-        users = User.select(User.telegram_id)
+        users = User.select(User.telegram_id).where(User.leaver == 0)
     telegram_ids = tuple(user.telegram_id for user in users)
     return telegram_ids
 
