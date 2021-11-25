@@ -39,6 +39,13 @@ class AllStates(StatesGroup):
     AnswersToPoll: State = State()
 
 
+class GiftStates(StatesGroup):
+    UserID: State = State()
+    Name: State = State()
+    Text: State = State()
+    SenderName: State = State()
+
+
 # ДОЛЖНО БЫТЬ ВСЕГДА В НАЧАЛЕ, НЕ ПЕРЕМЕЩАТЬ! -------------------------------------------------------------------------
 
 
@@ -211,6 +218,28 @@ async def command_statistics(message: types.Message):
     if user_id == config.ADMIN_ID:
         result = get_big_statistics()
         await message.answer(result)
+
+
+@dp.message_handler(commands=["roadmap"])
+async def command_roadmap(message: types.Message):
+    """Пожертвования на развитие проекта + карта развития проекта"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+
+    image_code = messages.TEST_IMAGES[f'roadmap_{user_language}'] if config.DEBUG else messages.IMAGES[
+        f'roadmap_{user_language}']
+    await bot.send_photo(telegram_id, image_code)
+
+    # link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
+    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'])  # reply_markup=link_button
+
+
+@dp.message_handler(commands=["certificate"])
+async def command_certificate(message: types.Message):
+    """Подарочный сертификат на покупку тарифа Премиум Max"""
+    telegram_id = message.from_user.id
+    user_language = get_user_language(telegram_id)
+    await message.answer(messages.MESSAGE.get(f'function_error_{user_language}'))
 
 
 @dp.message_handler(commands=["send_post_ru", "send_post_kz", "send_post_russia", "send_post_kazakhstan"], state='*')
@@ -446,31 +475,6 @@ async def scan_docs(message: types.Message):
             await message.answer('Не корректный набор данных!\n{}'.format(err))
 
 
-# ОСТАЛЬНОЕ -----------------------------------------------------------------------------------------------------------
-
-
-@dp.message_handler(commands=["roadmap"])
-async def command_roadmap(message: types.Message):
-    """Пожертвования на развитие проекта + карта развития проекта"""
-    telegram_id = message.from_user.id
-    user_language = get_user_language(telegram_id)
-
-    image_code = messages.TEST_IMAGES[f'roadmap_{user_language}'] if config.DEBUG else messages.IMAGES[
-        f'roadmap_{user_language}']
-    await bot.send_photo(telegram_id, image_code)
-
-    # link_button = get_url_button(text=messages.BUTTONS[f'help_project_{user_language}'], url=config.DONATE_URL)
-    await message.answer(messages.ROADMAP[f'roadmap_text_{user_language}'])  # reply_markup=link_button
-
-
-@dp.message_handler(commands=["certificate"])
-async def command_certificate(message: types.Message):
-    """Подарочный сертификат на покупку тарифа Премиум Max"""
-    telegram_id = message.from_user.id
-    user_language = get_user_language(telegram_id)
-    await message.answer(messages.MESSAGE.get(f'function_error_{user_language}'))
-
-
 # АДМИНКА -------------------------------------------------------------------------------------------------------------
 
 
@@ -512,7 +516,7 @@ async def command_get_user_info(message: types.Message):
     """Показать всю информацию о пользователе"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
-        await message.answer('Напиши или пришли сообщение от пользователя')
+        await message.answer('Напиши или пришли сообщение от пользователя', reply_markup=get_cancel_button())
         await AllStates.InfoAboutUser.set()
 
 
@@ -521,27 +525,30 @@ async def command_get_user_info_action(message: types.Message, state: FSMContext
     user_info = 'ID: {}\n' \
                 'Имя: {}\n' \
                 'Ник: @{}'
-    user_id, full_name, username = await get_attr_from_message(message)
-    user_info = user_info.format(user_id, full_name, username)
-    await message.answer(user_info)
-    await state.finish()
+    attributes = await get_attr_from_message(message)
+    if attributes:
+        user_id, full_name, username = attributes
+        user_info = user_info.format(user_id, full_name, username)
+        await message.answer(user_info, reply_markup=types.ReplyKeyboardRemove())
+        await state.finish()
 
 
 async def get_attr_from_message(message: types.Message):
+    """
+    Принимает сообщение и если оно пересланное -> извлекает данные отправителя из сообщения
+    :param message: сообщение пользователя
+    :return: id, имя, ник пользователя / None
+    """
     forwarded_message = message.to_python().get('forward_from')
     if forwarded_message:
         user_id = message.forward_from.id
         full_name = message.forward_from.full_name
         username = message.forward_from.username
+        return user_id, full_name, username
     else:
-        user_id = message.from_user.id
-        full_name = message.from_user.full_name
-        username = message.from_user.username
-
         telegram_id = message.from_user.id
-        user = get_user_by(telegram_id)
-        await message.answer(messages.GIFT_CERTIFICATE[f'identification_error_{user.language}'])
-    return user_id, full_name, username
+        language = get_user_language(telegram_id)
+        await message.answer(messages.GIFT_CERTIFICATE[f'identification_error_{language}'])
 
 
 @dp.message_handler(content_types=['photo'])
