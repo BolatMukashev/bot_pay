@@ -77,32 +77,17 @@ class User(BaseModel):
     language = CharField(null=False, default='RU')
     registration_date = DateTimeField(default=datetime.now)
     registration_is_over = BooleanField(null=False, default=False)
-    time_limit = DateTimeField(default=plus_one_day)                                # delete
     last_visit = DateTimeField(default=datetime.now)
-    promo_code_used = BooleanField(null=False, default=False)                       # переименовать в discount (PayData)
-    price_in_rubles = IntegerField(null=False)                                      # delete
     referral_id = IntegerField(null=True, default=0)
     tariff = CharField(null=False, max_length=50, default='basic')
     daily_limit = IntegerField(null=False, default=TARIFFS['basic']['daily_limit'])
+    discount = BooleanField(null=False, default=False)  # переименовать в discount (PayData)
     referral_bonus = IntegerField(null=False, default=0)
     leaver = BooleanField(null=False, default=False)
     notified = IntegerField(null=False, default=3)
 
     class Meta:
         db_table = "users"
-
-
-# удалить
-class Leaver(BaseModel):
-    """Ливер"""
-    id = PrimaryKeyField(null=False)
-    telegram_id = IntegerField(null=False, unique=True)
-    full_name = CharField(null=True, max_length=300)
-    tariff = CharField(null=False, max_length=50)
-    referral = IntegerField(null=True)
-
-    class Meta:
-        db_table = "leavers"
 
 
 class PayOrder(BaseModel):
@@ -190,7 +175,7 @@ class QuestionKZ(BaseModel):
         db_table = "questions_kz"
 
 
-table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder, PromoCode, Leaver, Gift]
+table_names = [User, QuestionRU, QuestionKZ, AutoSchool, PayOrder, PromoCode, Gift]
 
-__all__ = ['IntegrityError', 'User', 'PayOrder', 'PromoCode', 'QuestionRU', 'QuestionKZ', 'AutoSchool', 'Leaver',
-           'Gift', 'create_new_tables', 'create_database', 'database_initialization', 'table_names']
+__all__ = ['IntegrityError', 'User', 'PayOrder', 'PromoCode', 'QuestionRU', 'QuestionKZ', 'AutoSchool', 'Gift',
+           'create_new_tables', 'create_database', 'database_initialization', 'table_names']

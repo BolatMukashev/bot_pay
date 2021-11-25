@@ -248,8 +248,8 @@ async def command_promo_code(message: types.Message):
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
     language = user.language
-    promo_code_used = user.promo_code_used
-    if not promo_code_used:
+    discount = user.discount
+    if not discount:
         await message.answer(messages.PROMO_CODE[f'promo_code_command_text_{language}'],
                              reply_markup=get_cancel_button(language))
         await AllStates.UsePromoCode.set()
@@ -266,7 +266,7 @@ async def command_promo_code_action(message: types.Message, state: FSMContext):
     promo_codes = get_all_promo_codes()
     if user_promo_code in promo_codes:
         up_auto_school_number_of_references(user_promo_code)
-        update_user_promo_code_used_status(telegram_id)
+        update_user_discount_status(telegram_id)
         commit_use_promo_code_in_base(telegram_id, user_promo_code)
         await message.answer_sticker(messages.STICKERS['all_good'], reply_markup=types.ReplyKeyboardRemove())
         await message.answer(messages.PROMO_CODE[f'promo_code_activated_{language}'],

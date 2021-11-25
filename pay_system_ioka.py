@@ -40,11 +40,14 @@ class PayLinkIoka:
         return json_data
 
     def get_pay_url(self) -> str:
-        """сделать POST запрос в сервис Ioka и получить персональную платежную ссылку с метаданными пользователя"""
+        """
+        сделать POST запрос в сервис Ioka и получить персональную платежную ссылку с метаданными пользователя
+        order_id от 1 до 2 147 483 647
+        :return: платежная ссылка
+        """
         headers = self.get_headers()
         while True:
-            # order_id до 2147483647
-            order_id = random.choice(range(0, 2147483647))
+            order_id = random.choice(range(1, 2147483647))
             json_data = self.get_json_data(order_id)
             response = requests.post(self.url, headers=headers, json=json_data)
             if response.ok:

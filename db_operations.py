@@ -184,7 +184,8 @@ def questions_to_db(raw_db, language):
 def write_all_questions_in_db(json_file_name, language):
     data = get_data_from_json_file(json_file_name)
     questions_to_db(data, language)
-    print(f'Вопросы добавлены в таблицу {language}...\nНе забудь закомментировать эту строку кода!')
+    print(f'Вопросы добавлены в таблицу {language}...\n'
+          f'Не забудь закомментировать эту строку кода!')
 
 
 def choose_db_by_language(user_language):
@@ -417,7 +418,7 @@ class PayData:
         self.user_language = obj.language
         self.code = 398
         self.event = 2 if config.EVENT else 1
-        self.discount = 2 if obj.promo_code_used else 1
+        self.discount = 2 if obj.discount else 1
         self.price_ruble = int(config.TARIFFS[purchased_tariff]['price'] / self.event / self.discount)
         self.price_tenge = int(self.price_ruble * config.RUBLES_EXCHANGE_RATE)
         self.message_text = PAY[f'message_{self.user_country}_{self.user_language}'].format(
@@ -534,9 +535,9 @@ def get_user_promo_code_used_status(telegram_id):
     return user.promo_code_used
 
 
-def update_user_promo_code_used_status(telegram_id):
+def update_user_discount_status(telegram_id):
     database_initialization()
-    query = User.update(promo_code_used=True).where(User.telegram_id == telegram_id)
+    query = User.update(discount=True).where(User.telegram_id == telegram_id)
     query.execute()
 
 
@@ -1060,7 +1061,7 @@ def get_number_of_promo_codes_registrations_on_year(auto_schools):
 
 
 def get_number_of_promo_code_used_users(users):
-    promo_code_used_users = [user.id for user in users if user.promo_code_used == 1]
+    promo_code_used_users = [user.id for user in users if user.discount == 1]
     return len(promo_code_used_users)
 
 
