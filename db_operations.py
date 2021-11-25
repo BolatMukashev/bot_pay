@@ -7,9 +7,8 @@ import config
 import pickle
 from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
-from messages import COMMANDS_DESCRIPTIONS, PAY, MESSAGE
+from messages import COMMANDS_DESCRIPTIONS, PAY
 from typing import List, Union
-from bot import send_message_to_user
 
 
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
@@ -491,9 +490,6 @@ def up_user_referral_bonus(telegram_id: Union[int, str], count: int = 1) -> None
             User.update(referral_bonus=User.referral_bonus + count).where(User.telegram_id == telegram_id).execute()
         except Exception as exx:
             print(exx)
-        else:
-            user = get_user_by(telegram_id)
-            await send_message_to_user(telegram_id, MESSAGE.get(f'attraction_text_{user.language}'))
 
 
 def get_time_visit(telegram_id):

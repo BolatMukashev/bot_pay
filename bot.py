@@ -75,18 +75,23 @@ async def command_start(message: types.Message):
         question_button = get_question_button(user.language)
     elif invited_user:
         add_user(telegram_id, full_name, referral_id=invited_user.referral_id, tariff='premium_max')
-        up_user_referral_bonus(referral_telegram_id)
-        up_user_daily_limit(referral_telegram_id)
+        await reward_referral_user(referral_telegram_id)
     else:
         add_user(telegram_id, full_name, referral_id=referral_telegram_id)
-        up_user_referral_bonus(referral_telegram_id)
-        up_user_daily_limit(referral_telegram_id)
-
+        await reward_referral_user(referral_telegram_id)
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
     hello_text = messages.MESSAGE['start_user_text'].format(full_name)
     await message.answer(hello_text, reply_markup=question_button)
     if not get_user_registration_status(telegram_id):
         await message.answer(messages.MESSAGE['language_choice'], reply_markup=language_buttons)
+
+
+async def reward_referral_user(telegram_id: Union[str, int]) -> None:
+    ref_user = get_user_by(telegram_id)
+    if ref_user:
+        up_user_referral_bonus(telegram_id)
+        up_user_daily_limit(telegram_id)
+        await send_message_to_user(telegram_id, messages.MESSAGE.get(f'attraction_text_{ref_user.language}'))
 
 
 async def send_message_to_user(telegram_id: Union[str, int], text: str) -> None:
