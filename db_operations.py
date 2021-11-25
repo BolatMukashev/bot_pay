@@ -1,4 +1,3 @@
-import os
 import json
 import random
 import string
@@ -296,33 +295,33 @@ def search_user_in_gifts(telegram_id: int) -> Union[Gift, None]:
     else:
         return gift
 
-
-def set_user_on_db(telegram_id, full_name, country, language, registration_date, registration_is_over, time_limit,
-                   last_visit, promo_code_used, price_in_rubles, made_payment, second_week_promotional_offer,
-                   sixth_week_promotional_offer):
-    """Это когда добавляешь пользователя из JSON файла в базу (гавнокод), нужно будет переписать.
-    Спарсить всех пользователей из JSON файла модулем Pydantic и передавать сюда 1 параметр типа object"""
-    registration_date = convert_str_to_datetime(registration_date)
-    time_limit = convert_str_to_datetime(time_limit)
-    last_visit = convert_str_to_datetime(last_visit)
-    try:
-        database_initialization()
-        user = User(telegram_id=telegram_id,
-                    full_name=full_name,
-                    country=country,
-                    language=language,
-                    registration_date=registration_date,
-                    registration_is_over=registration_is_over,
-                    time_limit=time_limit,
-                    last_visit=last_visit,
-                    promo_code_used=promo_code_used,
-                    price_in_rubles=price_in_rubles,
-                    made_payment=made_payment,
-                    second_week_promotional_offer=second_week_promotional_offer,
-                    sixth_week_promotional_offer=sixth_week_promotional_offer)
-        user.save()
-    except IntegrityError:
-        pass
+# переписать
+# def set_user_on_db(telegram_id, full_name, country, language, registration_date, registration_is_over,
+#                last_visit, discount, made_payment, second_week_promotional_offer,
+#                sixth_week_promotional_offer):
+# """Это когда добавляешь пользователя из JSON файла в базу (гавнокод), нужно будет переписать.
+# Спарсить всех пользователей из JSON файла модулем Pydantic и передавать сюда 1 параметр типа object"""
+# registration_date = convert_str_to_datetime(registration_date)
+# time_limit = convert_str_to_datetime(time_limit)
+# last_visit = convert_str_to_datetime(last_visit)
+# try:
+#     database_initialization()
+#     user = User(telegram_id=telegram_id,
+#                 full_name=full_name,
+#                 country=country,
+#                 language=language,
+#                 registration_date=registration_date,
+#                 registration_is_over=registration_is_over,
+#                 time_limit=time_limit,
+#                 last_visit=last_visit,
+#                 promo_code_used=promo_code_used,
+#                 price_in_rubles=price_in_rubles,
+#                 made_payment=made_payment,
+#                 second_week_promotional_offer=second_week_promotional_offer,
+#                 sixth_week_promotional_offer=sixth_week_promotional_offer)
+#     user.save()
+# except IntegrityError:
+#     pass
 
 
 def valid_id(telegram_id):
@@ -529,12 +528,6 @@ def update_registration_status(telegram_id):
     query.execute()
 
 
-def get_user_promo_code_used_status(telegram_id):
-    database_initialization()
-    user = User.get(User.telegram_id == telegram_id)
-    return user.promo_code_used
-
-
 def update_user_discount_status(telegram_id):
     database_initialization()
     query = User.update(discount=True).where(User.telegram_id == telegram_id)
@@ -585,27 +578,27 @@ def filter_telegram_id(command: str):
     return language, country
 
 
-def get_all_users_on_dict_format():
-    all_users_list = []
-    database_initialization()
-    all_users = User.select()
-    for user in all_users:
-        simple_user = {'id': user.id,
-                       'telegram_id': user.telegram_id,
-                       'full_name': user.full_name,
-                       'country': user.country,
-                       'language': user.language,
-                       'registration_date': user.registration_date,
-                       'registration_is_over': user.registration_is_over,
-                       'time_limit': user.time_limit,
-                       'last_visit': user.last_visit,
-                       'promo_code_used': user.promo_code_used,
-                       'price_in_rubles': user.price_in_rubles,
-                       'made_payment': user.made_payment,
-                       'second_week_promotional_offer': user.second_week_promotional_offer,
-                       'sixth_week_promotional_offer': user.sixth_week_promotional_offer}
-        all_users_list.append(simple_user)
-    return all_users_list
+# def get_all_users_on_dict_format():
+#     all_users_list = []
+#     database_initialization()
+#     all_users = User.select()
+#     for user in all_users:
+#         simple_user = {'id': user.id,
+#                        'telegram_id': user.telegram_id,
+#                        'full_name': user.full_name,
+#                        'country': user.country,
+#                        'language': user.language,
+#                        'registration_date': user.registration_date,
+#                        'registration_is_over': user.registration_is_over,
+#                        'time_limit': user.time_limit,
+#                        'last_visit': user.last_visit,
+#                        'promo_code_used': user.promo_code_used,
+#                        'price_in_rubles': user.price_in_rubles,
+#                        'made_payment': user.made_payment,
+#                        'second_week_promotional_offer': user.second_week_promotional_offer,
+#                        'sixth_week_promotional_offer': user.sixth_week_promotional_offer}
+#         all_users_list.append(simple_user)
+#     return all_users_list
 
 
 # ПОДАРОЧНЫЕ СЕРТИФИКАТЫ ----------------------------------------------------------------------------------------------
@@ -649,7 +642,7 @@ def get_all_secret_keys():
 
 def get_all_promo_codes():
     auto_schools = get_all_auto_schools_on_db()
-    promo_codes_list = [promo_code.promo_code.upper() for promo_code in auto_schools]
+    promo_codes_list = [school.promo_code.upper() for school in auto_schools]
     return promo_codes_list
 
 
@@ -819,8 +812,8 @@ def get_unique_secret_key():
 
 def get_number_of_references(promo_code):
     database_initialization()
-    promo_code = AutoSchool.get(AutoSchool.promo_code == promo_code)
-    number_of_references = promo_code.number_of_references
+    school = AutoSchool.get(AutoSchool.promo_code == promo_code)
+    number_of_references = school.number_of_references
     return number_of_references
 
 
@@ -882,33 +875,6 @@ def check_pay_orders(telegram_id: int) -> Union[PayOrder, None]:
 # БЭКАП ДАННЫХ -------------------------------------------------------------------------------------------------------
 
 
-def path_to_users_backup():
-    file_name = 'users.json'
-    this_path = os.getcwd()
-    path = os.path.join(this_path, 'backup', file_name)
-    return path
-
-
-def path_to_auto_schools_backup():
-    file_name = 'auto_schools.json'
-    this_path = os.getcwd()
-    path = os.path.join(this_path, 'backup', file_name)
-    return path
-
-
-def backup_users():
-    all_users = get_all_users_on_dict_format()
-    path = path_to_users_backup()
-    create_new_json_file(path, all_users)
-
-
-def backup_auto_schools():
-    auto_schools = get_all_auto_schools_on_db()
-    all_auto_schools = get_all_auto_schools_on_dict_format(auto_schools)
-    path = path_to_auto_schools_backup()
-    create_new_json_file(path, all_auto_schools)
-
-
 def convert_str_to_datetime(date_time: str) -> datetime:
     date_time = datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S')
     return date_time
@@ -918,33 +884,6 @@ def convert_str_to_date(registration_date: str) -> datetime.date:
     print(registration_date)
     date = datetime.strptime(registration_date, '%Y-%m-%d')
     return date
-
-
-# изменить с учетеом парсера pydantic
-def set_users_from_backup():
-    path = path_to_users_backup()
-    users = get_data_from_json_file(path)
-    for user in users:
-        set_user_on_db(user['telegram_id'],
-                       user['full_name'],
-                       user['country'],
-                       user['language'],
-                       user['registration_date'],
-                       user['registration_is_over'],
-                       user['time_limit'],
-                       user['last_visit'],
-                       user['promo_code_used'],
-                       user['price_in_rubles'],
-                       user['made_payment'],
-                       user['second_week_promotional_offer'],
-                       user['sixth_week_promotional_offer'])
-
-
-def set_auto_schools_from_backup():
-    path = path_to_auto_schools_backup()
-    auto_schools = get_data_from_json_file(path)
-    for auto_school in auto_schools:
-        add_auto_school_from_backup(auto_school)
 
 
 # СТАТИСТИКА ---------------------------------------------------------------------------------------------------------
@@ -997,6 +936,13 @@ def get_number_of_registrations_on_year(users):
     return len(users)
 
 
+def get_users_tariffs_info(users):
+    basic_users = len([user.id for user in users if user.tariff == 'basic'])
+    premium_users = len([user.id for user in users if user.tariff == 'premium'])
+    premium_max_users = len([user.id for user in users if user.tariff == 'premium_max'])
+    return basic_users, premium_users, premium_max_users
+
+
 def get_users_online_today(users):
     today = datetime.now().date()
     users = [user.id for user in users if user.last_visit.date() == today]
@@ -1022,41 +968,8 @@ def get_users_online_on_this_year(users):
     return len(users)
 
 
-def get_number_of_promo_codes(auto_schools):
-    promo_codes = [auto_school.id for auto_school in auto_schools]
-    return len(promo_codes)
-
-
-def get_number_of_activated_promo_codes(auto_schools):
-    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.secret_key != auto_school.promo_code]
-    return len(promo_codes)
-
-
-def get_number_of_promo_codes_registrations_today(auto_schools):
-    today = datetime.now().date()
-    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.registration_date == today]
-    return len(promo_codes)
-
-
-def get_number_of_promo_codes_registrations_on_week(auto_schools):
-    seven_day_ago = datetime.now().date() - timedelta(days=7)
-    promo_codes = [auto_school.id for auto_school in auto_schools if
-                   auto_school.registration_date > seven_day_ago]
-    return len(promo_codes)
-
-
-def get_number_of_promo_codes_registrations_on_month(auto_schools):
-    this_year = datetime.now().year
-    this_month = datetime.now().month
-    promo_codes = [auto_school.id for auto_school in auto_schools if
-                   auto_school.registration_date.year == this_year and
-                   auto_school.registration_date.month == this_month]
-    return len(promo_codes)
-
-
-def get_number_of_promo_codes_registrations_on_year(auto_schools):
-    this_year = datetime.now().year
-    promo_codes = [auto_school.id for auto_school in auto_schools if auto_school.registration_date.year == this_year]
+def get_number_of_active_promo_codes(auto_schools):
+    promo_codes = [school.id for school in auto_schools if school.secret_key != school.promo_code]
     return len(promo_codes)
 
 
@@ -1065,11 +978,16 @@ def get_number_of_promo_code_used_users(users):
     return len(promo_code_used_users)
 
 
+def get_number_of_pay_orders():
+    database_initialization()
+    pay_orders = PayOrder.select().count()
+    return pay_orders
+
+
 def get_number_of_payed_users():
     database_initialization()
-    orders = PayOrder.select()
-    payed_users = set(user.telegram_id for user in orders)
-    return len(payed_users)
+    payed_users_count = PayOrder.select(PayOrder.telegram_id).distinct().count()
+    return payed_users_count
 
 
 def get_promo_code_conversion(users):
@@ -1130,18 +1048,18 @@ def get_percent_of_country_choice():
     return result_ru, result_kz
 
 
-def get_number_of_auto_schools(auto_schools):
-    auto_schools = get_number_of_promo_codes(auto_schools)
-    return auto_schools
+def get_number_of_auto_schools():
+    schools = AutoSchool.select().count()
+    return schools
 
 
 def get_number_of_active_auto_schools(auto_schools):
-    auto_schools = get_number_of_activated_promo_codes(auto_schools)
+    auto_schools = get_number_of_active_promo_codes(auto_schools)
     return auto_schools
 
 
 def get_active_auto_schools_conversion(auto_schools):
-    auto_schools_len = get_number_of_auto_schools(auto_schools)
+    auto_schools_len = get_number_of_auto_schools()
     active_auto_schools = get_number_of_active_auto_schools(auto_schools)
     conversion = round(active_auto_schools * 100 / auto_schools_len, 2)
     return conversion
@@ -1171,11 +1089,9 @@ def get_big_statistics() -> str:
     users_online_on_this_month = get_users_online_on_this_month(users)
     users_online_on_this_year = get_users_online_on_this_year(users)
 
-    promo_codes = get_number_of_promo_codes(auto_schools)
-    promo_codes_today = get_number_of_promo_codes_registrations_today(auto_schools)
-    promo_codes_on_week = get_number_of_promo_codes_registrations_on_week(auto_schools)
-    promo_codes_on_month = get_number_of_promo_codes_registrations_on_month(auto_schools)
-    promo_codes_on_year = get_number_of_promo_codes_registrations_on_year(auto_schools)
+    basic_users, premium_users, premium_max_users = get_users_tariffs_info(users)
+
+    number_of_pay_orders = get_number_of_pay_orders()
     promo_code_conversion = get_promo_code_conversion(users)
 
     payed_users = get_number_of_payed_users()
@@ -1183,20 +1099,24 @@ def get_big_statistics() -> str:
     ru_language_users, kz_language_users = get_percent_of_language_choice()
     users_from_russia, users_from_kazakhstan = get_percent_of_country_choice()
 
-    all_auto_schools = get_number_of_auto_schools(auto_schools)
+    all_auto_schools = get_number_of_auto_schools()
     active_auto_schools = get_number_of_active_auto_schools(auto_schools)
     active_auto_schools_conversion = get_active_auto_schools_conversion(auto_schools)
 
     text = [
-        f'Зарегистрированных пользователей',
+        f'Пользователей',
         f'Всего: {users_len}',
+        f'Активных: {active_users_len} - {percentage_active_users} %',
+        f'Ливеров: {leavers_len} - {percentage_leavers} %',
+        f'Тариф Базовый: {basic_users}',
+        f'Тариф Премиум: {premium_users}',
+        f'Тариф Премиум Max: {premium_max_users}',
+        '',
+        'Регистраций',
         f'Сегодня: {users_today}',
         f'За неделю: {users_on_week}',
         f'За месяц: {users_on_month}',
         f'За год: {users_on_year}',
-        ' ',
-        f'Активных: {active_users_len} - {percentage_active_users} %',
-        f'Ливеров: {leavers_len} - {percentage_leavers} %',
         ' ',
         f'Онлайн',
         f'Сегодня: {users_online_today}',
@@ -1204,21 +1124,17 @@ def get_big_statistics() -> str:
         f'За месяц: {users_online_on_this_month}',
         f'За год: {users_online_on_this_year}',
         f' ',
-        f'Зарегистрировано промо-кодов',
-        f'Всего: {promo_codes}',
-        f'Сегодня: {promo_codes_today}',
-        f'За неделю: {promo_codes_on_week}',
-        f'За месяц: {promo_codes_on_month}',
-        f'За год: {promo_codes_on_year}',
+        f'Промо-коды',
         f'Воспользовались {promo_code_conversion} % пользователей',
         f' ',
-        f'Зарегистрировано автошкол',
+        f'Автошколы',
         f'Всего: {all_auto_schools}',
         f'Активных: {active_auto_schools}',
         f'Конверсия: {active_auto_schools_conversion} %',
         f' ',
-        f'Оплатили сервис',
-        f'{payed_users} человек',
+        f'Платежи',
+        f'Зарегистрировано: {number_of_pay_orders}',
+        f'Оплатили {payed_users} человек',
         f'{pay_conversion} % пользователей',
         f' ',
         f'Из России: {users_from_russia} %',
