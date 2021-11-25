@@ -39,6 +39,21 @@ class AllStates(StatesGroup):
     AnswersToPoll: State = State()
 
 
+# ДОЛЖНО БЫТЬ ВСЕГДА В НАЧАЛЕ, НЕ ПЕРЕМЕЩАТЬ! -------------------------------------------------------------------------
+
+
+@dp.message_handler(lambda message: message.text in ['Отмена', 'Жою'], state='*')
+async def cancel_button_action(message: types.Message, state: FSMContext):
+    """Отменить любое действие"""
+    telegram_id = message.from_user.id
+    language = get_user_language(telegram_id)
+    await message.answer(messages.MESSAGE[f'cancel_action_{language}'], reply_markup=types.ReplyKeyboardRemove())
+    await state.finish()
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
     """
@@ -93,7 +108,7 @@ async def send_message_to_user(telegram_id: Union[str, int], text: str) -> None:
             await bot.send_message(config.ADMIN_ID, str(exx))
 
 
-@dp.message_handler(commands=["question"])
+@dp.message_handler(commands=["question"], state='*')
 async def command_question(message: types.Message):
     """Отправить случайный вопрос из базы"""
     telegram_id = message.from_user.id
@@ -109,7 +124,6 @@ async def handle_poll_answer(quiz_answer: types.PollAnswer):
 
 async def send_quiz(telegram_id):
     user = get_user_by(telegram_id)
-    # user_language = get_user_language(telegram_id)  заморозил кэш
     if user:
         if user.daily_limit > 0:
             question = get_random_question(user.language)
@@ -139,21 +153,21 @@ async def send_quiz(telegram_id):
     update_time_visit(telegram_id)
 
 
-@dp.message_handler(commands=["language"])
+@dp.message_handler(commands=["language"], state='*')
 async def command_language(message: types.Message):
-    """Вызвать меню смены языка"""
+    """Вызвать меню выбора языка"""
     await message.answer(messages.MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
-@dp.message_handler(commands=["country"])
+@dp.message_handler(commands=["country"], state='*')
 async def command_country(message: types.Message):
-    """Вызвать меню смены страны"""
+    """Вызвать меню выбора страны"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
     await message.answer(messages.MESSAGE[f'country_choice_{user_language}'], reply_markup=country_buttons)
 
 
-@dp.message_handler(commands=["chat"])
+@dp.message_handler(commands=["chat"], state='*')
 async def command_chat(message: types.Message):
     """Ссылка на чат (форум)"""
     telegram_id = message.from_user.id
@@ -161,7 +175,7 @@ async def command_chat(message: types.Message):
     await message.answer(messages.MESSAGE[f'link_to_chat_{user_language}'])
 
 
-@dp.message_handler(commands=["error"])
+@dp.message_handler(commands=["error"], state='*')
 async def command_error(message: types.Message):
     """Ссылка на чат обсуждения ошибок"""
     telegram_id = message.from_user.id
@@ -169,7 +183,7 @@ async def command_error(message: types.Message):
     await message.answer(messages.MESSAGE[f'link_error_chat_{user_language}'])
 
 
-@dp.message_handler(commands=["penalty"])
+@dp.message_handler(commands=["penalty"], state='*')
 async def command_penalty(message: types.Message):
     """Раздел со штрафами. Показывает размеры всех штрафов по категориям"""
     telegram_id = message.from_user.id
@@ -185,7 +199,7 @@ async def command_penalty(message: types.Message):
     await message.answer(data['title'], reply_markup=penalty_keyboard)
 
 
-@dp.message_handler(commands=["statistics"])
+@dp.message_handler(commands=["statistics"], state='*')
 async def command_statistics(message: types.Message):
     """Показать статистику по пользователям, промо-кодам, автошколам"""
     user_id = message.from_user.id
@@ -196,10 +210,10 @@ async def command_statistics(message: types.Message):
 
 @dp.message_handler(commands=["send_post_ru", "send_post_kz", "send_post_russia", "send_post_kazakhstan"], state='*')
 async def command_send_post(message: types.Message, state: FSMContext):
-    """Отправить рекламное сообщение всем пользователям - фото+подпись"""
+    """Отправить рекламное/информационное сообщение всем пользователям - фото+подпись"""
     telegram_id = message.from_user.id
     if telegram_id == config.ADMIN_ID:
-        await message.answer('Отправь рекламное фото и сообщение, оно будет перенаправлено всем пользователям!',
+        await message.answer('Отправь фото + подпись, оно будет перенаправлено всем пользователям!',
                              reply_markup=get_cancel_button())
         await AllStates.SendPromotionalPost.set()
         await state.update_data(location=message.text)
@@ -207,26 +221,22 @@ async def command_send_post(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=AllStates.SendPromotionalPost, content_types=['text', 'photo'])
 async def command_send_post_action(message: types.Message, state: FSMContext):
-    if message.text == messages.BUTTONS['cancel_RU']:
-        await message.answer(messages.MESSAGE['cancel_action_RU'], reply_markup=types.ReplyKeyboardRemove())
-        await state.finish()
-    else:
-        photo_id = message.photo[0].file_id
-        caption = message.caption
-        await state.update_data(photo_id=photo_id)
-        data = await state.get_data()
-        comm = data['location']
-        await state.finish()
-        users_language, user_country = filter_telegram_id(comm)
-        users = get_all_users_telegram_id(language=users_language, country=user_country)
-        for user_id in loading_bar(users):
-            try:
-                await bot.send_photo(user_id, photo_id, caption=caption)
-            except (ChatNotFound, UserDeactivated, BotBlocked):
-                edit_leaver_status(user_id, True)
-            except Exception as exx:
-                await bot.send_message(config.ADMIN_ID, str(exx))
-        await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n')
+    photo_id = message.photo[0].file_id
+    caption = message.caption
+    await state.update_data(photo_id=photo_id)
+    data = await state.get_data()
+    comm = data['location']
+    await state.finish()
+    users_language, user_country = filter_telegram_id(comm)
+    users = get_all_users_telegram_id(language=users_language, country=user_country)
+    for user_id in loading_bar(users):
+        try:
+            await bot.send_photo(user_id, photo_id, caption=caption)
+        except (ChatNotFound, UserDeactivated, BotBlocked):
+            edit_leaver_status(user_id, True)
+        except Exception as exx:
+            await bot.send_message(config.ADMIN_ID, str(exx))
+    await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n')
 
 
 @dp.message_handler(commands=["promo_code"], state='*')
@@ -238,8 +248,8 @@ async def command_promo_code(message: types.Message):
     telegram_id = message.from_user.id
     user = get_user_by(telegram_id)
     language = user.language
-    user_promo_code_used_status = user.promo_code_used
-    if not user_promo_code_used_status:
+    promo_code_used = user.promo_code_used
+    if not promo_code_used:
         await message.answer(messages.PROMO_CODE[f'promo_code_command_text_{language}'],
                              reply_markup=get_cancel_button(language))
         await AllStates.UsePromoCode.set()
@@ -252,29 +262,22 @@ async def command_promo_code(message: types.Message):
 async def command_promo_code_action(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     language = get_user_language(telegram_id)
-    user_promo_code = message.text
-    if user_promo_code == messages.BUTTONS[f'cancel_{language}']:
-        await message.answer(messages.MESSAGE[f'cancel_action_{language}'], reply_markup=types.ReplyKeyboardRemove())
+    user_promo_code = message.text.upper()
+    promo_codes = get_all_promo_codes()
+    if user_promo_code in promo_codes:
+        up_auto_school_number_of_references(user_promo_code)
+        update_user_promo_code_used_status(telegram_id)
+        commit_use_promo_code_in_base(telegram_id, user_promo_code)
+        await message.answer_sticker(messages.STICKERS['all_good'], reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(messages.PROMO_CODE[f'promo_code_activated_{language}'],
+                             reply_markup=get_question_button(language))
         await state.finish()
     else:
-        user_promo_code = message.text.upper()
-        await state.update_data(user_promo_code=user_promo_code)
-        promo_codes = get_all_promo_codes()
-        if user_promo_code in promo_codes:
-            up_user_time_limit_days(telegram_id)
-            up_number_of_references(user_promo_code)
-            update_user_promo_code_used_status(telegram_id)
-            commit_use_promo_code_in_base(telegram_id, user_promo_code)
-            await message.answer_sticker(messages.STICKERS['all_good'], reply_markup=types.ReplyKeyboardRemove())
-            await message.answer(messages.PROMO_CODE[f'promo_code_activated_{language}'],
-                                 reply_markup=get_question_button(language))
-            await state.finish()
-        else:
-            await message.answer_sticker(messages.STICKERS['NO'])
-            await message.answer(messages.PROMO_CODE[f'promo_code_error_{language}'])
+        await message.answer_sticker(messages.STICKERS['NO'])
+        await message.answer(messages.PROMO_CODE[f'promo_code_error_{language}'])
 
 
-@dp.message_handler(commands=["tariffs", "pay"])
+@dp.message_handler(commands=["tariffs", "pay"], state='*')
 async def command_pay(message: types.Message):
     """
     Раздел Оплаты
@@ -336,19 +339,19 @@ async def send_order_message(telegram_id: int, user_language: str, order_number:
     await bot.send_message(telegram_id, text, reply_markup=get_question_button(user_language))
 
 
-@dp.message_handler(commands=["promotions"])
+@dp.message_handler(commands=["promotions"], state='*')
 async def command_promotions(message: types.Message):
     """Раздел с акциями и скидками. Пока только 1 акция с рефералкой"""
     telegram_id = message.from_user.id
     user_language = get_user_language(telegram_id)
-    image = messages.IMAGES[f'100friends_{user_language}'] if not config.DEBUG else messages.TEST_IMAGES[
-        f'100friends_{user_language}']
+    image_path = messages.IMAGES if not config.DEBUG else messages.TEST_IMAGES
+    image = image_path.get(f'100friends_{user_language}')
     await bot.send_photo(telegram_id, image)
     await message.answer(messages.PROMOTIONS[f'100friends_{user_language}'],
                          reply_markup=get_referral_button(user_language))
 
 
-@dp.message_handler(commands=["info"])
+@dp.message_handler(commands=["info"], state='*')
 async def command_help(message: types.Message):
     """Раздел Инфо о боте"""
     telegram_id = message.from_user.id
@@ -392,19 +395,15 @@ async def command_send_email_for_all_auto_schools(message: types.Message):
 
 @dp.message_handler(state=AllStates.SendEmailToAllAutoSchools, content_types=types.ContentTypes.TEXT)
 async def command_send_email_for_all_auto_schools_action(message: types.Message, state: FSMContext):
-    if message.text == messages.BUTTONS['cancel_RU']:
-        await message.answer(messages.MESSAGE['cancel_action_RU'], reply_markup=types.ReplyKeyboardRemove())
-        await state.finish()
-    else:
-        my_message = message.text
-        await state.update_data(my_message=my_message)
-        auto_schools = get_all_auto_schools_on_db()
-        emails = get_auto_schools_emails(auto_schools)
-        message_subtitle = 'Произошли изменения'
-        html = new_func_and_offers_message(my_message)
-        send_emails_to_schools(emails, message_subtitle, html)
-        await message.answer('Сообщения о изменениях были отправлены автошколам! ✅')
-        await state.finish()
+    my_message = message.text
+    await state.update_data(my_message=my_message)
+    auto_schools = get_all_auto_schools_on_db()
+    emails = get_auto_schools_emails(auto_schools)
+    message_subtitle = 'Произошли изменения'
+    html = new_func_and_offers_message(my_message)
+    send_emails_to_schools(emails, message_subtitle, html)
+    await message.answer('Сообщения о изменениях были отправлены автошколам! ✅')
+    await state.finish()
 
 
 @dp.message_handler(commands=["delete_auto_school"], state='*')
@@ -418,15 +417,11 @@ async def command_delete_auto_school(message: types.Message):
 
 @dp.message_handler(state=AllStates.DeleteAutoSchool, content_types=types.ContentTypes.TEXT)
 async def command_delete_auto_school_action(message: types.Message, state: FSMContext):
-    if message.text == messages.BUTTONS['cancel_RU']:
-        await message.answer(messages.MESSAGE['cancel_action_RU'], reply_markup=types.ReplyKeyboardRemove())
-        await state.finish()
-    else:
-        secret_key = message.text
-        await state.update_data(secret_key=secret_key)
-        delete_auto_school_by(secret_key)
-        await message.answer('Автошкола успешно удалена из базы!')
-        await state.finish()
+    secret_key = message.text
+    await state.update_data(secret_key=secret_key)
+    delete_auto_school_by(secret_key)
+    await message.answer('Автошкола успешно удалена из базы!')
+    await state.finish()
 
 
 # добавить парсер и валидацию от Pydantic

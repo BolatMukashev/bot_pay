@@ -10,7 +10,6 @@ from google_trans_new import google_translator
 from google_trans_new.google_trans_new import google_new_transError
 from messages import COMMANDS_DESCRIPTIONS, PAY
 from typing import List, Union
-from tqdm import tqdm as loading_bar
 
 
 # КАРТИНКИ -----------------------------------------------------------------------------------------------------------
@@ -454,36 +453,6 @@ def get_user_daily_limit(telegram_id) -> int:
     return daily_limit
 
 
-def up_user_time_limit_days(telegram_id: Union[int, str], days: int = 1) -> None:
-    """
-    Продлить доступ к боту 1 пользователю на n дней
-    :param telegram_id: Telegram id пользователя
-    :param days: Количество дней, на которое нужно увеличить доступ
-    """
-    user = get_user_by(telegram_id)
-    if not user:
-        return
-    time_limit_is_over = user_time_limit_is_over(telegram_id)
-    if time_limit_is_over:
-        User.update(time_limit=datetime.now() + timedelta(days=days)).where(User.telegram_id == telegram_id).execute()
-    else:
-        time_limit_date = get_user_time_limit(telegram_id)
-        User.update(time_limit=time_limit_date + timedelta(days=days)).where(User.telegram_id == telegram_id).execute()
-
-
-def up_all_user_time_limit(days: int) -> None:
-    """
-    Продлить доступ к боту ВСЕМ пользователям на n дней
-    :param days: Количество дней, на которое нужно увеличить доступ
-    """
-    database_initialization()
-    today = datetime.now()
-    res = User.select(User.id, User.time_limit).where(User.time_limit >= today)
-    for user in loading_bar(res):
-        User.update(time_limit=user.time_limit + timedelta(days=days)).where(User.id == user.id).execute()
-    User.update(time_limit=today + timedelta(days=days)).where(User.time_limit < today).execute()
-
-
 def up_admin_daily_limit() -> None:
     """
     Увеличить дневной лимит админу
@@ -854,7 +823,7 @@ def get_number_of_references(promo_code):
     return number_of_references
 
 
-def up_number_of_references(promo_code):
+def up_auto_school_number_of_references(promo_code):
     database_initialization()
     AutoSchool.update(number_of_references=AutoSchool.number_of_references + 1).where(
         AutoSchool.promo_code == promo_code).execute()
