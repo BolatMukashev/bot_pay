@@ -77,12 +77,10 @@ async def command_start(message: types.Message):
         add_user(telegram_id, full_name, referral_id=invited_user.referral_id, tariff='premium_max')
         up_user_referral_bonus(referral_telegram_id)
         up_user_daily_limit(referral_telegram_id)
-        await send_message_to_user(referral_telegram_id, messages.MESSAGE.get(f'attraction_text_{user.language}'))
     else:
         add_user(telegram_id, full_name, referral_id=referral_telegram_id)
         up_user_referral_bonus(referral_telegram_id)
         up_user_daily_limit(referral_telegram_id)
-        await send_message_to_user(referral_telegram_id, messages.MESSAGE.get(f'attraction_text_{user.language}'))
 
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
     hello_text = messages.MESSAGE['start_user_text'].format(full_name)
@@ -98,14 +96,12 @@ async def send_message_to_user(telegram_id: Union[str, int], text: str) -> None:
     :param text: текст сообщения
     :return:
     """
-    user = get_user_by(telegram_id)
-    if user:
-        try:
-            await bot.send_message(telegram_id, text)
-        except (ChatNotFound, UserDeactivated, BotBlocked):
-            edit_leaver_status(telegram_id, True)
-        except Exception as exx:
-            await bot.send_message(config.ADMIN_ID, str(exx))
+    try:
+        await bot.send_message(telegram_id, text)
+    except (ChatNotFound, UserDeactivated, BotBlocked):
+        edit_leaver_status(telegram_id, True)
+    except Exception as exx:
+        await bot.send_message(config.ADMIN_ID, str(exx))
 
 
 @dp.message_handler(commands=["question"], state='*')
