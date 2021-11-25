@@ -80,13 +80,17 @@ async def command_start(message: types.Message):
         add_user(telegram_id, full_name, referral_id=referral_telegram_id)
         await reward_referral_user(referral_telegram_id)
     await bot.send_sticker(telegram_id, messages.STICKERS['hello'])
-    hello_text = messages.MESSAGE['start_user_text'].format(full_name)
-    await message.answer(hello_text, reply_markup=question_button)
+    await message.answer(messages.MESSAGE['start_user_text'].format(full_name), reply_markup=question_button)
     if not get_user_registration_status(telegram_id):
         await message.answer(messages.MESSAGE['language_choice'], reply_markup=language_buttons)
 
 
 async def reward_referral_user(telegram_id: Union[str, int]) -> None:
+    """
+    Наградить рефералла
+    :param telegram_id: id
+    :return:
+    """
     ref_user = get_user_by(telegram_id)
     if ref_user:
         up_user_referral_bonus(telegram_id)
