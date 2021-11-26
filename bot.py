@@ -270,7 +270,8 @@ async def command_send_post_action(message: types.Message, state: FSMContext):
             edit_leaver_status(user_id, True)
         except Exception as exx:
             await bot.send_message(config.ADMIN_ID, str(exx))
-    await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n')
+    await bot.send_message(config.ADMIN_ID, f'Сообщение доставлено до {len(users)} пользователей ✌🏻\n',
+                           reply_markup=types.ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=["promo_code"], state='*')
@@ -436,7 +437,8 @@ async def command_send_email_for_all_auto_schools_action(message: types.Message,
     message_subtitle = 'Произошли изменения'
     html = new_func_and_offers_message(my_message)
     send_emails_to_schools(emails, message_subtitle, html)
-    await message.answer('Сообщения о изменениях были отправлены автошколам! ✅')
+    await message.answer('Сообщения о изменениях были отправлены автошколам! ✅',
+                         reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
 
@@ -454,7 +456,7 @@ async def command_delete_auto_school_action(message: types.Message, state: FSMCo
     secret_key = message.text
     await state.update_data(secret_key=secret_key)
     delete_auto_school_by(secret_key)
-    await message.answer('Автошкола успешно удалена из базы!')
+    await message.answer('Автошкола успешно удалена из базы!', reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
 
