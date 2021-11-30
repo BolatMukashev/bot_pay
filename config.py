@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-EVENT = False
+EVENT = bool(int(os.getenv('EVENT')))
 
-RUBLES_EXCHANGE_RATE = 6
+RUBLES_EXCHANGE_RATE = 6                # ruble/tenge
 
 TARIFFS = {
     'basic':  {"daily_limit": 5, "price": 0, 'translate': 'Базовый'},
