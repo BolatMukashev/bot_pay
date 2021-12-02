@@ -1,8 +1,8 @@
+import sys
 import os
 from pytube import YouTube
 from pytube.cli import on_progress
 from moviepy.editor import VideoFileClip, concatenate_videoclips
-
 
 PATH_TO_SAVE = r'C:\Users\user\Desktop\картинки для сайта\youtube_video'
 PATH_TO_SAVE_CLIP = r'C:\Users\user\Desktop\картинки для сайта\youtube_video\clips'
@@ -13,19 +13,29 @@ PATH_TO_SAVE_CLIP = r'C:\Users\user\Desktop\картинки для сайта\y
 # 9:16 = 405 на 720
 
 
-def download_video(url, quality):
-    video = YouTube(url, on_progress_callback=on_progress).streams.filter(progressive=True,
-                                                                          file_extension='mp4',
-                                                                          res=quality).first()
+def progress_function(chunk, file_handle, bytes_remaining):
+    global file_size
+    current = ((file_size - bytes_remaining) / file_size)
+    percent = ('{0:.1f}').format(current * 100)
+    progress = int(50 * current)
+    status = '█' * progress + '-' * (50 - progress)
+    sys.stdout.write(' ↳ |{bar}| {percent}%\r'.format(bar=status, percent=percent))
+    sys.stdout.flush()
+
+
+def download_video(url):
+    yt = YouTube(url, on_progress_callback=progress_function)
+    video = yt.streams.filter(progressive=True, file_extension='mp4').get_highest_resolution()
     title = video.title
     video.download(PATH_TO_SAVE)
-    return title
+    return title.replace(':', '')
 
 
-def cut_video(input_name, output_name, times: list):
+def cut_video(input_name, output_name, times: list, coefficient: int = 0):
     """
     Обрезать видео
     fps default = 24
+    :param coefficient:
     :param input_name:
     :param output_name:
     :param times: лист с таймингами
@@ -36,7 +46,7 @@ def cut_video(input_name, output_name, times: list):
     for time in times:
         clip = VideoFileClip(path_to_video).subclip(time[0], time[1])
         video_width, video_height = clip.size
-        clip = clip.crop(x1=(video_width-405)/2, width=405)
+        clip = clip.crop(x1=(video_width - 405 + coefficient) / 2, width=405)
         clips.append(clip)
     path_to_save = os.path.join(PATH_TO_SAVE_CLIP, f'{output_name}.mp4')
     new_clip = concatenate_videoclips(clips).resize(height=1920)
@@ -85,7 +95,7 @@ def concatenate_clips(raw_video_path, ending, output_name='final'):
     clips.append(raw_video_)
     clips.append(ending_video)
     final_clip = concatenate_videoclips(clips)
-    path_to_save = os.path.join(PATH_TO_SAVE_CLIP, f'final_{output_name}.mp4')
+    path_to_save = os.path.join(PATH_TO_SAVE_CLIP, f'{output_name}.mp4')
     try:
         final_clip.write_videofile(path_to_save)
     except OSError:
@@ -95,14 +105,14 @@ def concatenate_clips(raw_video_path, ending, output_name='final'):
 
 
 if __name__ == '__main__':
-    video_url = 'https://www.youtube.com/watch?v=GMkAKMTEku4&ab_channel=varlamov'
-    original_video_name = download_video(video_url, '720p')
+    video_url = 'https://www.youtube.com/watch?v=tzdcCa56OTw&ab_channel=varlamov'
+    original_video_name = download_video(video_url)
     parts_for_cuts = [
-        ('00:01:47.0', '00:02:26.0'),
-        ('00:03:26.0', '00:03:33.0')
+        ('00:00:00.0', '00:00:32.0'),
+        ('00:01:01.5', '00:01:13.3')
     ]
-    raw_video = cut_video(original_video_name, '1minute_clip', parts_for_cuts)
+    raw_video = cut_video(original_video_name, '1minute_clip', parts_for_cuts, coefficient=100)
     print(f'{raw_video=}')
     # raw_video = resize_video(raw_video)
     # print(f'{raw_video=}')
-    concatenate_clips(raw_video, ending='tyan')
+    concatenate_clips(raw_video, ending='lady', output_name='smertnost')
