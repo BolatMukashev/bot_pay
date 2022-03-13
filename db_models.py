@@ -1,21 +1,27 @@
 import pymysql
 from peewee import *
 from peewee import InternalError
-from config import DB_CONFIGS, TARIFFS
+import psycopg2
+import config
 from datetime import datetime, timedelta, date
 
+database_now = config.POSTGRESQL_DB_CONFIGS
 
-conn = pymysql.connect(host=DB_CONFIGS['host'],
-                       port=DB_CONFIGS['port'],
-                       user=DB_CONFIGS['user'],
-                       password=DB_CONFIGS['password'])
+try:
+    conn = psycopg2.connect(
+        database=database_now['db_name'],
+        host=database_now['host'],
+        user=database_now['user'],
+        password=database_now['password']
+    )
+except Exception as exx:
+    print(exx)
 
-
-db = MySQLDatabase(DB_CONFIGS['db_name'],
-                   host=DB_CONFIGS['host'],
-                   port=DB_CONFIGS['port'],
-                   user=DB_CONFIGS['user'],
-                   password=DB_CONFIGS['password'])
+db = PostgresqlDatabase(database_now['db_name'],
+                        host=database_now['host'],
+                        port=database_now['port'],
+                        user=database_now['user'],
+                        password=database_now['password'])
 
 
 def create_database(db_name: str) -> None:
@@ -80,7 +86,7 @@ class User(BaseModel):
     last_visit = DateTimeField(default=datetime.now)
     referral_id = IntegerField(null=True, default=0)
     tariff = CharField(null=False, max_length=50, default='basic')
-    daily_limit = IntegerField(null=False, default=TARIFFS['basic']['daily_limit'])
+    daily_limit = IntegerField(null=False, default=config.TARIFFS['basic']['daily_limit'])
     discount = BooleanField(null=False, default=False)  # переименовать в discount (PayData)
     referral_bonus = IntegerField(null=False, default=0)
     leaver = BooleanField(null=False, default=False)
@@ -107,9 +113,9 @@ class Gift(BaseModel):
     """Подарочный сертификат"""
     id = PrimaryKeyField(null=False)
     telegram_id = IntegerField(null=False, unique=True)
-    full_name = CharField(null=True, max_length=255)                        # nickname
-    text = CharField(null=False, max_length=255)                            # подпись к сертификату (добавить от кого?)
-    referral_id = IntegerField(null=True)                                   # telegram_id купившего сертификат
+    full_name = CharField(null=True, max_length=255)  # nickname
+    text = CharField(null=False, max_length=255)  # подпись к сертификату (добавить от кого?)
+    referral_id = IntegerField(null=True)  # telegram_id купившего сертификат
     date = DateTimeField(default=datetime.now)
     order_number = IntegerField(null=False, unique=True)
     price = IntegerField(null=False)

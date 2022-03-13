@@ -42,6 +42,12 @@ DB_HOST = os.getenv('DB_HOST')
 DB_PORT = int(os.getenv('DB_PORT'))
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
+PG_DB_NAME = os.getenv('PG_DB_NAME')
+PG_DB_USER_NAME = os.getenv('PG_DB_USER_NAME')
+PG_DB_HOST = os.getenv('PG_DB_HOST')
+PG_DB_PORT = int(os.getenv('PG_DB_PORT'))
+PG_DB_PASSWORD = os.getenv('PG_DB_PASSWORD')
+
 GMAIL = os.getenv('GMAIL')
 
 KASSA_24_PAY_CONFIGS = {
@@ -54,16 +60,25 @@ KASSA_24_PAY_CONFIGS = {
 IOKA_PAY_CONFIGS = {
     'IOKA_TEST_KEY': os.getenv('IOKA_TEST_KEY'),
     'IOKA_SECRET_KEY': os.getenv('IOKA_SECRET_KEY'),
-    'IOKA_PUBLIC_KEY': os.getenv('IOKA_PUBLIC_KEY')
+    'IOKA_PUBLIC_KEY': os.getenv('IOKA_PUBLIC_KEY'),
+    'IOKA_API_KEY': os.getenv('IOKA_API_KEY')
 }
 
 
-DB_CONFIGS = {
+MYSQL_DB_CONFIGS = {
     'db_name': DB_NAME,
     'host': DB_HOST,
     'port': DB_PORT,
     'user': DB_USER_NAME,
     'password': DB_PASSWORD
+}
+
+POSTGRESQL_DB_CONFIGS = {
+    'db_name': PG_DB_NAME,
+    'host': PG_DB_HOST,
+    'port': PG_DB_PORT,
+    'user': PG_DB_USER_NAME,
+    'password': PG_DB_PASSWORD
 }
 
 CACHE = {
